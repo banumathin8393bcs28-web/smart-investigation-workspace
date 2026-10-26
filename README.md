@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Smart Investigation Workspace
 
 **Smart Investigation Workspace** is an internal digital investigation and evidence management web application designed for certified law enforcement and forensic investigators. It provides end-to-end tooling to organize crime-scene photographs, extract EXIF metadata, calculate tamper-evident SHA-256 cryptographic digests, execute AI computer-vision object detection with Ultralytics YOLOv8, maintain immutable chain-of-custody ledgers, collaborate via real-time messaging, and compile comprehensive forensic PDF investigation reports.
@@ -309,3 +310,7 @@ All 14 tests run against the active MongoDB database and print:
 ## 10. License
 
 Confidential Internal Software &copy; 2026 Central Digital Forensics & Crime Investigation Division. All rights reserved.
+=======
+# smart-investigation-workspace
+Mini Project
+>>>>>>> 2163155975985d5bbda6d3e9a608657a842c0d51
