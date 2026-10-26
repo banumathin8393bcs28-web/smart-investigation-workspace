@@ -1,0 +1,79 @@
+<nav class="gov-sidebar">
+  <div class="px-3 mb-3 d-flex align-items-center gap-2">
+    <i class="bi bi-person-badge fs-4 text-primary"></i>
+    <div>
+      <div class="fw-bold small text-dark"><%= currentInvestigator.fullName %></div>
+      <div class="text-muted" style="font-size: 11px;"><%= currentInvestigator.email %></div>
+    </div>
+  </div>
+
+  <hr class="my-2 border-secondary-subtle">
+
+  <ul class="gov-sidebar-menu">
+    <li class="gov-sidebar-item">
+      <a href="/dashboard" class="gov-sidebar-link">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/profile/edit" class="gov-sidebar-link">
+        <i class="bi bi-person-circle"></i>
+        <span>Edit Profile</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/cases/new" class="gov-sidebar-link">
+        <i class="bi bi-folder-plus"></i>
+        <span>Create New Case</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/cases" class="gov-sidebar-link">
+        <i class="bi bi-folder2-open"></i>
+        <span>View Existing Cases</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/contacts" class="gov-sidebar-link">
+        <i class="bi bi-chat-left-text"></i>
+        <span>Investigator Communication</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/custody" class="gov-sidebar-link">
+        <i class="bi bi-shield-check"></i>
+        <span>Chain of Custody</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/reports" class="gov-sidebar-link">
+        <i class="bi bi-file-earmark-pdf"></i>
+        <span>Generate Report</span>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item">
+      <a href="/notifications" class="gov-sidebar-link">
+        <i class="bi bi-bell"></i>
+        <span>Notifications</span>
+        <% if (typeof unreadNotificationsCount !== 'undefined' && unreadNotificationsCount > 0) { %>
+          <span class="gov-sidebar-badge"><%= unreadNotificationsCount %></span>
+        <% } %>
+      </a>
+    </li>
+
+    <li class="gov-sidebar-item mt-3 pt-2 border-top border-secondary-subtle">
+      <a href="/auth/logout" class="gov-sidebar-link text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Sign Out</span>
+      </a>
+    </li>
+  </ul>
+</nav>

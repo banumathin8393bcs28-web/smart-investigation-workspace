@@ -1,0 +1,41 @@
+[
+  {
+    "_id": "msg_001",
+    "sender": "usr_david_chen",
+    "senderName": "Inspector David Chen",
+    "senderBadge": "INV-7721",
+    "recipient": null,
+    "caseId": "case_vault_robbery",
+    "content": "Sarah, I just uploaded the exterior DOT traffic camera still (EVD-2026-1002). License plate is obscured with mud, but the vehicle body matches Vance’s known associate.",
+    "evidenceShare": "evd_getaway_car",
+    "messageType": "chat",
+    "read": true,
+    "createdAt": "2026-10-19T06:30:00.000Z"
+  },
+  {
+    "_id": "msg_002",
+    "sender": "usr_sarah_miller",
+    "senderName": "Detective Sarah Miller",
+    "senderBadge": "INV-4029",
+    "recipient": null,
+    "caseId": "case_vault_robbery",
+    "content": "Excellent work David. I ran the AI detection model over Camera #4 and verified the handgun profile. Elena, please cross-reference the striations with recovered evidence EVD-2026-1003.",
+    "evidenceShare": "evd_cctv_vault",
+    "messageType": "chat",
+    "read": true,
+    "createdAt": "2026-10-19T07:15:00.000Z"
+  },
+  {
+    "_id": "msg_003",
+    "sender": "usr_elena_rostova",
+    "senderName": "Elena Rostova",
+    "senderBadge": "INV-3310",
+    "recipient": null,
+    "caseId": "case_vault_robbery",
+    "content": "Understood Detective. Ballistics baseline established and SHA-256 hashes verified intact. Submitting report now.",
+    "evidenceShare": null,
+    "messageType": "chat",
+    "read": true,
+    "createdAt": "2026-10-19T08:00:00.000Z"
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "1. Start Smart Investigation Server (Node.js)",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/server.js",
+      "console": "integratedTerminal",
+      "restart": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "2. Run Verification Test Suite",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/tests/runAllTests.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "3. Seed MongoDB Test Accounts & Cases",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/scripts/seedDatabase.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "4. Run End-to-End HTTP Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/tests/testServerEndpoints.js",
+      "console": "integratedTerminal"
+    }
+  ]
+}

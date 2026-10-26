@@ -1,0 +1,97 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Initiate Case Assignment Transfer</h1>
+        <small class="text-muted">Formal transfer request protocol requiring recipient acknowledgment</small>
+      </div>
+      <a href="/custody" class="btn btn-gov-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Return to Custody Ledger
+      </a>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+
+        <% if (errors.general) { %>
+          <div class="alert alert-danger alert-gov mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= errors.general %>
+          </div>
+        <% } %>
+
+        <div class="gov-card shadow-sm border">
+          <div class="gov-card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-arrow-left-right text-primary me-2"></i> Case Transfer Directive</h5>
+          </div>
+          <div class="gov-card-body p-4">
+
+            <div class="alert alert-light border py-2 mb-4 small text-muted">
+              <i class="bi bi-info-circle text-primary me-1"></i> Submitting this form does <strong>not</strong> immediately change case custody. A formal transfer request is transmitted to the receiving officer's dashboard, who must review and acknowledge or decline.
+            </div>
+
+            <form action="/custody/transfer-case" method="POST">
+
+              <!-- Case Selection -->
+              <div class="mb-3">
+                <label class="form-label" for="caseId">Select Authorized Investigation Case <span class="text-danger">*</span></label>
+                <select class="form-select <%= errors.caseId ? 'is-invalid' : '' %>" id="caseId" name="caseId" required>
+                  <option value="">Select case...</option>
+                  <% authorizedCases.forEach(c => { %>
+                    <option value="<%= c._id %>" <%= (selectedCase && selectedCase._id.toString() === c._id.toString()) ? 'selected' : '' %>>
+                      <%= c.caseNumber %>: <%= c.caseName %>
+                    </option>
+                  <% }) %>
+                </select>
+                <% if (errors.caseId) { %><div class="invalid-feedback"><%= errors.caseId %></div><% } %>
+              </div>
+
+              <!-- Recipient Investigator Selection -->
+              <div class="mb-3">
+                <label class="form-label" for="recipientId">Receiving Investigator <span class="text-danger">*</span></label>
+                <select class="form-select <%= errors.recipientId ? 'is-invalid' : '' %>" id="recipientId" name="recipientId" required>
+                  <option value="">Select receiving officer...</option>
+                  <% colleagues.forEach(col => { %>
+                    <option value="<%= col._id %>">
+                      <%= col.fullName %> (<%= col.role %> - <%= col.email %>)
+                    </option>
+                  <% }) %>
+                </select>
+                <% if (errors.recipientId) { %><div class="invalid-feedback"><%= errors.recipientId %></div><% } %>
+              </div>
+
+              <!-- Transfer Reason -->
+              <div class="mb-3">
+                <label class="form-label" for="reason">Official Reason for Transfer <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.reason ? 'is-invalid' : '' %>" id="reason" name="reason" placeholder="e.g. Specialized ballistic forensics analysis required by Unit 4" required>
+                <% if (errors.reason) { %><div class="invalid-feedback"><%= errors.reason %></div><% } %>
+              </div>
+
+              <!-- Detailed Handover Notes -->
+              <div class="mb-4">
+                <label class="form-label" for="notes">Handover Notes & Handling Directives</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Specify any critical timeline constraints, sensitive witness protection rules, or evidentiary storage requirements..."></textarea>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <a href="/custody" class="btn btn-gov-secondary">
+                  <i class="bi bi-x-circle me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-gov-primary px-4">
+                  <i class="bi bi-send me-1"></i> Transmit Transfer Request
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

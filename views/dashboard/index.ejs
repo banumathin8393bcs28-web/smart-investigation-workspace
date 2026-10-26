@@ -1,0 +1,243 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <!-- Practical Administrative Sidebar -->
+  <%- include('../partials/sidebar') %>
+
+  <!-- Main Workspace Area -->
+  <main class="gov-main-content">
+
+    <!-- Flash notifications -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <!-- Workspace Banner -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Investigator Operational Dashboard</h1>
+        <div class="text-muted small">
+          Active Officer: <strong class="text-dark"><%= currentInvestigator.fullName %></strong> &bull;
+          Role: <span class="badge bg-secondary"><%= currentInvestigator.role %></span> &bull;
+          Authorized Unit: Digital Forensics & Investigation Division
+        </div>
+      </div>
+      <div class="mt-2 mt-md-0 d-flex gap-2">
+        <a href="/cases/new" class="btn btn-gov-primary btn-sm">
+          <i class="bi bi-folder-plus me-1"></i> Ingest New Case
+        </a>
+        <a href="/custody/transfer-case" class="btn btn-gov-secondary btn-sm">
+          <i class="bi bi-arrow-left-right me-1"></i> Transfer Case
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Metrics (MongoDB Aggregates) -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Assigned Cases</div>
+          <div class="gov-stat-value"><%= stats.totalAssignedCases %></div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Active Cases</div>
+          <div class="gov-stat-value text-primary"><%= stats.activeCases %></div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Closed Cases</div>
+          <div class="gov-stat-value text-secondary"><%= stats.closedCases %></div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Evidence Files</div>
+          <div class="gov-stat-value"><%= stats.evidenceItemsCount %></div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Pending Transfers</div>
+          <div class="gov-stat-value <%= stats.pendingTransfers > 0 ? 'text-danger' : 'text-dark' %>">
+            <%= stats.pendingTransfers %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-2">
+        <div class="gov-stat-tile">
+          <div class="gov-stat-label">Unread Messages</div>
+          <div class="gov-stat-value <%= stats.unreadMessages > 0 ? 'text-primary' : 'text-dark' %>">
+            <%= stats.unreadMessages %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Columns -->
+    <div class="row g-3">
+
+      <!-- Left Column: Active Cases -->
+      <div class="col-lg-7">
+        <div class="gov-card">
+          <div class="gov-card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-folder2-open me-2"></i> Authorized Cases (Recent Activity)</span>
+            <a href="/cases" class="btn btn-gov-secondary btn-sm py-0 px-2 small">View All Cases</a>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (recentCases && recentCases.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-gov mb-0">
+                  <thead>
+                    <tr>
+                      <th>Case #</th>
+                      <th>Case Title</th>
+                      <th>Crime Type</th>
+                      <th>Status</th>
+                      <th>Last Modified</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentCases.forEach(c => { %>
+                      <tr>
+                        <td>
+                          <a href="/cases/<%= c._id %>" class="fw-bold text-decoration-none text-primary">
+                            <%= c.caseNumber %>
+                          </a>
+                        </td>
+                        <td>
+                          <a href="/cases/<%= c._id %>" class="text-dark text-decoration-none">
+                            <%= c.caseName %>
+                          </a>
+                        </td>
+                        <td><span class="badge bg-light text-dark border"><%= c.crimeType %></span></td>
+                        <td>
+                          <span class="badge <%= c.status === 'Closed' ? 'bg-secondary' : (c.status === 'Under Investigation' ? 'bg-primary' : 'bg-warning text-dark') %>">
+                            <%= c.status %>
+                          </span>
+                        </td>
+                        <td class="small text-muted">
+                          <%= formatTimestamp(c.lastUpdatedTimestamp, { includeSeconds: false }) %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox fs-2 mb-2 d-block"></i>
+                No cases registered yet. Click <strong>Ingest New Case</strong> to initialize your first investigation file.
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Recent Audit Activity Log -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <span><i class="bi bi-journal-text me-2"></i> Recent Security & Investigative Activity Log</span>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (recentActivities && recentActivities.length > 0) { %>
+              <ul class="list-group list-group-flush small">
+                <% recentActivities.forEach(act => { %>
+                  <li class="list-group-item d-flex justify-content-between align-items-start py-2 px-3">
+                    <div>
+                      <div class="fw-semibold text-dark">
+                        <span class="badge bg-light text-secondary border me-1"><%= act.action %></span>
+                        <%= act.changeSummary %>
+                      </div>
+                      <small class="text-muted">
+                        Officer: <%= act.actorName %> &bull; IP: <%= act.ipAddress %>
+                      </small>
+                    </div>
+                    <span class="text-muted small ps-2 text-nowrap">
+                      <%= formatTimestamp(act.timestamp, { includeSeconds: false }) %>
+                    </span>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <div class="p-3 text-muted text-center small">No recorded activity logs found.</div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Notifications & Quick Access -->
+      <div class="col-lg-5">
+
+        <!-- Notification Highlights -->
+        <div class="gov-card mb-3">
+          <div class="gov-card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-bell me-2"></i> Notification Center</span>
+            <a href="/notifications" class="btn btn-gov-secondary btn-sm py-0 px-2 small">Full Center</a>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (recentNotifications && recentNotifications.length > 0) { %>
+              <ul class="list-group list-group-flush small">
+                <% recentNotifications.forEach(n => { %>
+                  <li class="list-group-item py-2 px-3 <%= !n.isRead ? 'bg-light' : '' %>">
+                    <div class="d-flex justify-content-between">
+                      <strong class="text-dark"><%= n.title %></strong>
+                      <span class="text-muted" style="font-size: 11px;"><%= formatTimestamp(n.createdTimestamp, { includeSeconds: false }) %></span>
+                    </div>
+                    <div class="text-secondary mb-1"><%= n.notificationText %></div>
+                    <% if (n.actionLink) { %>
+                      <a href="/notifications/<%= n._id %>/read" class="small text-decoration-none">Review & Action &rarr;</a>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <div class="p-3 text-muted text-center small">No recent notifications.</div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Quick Modules Panel -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <span><i class="bi bi-grid me-2"></i> Investigation Operations</span>
+          </div>
+          <div class="gov-card-body">
+            <div class="d-grid gap-2">
+              <a href="/cases/new" class="btn btn-gov-secondary text-start d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-plus-circle text-primary me-2"></i> Ingest New Investigation Case</span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+              <a href="/contacts" class="btn btn-gov-secondary text-start d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-left-dots text-primary me-2"></i> Real-time Secure Messaging</span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+              <a href="/custody" class="btn btn-gov-secondary text-start d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-check text-primary me-2"></i> Chain of Custody Ledger</span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+              <a href="/reports" class="btn btn-gov-secondary text-start d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Generate Forensic PDF Report</span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

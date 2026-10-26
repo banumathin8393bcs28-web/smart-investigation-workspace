@@ -1,0 +1,140 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Add Crime-Scene Digital Photographs</h1>
+        <small class="text-muted">Associated Case: <strong class="text-dark"><%= caseDoc.caseNumber %></strong> &bull; <%= caseDoc.caseName %></small>
+      </div>
+      <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Return to Case
+      </a>
+    </div>
+
+    <% if (errors.files || errors.general) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= errors.files || errors.general %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <div class="gov-card shadow-sm border">
+      <div class="gov-card-header bg-white py-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-cloud-upload text-primary fs-4"></i>
+          <div>
+            <h5 class="mb-0 fw-bold">Evidence File Upload Interface</h5>
+            <small class="text-muted">Upload original crime-scene photography for cryptographic hashing, EXIF parsing, and AI inspection</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="gov-card-body p-4">
+        <form action="/evidence/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+          <input type="hidden" name="caseId" value="<%= caseDoc._id %>">
+
+          <div class="mb-4">
+            <label class="form-label" for="evidenceFiles">Select Digital Crime-Scene Photographs <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" id="evidenceFiles" name="evidenceFiles" multiple accept="image/jpeg,image/png,image/webp" required>
+            <small class="text-muted d-block mt-1">
+              Supported formats: <strong>JPG, JPEG, PNG, WebP</strong>. Maximum 10 images per batch, up to 30MB per image.
+            </small>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="generalDescription">Evidence Batch Description / Field Notes</label>
+            <textarea class="form-control" id="generalDescription" name="generalDescription" rows="3" placeholder="e.g. Crime scene photographs taken in kitchen and living room entry. Evidence markers 1-4 visible."></textarea>
+            <small class="text-muted">Initial evidentiary description applied to uploaded items.</small>
+          </div>
+
+          <!-- Selected Files Preview Container -->
+          <div id="fileListContainer" class="mb-4 d-none">
+            <h6 class="text-uppercase text-muted border-bottom pb-2 mb-2 fw-bold" style="font-size: 11px;">
+              Selected Files for Cryptographic Ingestion (<span id="fileCount">0</span>)
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-gov table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Filename</th>
+                    <th>Size</th>
+                    <th>MIME Type</th>
+                  </tr>
+                </thead>
+                <tbody id="fileListBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Upload Progress Bar -->
+          <div id="uploadProgressContainer" class="mb-4 d-none">
+            <label class="form-label small text-muted mb-1">Upload & Integrity Verification Progress:</label>
+            <div class="progress" style="height: 12px;">
+              <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
+            </div>
+            <small id="uploadStatusText" class="text-muted mt-1 d-block" style="font-size: 11px;">Uploading bytes...</small>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-gov-primary px-4 py-2" id="submitUploadBtn">
+              <i class="bi bi-cloud-arrow-up-fill me-1"></i> Ingest Crime-Scene Photographs
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const fileInput = document.getElementById('evidenceFiles');
+const fileListContainer = document.getElementById('fileListContainer');
+const fileListBody = document.getElementById('fileListBody');
+const fileCount = document.getElementById('fileCount');
+
+fileInput.addEventListener('change', () => {
+  fileListBody.innerHTML = '';
+  if (fileInput.files.length > 0) {
+    fileCount.textContent = fileInput.files.length;
+    fileListContainer.classList.remove('d-none');
+    for (let i = 0; i < fileInput.files.length; i++) {
+      const f = fileInput.files[i];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td><strong>${f.name}</strong></td>
+        <td>${(f.size / 1024).toFixed(1)} KB</td>
+        <td><span class="badge bg-light text-dark border">${f.type || 'image'}</span></td>
+      `;
+      fileListBody.appendChild(tr);
+    }
+  } else {
+    fileListContainer.classList.add('d-none');
+  }
+});
+
+document.getElementById('uploadForm').addEventListener('submit', () => {
+  const btn = document.getElementById('submitUploadBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ingesting & Calculating SHA-256...';
+
+  document.getElementById('uploadProgressContainer').classList.remove('d-none');
+  const bar = document.getElementById('uploadProgressBar');
+  let p = 15;
+  bar.style.width = p + '%';
+  const interval = setInterval(() => {
+    p = Math.min(95, p + 20);
+    bar.style.width = p + '%';
+    if (p >= 95) clearInterval(interval);
+  }, 400);
+});
+</script>
+
+<%- include('../partials/footer') %>

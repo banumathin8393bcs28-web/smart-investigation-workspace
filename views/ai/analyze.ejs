@@ -1,0 +1,224 @@
+<%- include('../partials/header') %>
+
+<!-- Top Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-3 mb-1">
+      <h1 class="mb-0 text-white"><i class="bi bi-cpu text-info"></i> AI Forensic Object Detection Suite</h1>
+      <span class="badge badge-open fs-6"><%= evidence.evidenceNumber %></span>
+    </div>
+    <p class="text-muted fs-5 mb-0">
+      Case: <%= linkedCase ? `${linkedCase.caseNumber} - ${linkedCase.title}` : 'Unassigned' %> • 
+      Model: <strong class="text-cyan"><%= evidence.aiAnalysis?.model || 'Ultralytics YOLOv8 / Forensic Vision' %></strong>
+    </p>
+  </div>
+
+  <div class="d-flex gap-2">
+    <!-- Execute / Re-run AI analysis button -->
+    <form action="/ai/analyze/<%= evidence._id %>" method="POST" class="d-inline">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-play-fill"></i> <%= evidence.aiAnalysis?.analyzed ? 'Re-Run Detection Model' : 'Execute AI Detection' %>
+      </button>
+    </form>
+    <a href="/evidence/<%= evidence._id %>" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Evidence File</a>
+  </div>
+</div>
+
+<% if (success) { %>
+  <div class="alert alert-success" role="alert">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <div><%= success %></div>
+  </div>
+<% } %>
+
+<% if (error) { %>
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div><%= error %></div>
+  </div>
+<% } %>
+
+<!-- Legal & Compliance Notice -->
+<div class="p-3 mb-4 rounded bg-dark border border-warning-subtle d-flex align-items-center gap-3">
+  <i class="bi bi-shield-exclamation text-warning fs-3"></i>
+  <div class="small text-secondary">
+    <strong class="text-warning">STATUTORY FORENSIC NOTICE:</strong> AI-assisted object detection markers are probabilistic computer-vision hypotheses generated to assist triage. Under evidentiary law, AI detections are strictly advisory and <strong>MUST be independently corroborated and signed off by an authorized human investigator</strong> before admission into judicial case proceedings.
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Visual Media with Bounding Box Overlay -->
+  <div class="col-lg-7">
+    <div class="forensic-card">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-bounding-box-circles text-primary"></i> Forensic Visual Inspection Canvas
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline" id="toggle-boxes-btn"><i class="bi bi-eye"></i> Toggle Bounding Boxes</button>
+        </div>
+      </div>
+
+      <!-- Media Canvas Container -->
+      <div class="text-center p-2 bg-black rounded border border-secondary mb-3">
+        <div class="ai-view-container position-relative d-inline-block">
+          <% if (evidence.fileType === 'image') { %>
+            <img src="<%= evidence.analysisPath || evidence.originalPath %>" alt="Forensic Media" class="ai-view-image" id="inspection-target-media">
+          <% } else if (evidence.fileType === 'video') { %>
+            <video src="<%= evidence.analysisPath || evidence.originalPath %>" controls class="ai-view-image w-100" id="inspection-target-media"></video>
+          <% } else { %>
+            <div class="p-5 text-secondary">
+              <i class="bi bi-file-earmark-lock text-info fs-1"></i>
+              <p class="mt-2 text-white">Media format does not support spatial computer-vision canvas overlay.</p>
+            </div>
+          <% } %>
+
+          <!-- Bounding Boxes Overlaid as percentages -->
+          <% if (evidence.aiAnalysis && evidence.aiAnalysis.detections) { %>
+            <% evidence.aiAnalysis.detections.forEach((d, idx) => { %>
+              <% const isVerified = d.investigatorStatus === 'Verified Relevant'; %>
+              <div 
+                class="bbox-box <%= isVerified ? 'verified' : '' %>"
+                id="box-<%= d.id %>"
+                style="left: <%= d.bbox[0] %>%; top: <%= d.bbox[1] %>%; width: <%= d.bbox[2] %>%; height: <%= d.bbox[3] %>%;"
+                title="<%= d.label %> (<%= Math.round(d.confidence * 100) %>%)"
+                onclick="highlightDetectionItem('<%= d.id %>')"
+              >
+                <span class="bbox-label">
+                  <%= d.label %> (<%= Math.round(d.confidence * 100) %>%)
+                </span>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Summary Info -->
+      <div class="d-flex justify-content-between align-items-center text-muted small px-2">
+        <span>Analysis Target: <strong><%= evidence.analysisPath ? 'Standardized Analysis Copy' : 'Original Baseline' %></strong></span>
+        <span>Objects Highlighted: <strong><%= evidence.aiAnalysis?.detections?.length || 0 %> Markers</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Detections List & Human Investigator Review Form -->
+  <div class="col-lg-5">
+    <div class="forensic-card">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-person-check-fill text-success"></i> Investigator Verification & Sign-Off
+        </div>
+      </div>
+
+      <% if (!evidence.aiAnalysis || !evidence.aiAnalysis.analyzed) { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-cpu fs-1 mb-2 d-block"></i>
+          <p class="fs-5">AI object detection has not been executed on this file yet.</p>
+          <form action="/ai/analyze/<%= evidence._id %>" method="POST">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-play-fill"></i> Run AI Detection Now</button>
+          </form>
+        </div>
+      <% } else { %>
+        <!-- Review Form -->
+        <form action="/ai/review/<%= evidence._id %>" method="POST">
+          <!-- Overall Attestation Verdict -->
+          <div class="p-3 mb-4 rounded bg-dark border border-secondary">
+            <h4 class="text-white mb-2 fs-5">1. Forensic Attestation Verdict</h4>
+            <div class="mb-3">
+              <label for="overallStatus" class="form-label">Review Status</label>
+              <select class="form-select" id="overallStatus" name="overallStatus">
+                <option value="Approved & Verified" <%= evidence.aiAnalysis.investigatorReview?.status === 'Approved & Verified' ? 'selected' : '' %>>Approved & Verified (Admissible Evidence)</option>
+                <option value="Under Forensic Review" <%= evidence.aiAnalysis.investigatorReview?.status === 'Under Forensic Review' ? 'selected' : '' %>>Under Forensic Review (Inconclusive)</option>
+                <option value="Dismissed / False Positives" <%= evidence.aiAnalysis.investigatorReview?.status === 'Dismissed / False Positives' ? 'selected' : '' %>>Dismissed (False Positives / Noise)</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="verdictNotes" class="form-label mb-0">Officer Finding Notes</label>
+                <button type="button" class="voice-dictate-btn" data-target="#verdictNotes">
+                  <i class="bi bi-mic"></i> Voice Dictation
+                </button>
+              </div>
+              <textarea class="form-control" id="verdictNotes" name="verdictNotes" rows="3" placeholder="Enter corroborating investigative findings..."><%= evidence.aiAnalysis.investigatorReview?.verdictNotes || '' %></textarea>
+            </div>
+
+            <% if (evidence.aiAnalysis.investigatorReview?.reviewedBy) { %>
+              <div class="text-muted small mt-2">
+                Last Attested by <strong><%= evidence.aiAnalysis.investigatorReview.reviewedBy %></strong> on <%= new Date(evidence.aiAnalysis.investigatorReview.reviewedAt).toLocaleString() %>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Individual Detection Reviews -->
+          <h4 class="text-white mb-3 fs-5">2. Itemized Object Attestation (<%= (evidence.aiAnalysis.detections || []).length %>)</h4>
+          <div class="detection-items-list" style="max-height: 400px; overflow-y: auto;">
+            <% (evidence.aiAnalysis.detections || []).forEach(d => { %>
+              <div class="p-3 mb-3 rounded bg-dark border border-secondary-subtle" id="item-card-<%= d.id %>">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-white fs-6"><%= d.label %></span>
+                  <span class="badge badge-open text-warning"><%= Math.round(d.confidence * 100) %>% Confidence</span>
+                </div>
+
+                <% if (d.frameTimestamp) { %>
+                  <div class="text-info small mb-2"><i class="bi bi-clock"></i> Frame Timestamp: <strong><%= d.frameTimestamp %></strong></div>
+                <% } %>
+
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-sm-5">
+                    <label class="form-label small text-muted mb-0">Investigator Verdict:</label>
+                  </div>
+                  <div class="col-sm-7">
+                    <select class="form-select form-select-sm" name="status_<%= d.id %>">
+                      <option value="Verified Relevant" <%= d.investigatorStatus === 'Verified Relevant' ? 'selected' : '' %>>Verified Relevant</option>
+                      <option value="Under Review" <%= d.investigatorStatus === 'Under Review' ? 'selected' : '' %>>Under Review</option>
+                      <option value="Inconclusive" <%= d.investigatorStatus === 'Inconclusive' ? 'selected' : '' %>>Inconclusive</option>
+                      <option value="False Positive" <%= d.investigatorStatus === 'False Positive' ? 'selected' : '' %>>False Positive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <input type="text" class="form-control form-control-sm" name="notes_<%= d.id %>" value="<%= d.notes || '' %>" placeholder="Notes on this object...">
+                </div>
+              </div>
+            <% }); %>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="bi bi-file-earmark-check"></i> Submit Official Review Sign-Off
+            </button>
+          </div>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle bounding box visibility
+  const toggleBtn = document.getElementById('toggle-boxes-btn');
+  let boxesVisible = true;
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      boxesVisible = !boxesVisible;
+      document.querySelectorAll('.bbox-box').forEach(b => {
+        b.style.display = boxesVisible ? 'block' : 'none';
+      });
+      toggleBtn.innerHTML = boxesVisible ? '<i class="bi bi-eye-slash"></i> Hide Bounding Boxes' : '<i class="bi bi-eye"></i> Show Bounding Boxes';
+    });
+  }
+
+  // Highlight card when clicking bounding box
+  function highlightDetectionItem(id) {
+    document.querySelectorAll('[id^="item-card-"]').forEach(el => el.classList.remove('border-primary'));
+    const target = document.getElementById('item-card-' + id);
+    if (target) {
+      target.classList.add('border-primary');
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

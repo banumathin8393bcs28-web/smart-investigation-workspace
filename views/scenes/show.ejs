@@ -1,0 +1,29 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Crime Scene Sector: <%= scene.sceneIdentifier %></h1>
+        <small class="text-muted">Associated Case: <a href="/cases/<%= caseDoc._id %>"><%= caseDoc.caseNumber %></a></small>
+      </div>
+      <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Return to Case
+      </a>
+    </div>
+
+    <div class="gov-card">
+      <div class="gov-card-header">
+        <span><i class="bi bi-geo-alt me-2"></i> Scene Sector Details</span>
+      </div>
+      <div class="gov-card-body">
+        <p><%= scene.sceneDetails %></p>
+        <div class="text-muted small">Recorded on <%= formatTimestamp(scene.createdAt) %></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

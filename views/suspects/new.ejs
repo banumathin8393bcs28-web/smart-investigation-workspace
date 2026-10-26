@@ -1,0 +1,150 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-1"><i class="bi bi-person-plus-fill text-danger"></i> Register Suspect Profile</h1>
+    <p class="text-muted fs-5 mb-0">Record physical characteristics, mugshot, criminal history, and case associations.</p>
+  </div>
+  <a href="/suspects" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Back to Suspects</a>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div><%= error %></div>
+  </div>
+<% } %>
+
+<div class="forensic-card">
+  <form action="/suspects" method="POST" enctype="multipart/form-data">
+    <div class="row g-3">
+      <!-- Mugshot upload -->
+      <div class="col-md-4 text-center">
+        <label class="form-label d-block text-start">Suspect Photograph (Mugshot)</label>
+        <div class="p-3 border border-secondary rounded bg-dark mb-2">
+          <img 
+            src="/images/default-suspect.png" 
+            alt="Mugshot" 
+            id="mugshot-preview" 
+            class="rounded border border-secondary mb-2" 
+            style="width: 140px; height: 160px; object-fit: cover;"
+          >
+          <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+        </div>
+      </div>
+
+      <!-- Core identifiers -->
+      <div class="col-md-8">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="fullName" class="form-label">Full Legal Name *</label>
+            <input type="text" class="form-control" id="fullName" name="fullName" required placeholder="e.g. Marcus Vance">
+          </div>
+          <div class="col-md-6">
+            <label for="alias" class="form-label">Known Street Alias / Moniker</label>
+            <input type="text" class="form-control" id="alias" name="alias" placeholder="e.g. 'Ghost', 'Viper'">
+          </div>
+          <div class="col-md-6">
+            <label for="nationalId" class="form-label">National ID / SSN</label>
+            <input type="text" class="form-control" id="nationalId" name="nationalId" placeholder="e.g. SSN-984-21-0941">
+          </div>
+          <div class="col-md-6">
+            <label for="phone" class="form-label">Contact / Intercepted Phone</label>
+            <input type="text" class="form-control" id="phone" name="phone" placeholder="e.g. 555-892-0192">
+          </div>
+          <div class="col-md-6">
+            <label for="status" class="form-label">Surveillance Status</label>
+            <select class="form-select" id="status" name="status">
+              <option value="Wanted">Wanted (Active Warrant)</option>
+              <option value="In Custody">In Custody</option>
+              <option value="Under Surveillance">Under Surveillance</option>
+              <option value="Person of Interest" selected>Person of Interest</option>
+              <option value="Cleared">Cleared</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="riskLevel" class="form-label">Assessed Risk Level</label>
+            <select class="form-select" id="riskLevel" name="riskLevel">
+              <option value="Extreme">Extreme (Armed & Dangerous)</option>
+              <option value="High" selected>High Risk</option>
+              <option value="Moderate">Moderate Risk</option>
+              <option value="Low">Low Risk</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Physical Traits -->
+      <div class="col-12 mt-4">
+        <h4 class="text-white mb-2 fs-5"><i class="bi bi-body-text text-info"></i> Physical Traits & Identifying Marks</h4>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="height" class="form-label">Height</label>
+            <input type="text" class="form-control" id="height" name="height" placeholder="e.g. 6 ft 1 in (185 cm)">
+          </div>
+          <div class="col-md-3">
+            <label for="eyeColor" class="form-label">Eye Color</label>
+            <input type="text" class="form-control" id="eyeColor" name="eyeColor" placeholder="e.g. Brown / Hazel">
+          </div>
+          <div class="col-md-3">
+            <label for="hairColor" class="form-label">Hair Color</label>
+            <input type="text" class="form-control" id="hairColor" name="hairColor" placeholder="e.g. Black / Short">
+          </div>
+          <div class="col-md-3">
+            <label for="identifyingMarks" class="form-label">Tattoos, Scars, Marks</label>
+            <input type="text" class="form-control" id="identifyingMarks" name="identifyingMarks" placeholder="e.g. Serpent tattoo left forearm">
+          </div>
+        </div>
+      </div>
+
+      <!-- Prior Offenses -->
+      <div class="col-md-6 mt-4">
+        <label for="priorOffenses" class="form-label">Prior Criminal Offenses / Rap Sheet</label>
+        <textarea class="form-control" id="priorOffenses" name="priorOffenses" rows="4" placeholder="Enter one charge per line (e.g. 2021 - Armed Robbery, 2023 - Possession of Firearm)"></textarea>
+      </div>
+
+      <!-- Connected Cases -->
+      <div class="col-md-6 mt-4">
+        <label for="connectedCases" class="form-label">Link to Criminal Cases</label>
+        <select class="form-select" id="connectedCases" name="connectedCases" multiple size="4">
+          <% cases.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.caseNumber %> - <%= c.title %> (<%= c.classification %>)</option>
+          <% }); %>
+        </select>
+        <div class="form-text text-muted">Hold Ctrl/Cmd to select multiple associated cases.</div>
+      </div>
+
+      <!-- General Notes -->
+      <div class="col-12 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label for="notes" class="form-label mb-0">Investigator Intelligence Notes</label>
+          <button type="button" class="voice-dictate-btn" data-target="#notes">
+            <i class="bi bi-mic"></i> Voice Dictation
+          </button>
+        </div>
+        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Modus operandi, known associates, vehicle registrations..."></textarea>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top border-secondary-subtle">
+      <a href="/suspects" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-check-circle"></i> Save Suspect Record
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const photoInput = document.getElementById('photo');
+  const preview = document.getElementById('mugshot-preview');
+  photoInput.addEventListener('change', () => {
+    if (photoInput.files && photoInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => { preview.src = e.target.result; };
+      reader.readAsDataURL(photoInput.files[0]);
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

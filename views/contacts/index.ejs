@@ -1,0 +1,177 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Investigator Communication & Contacts</h1>
+        <small class="text-muted">Manage verified colleague connections and initiate secure messaging</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/contacts/add" class="btn btn-gov-primary btn-sm">
+          <i class="bi bi-person-plus-fill me-1"></i> Add New Contact
+        </a>
+        <a href="/messages" class="btn btn-gov-secondary btn-sm">
+          <i class="bi bi-chat-left-text me-1"></i> Open Chat Interface
+        </a>
+      </div>
+    </div>
+
+    <!-- Flash message -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <!-- Incoming Connection Requests (if any) -->
+    <% if (incomingRequests && incomingRequests.length > 0) { %>
+      <div class="gov-card border-warning mb-4">
+        <div class="gov-card-header bg-warning-subtle text-dark">
+          <i class="bi bi-person-exclamation me-2"></i> Incoming Connection Requests (<%= incomingRequests.length %> Pending Approval)
+        </div>
+        <div class="gov-card-body p-0">
+          <ul class="list-group list-group-flush small">
+            <% incomingRequests.forEach(reqItem => { %>
+              <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                <div class="d-flex align-items-center gap-3">
+                  <img src="<%= reqItem.owner.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm">
+                  <div>
+                    <strong class="text-dark"><%= reqItem.owner.fullName %></strong>
+                    <span class="text-muted">&bull; <%= reqItem.owner.role %></span>
+                    <div class="text-muted" style="font-size: 11px;"><%= reqItem.owner.email %></div>
+                  </div>
+                </div>
+                <form action="/contacts/accept/<%= reqItem._id %>" method="POST">
+                  <button type="submit" class="btn btn-gov-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i> Accept Connection
+                  </button>
+                </form>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Existing Contacts List -->
+    <div class="gov-card">
+      <div class="gov-card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people-fill me-2"></i> Verified Contacts Directory (<%= contacts.length %>)</span>
+        <a href="/contacts/add" class="small text-decoration-none">Search by official email &rarr;</a>
+      </div>
+      <div class="gov-card-body p-0">
+        <% if (contacts.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-gov mb-0">
+              <thead>
+                <tr>
+                  <th>Officer</th>
+                  <th>Official Email</th>
+                  <th>Designation / Role</th>
+                  <th>Status</th>
+                  <th>Unread Messages</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% contacts.forEach(c => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <img src="<%= c.contact.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm">
+                        <div>
+                          <strong class="text-dark"><%= c.displayName || c.contact.fullName %></strong>
+                          <% if (c.displayName && c.displayName !== c.contact.fullName) { %>
+                            <small class="text-muted d-block" style="font-size: 10px;">Official: <%= c.contact.fullName %></small>
+                          <% } %>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= c.contact.email %></td>
+                    <td><span class="badge bg-light text-dark border"><%= c.contact.role %></span></td>
+                    <td>
+                      <% if (c.isOnline) { %>
+                        <span class="badge bg-success-subtle text-success border border-success">
+                          <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i> Active
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-light text-muted border">Offline</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (c.unreadCount > 0) { %>
+                        <span class="badge bg-danger"><%= c.unreadCount %> New</span>
+                      <% } else { %>
+                        <span class="text-muted small">0</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <a href="/messages?recipientId Antonio=<%= c.contact._id %>&recipientId=<%= c.contact._id %>" class="btn btn-gov-primary btn-sm py-1 px-2" title="Chat">
+                          <i class="bi bi-chat-dots"></i> Message
+                        </a>
+                        <!-- Edit Contact Modal Trigger -->
+                        <button type="button" class="btn btn-gov-secondary btn-sm py-1 px-2" data-bs-toggle="modal" data-bs-target="#editModal<%= c._id %>" title="Edit Alias">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                      </div>
+
+                      <!-- Edit Alias Modal -->
+                      <div class="modal fade" id="editModal<%= c._id %>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                            <form action="/contacts/edit/<%= c._id %>" method="POST">
+                              <div class="modal-header">
+                                <h6 class="modal-title fw-bold">Edit Contact Alias</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                              </div>
+                              <div class="modal-body">
+                                <p class="small text-muted mb-2">
+                                  You can specify a custom display alias for this contact without changing their registered government identity.
+                                </p>
+                                <label class="form-label small">Display Alias</label>
+                                <input type="text" class="form-control" name="displayName" value="<%= c.displayName || c.contact.fullName %>">
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-gov-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-gov-primary btn-sm">Save Alias</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="p-5 text-center text-muted">
+            <i class="bi bi-people fs-2 mb-2 d-block"></i>
+            No contacts added yet. Search and connect with other verified government investigators to begin secure messaging.
+            <div class="mt-3">
+              <a href="/contacts/add" class="btn btn-gov-primary btn-sm">
+                <i class="bi bi-person-plus me-1"></i> Add New Contact
+              </a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

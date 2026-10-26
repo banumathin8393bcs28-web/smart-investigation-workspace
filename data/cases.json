@@ -1,0 +1,230 @@
+[
+  {
+    "_id": "case_vault_robbery",
+    "caseNumber": "CASE-2026-1042",
+    "title": "5th Avenue Vault Breach & Armed Robbery",
+    "classification": "Armed Robbery",
+    "priority": "Critical",
+    "status": "In Progress",
+    "incidentDate": "2026-10-18T22:30:00.000Z",
+    "incidentLocation": "482 5th Avenue, Commercial Deposit Vault",
+    "description": "At approximately 22:30 hours, three armed masked perpetrators breached the primary vault mechanism using specialized plasma cutting gear. Surveillance cameras logged tactical firearms and an obscured black sedan departing westbound. Preliminary forensic ballistics indicate 9mm cartridge casings recovered near exit.",
+    "leadInvestigator": "usr_sarah_miller",
+    "leadInvestigatorName": "Detective Sarah Miller",
+    "assignedTeam": [
+      "usr_david_chen",
+      "usr_elena_rostova"
+    ],
+    "tags": [
+      "CCTV",
+      "Vault",
+      "Firearms",
+      "Vehicle",
+      "Ballistics"
+    ],
+    "timeline": [
+      {
+        "timestamp": "2026-10-18T23:15:00.000Z",
+        "title": "Emergency Dispatch & Perimeter Secured",
+        "description": "First responders established perimeter. Evidence technicians deployed for physical extraction.",
+        "investigator": "Inspector David Chen",
+        "type": "dispatch"
+      },
+      {
+        "timestamp": "2026-10-19T02:00:00.000Z",
+        "title": "CCTV Video Extraction Completed",
+        "description": "Hard drive media pulled from surveillance rack. Ingestion SHA-256 hash verified.",
+        "investigator": "Detective Sarah Miller",
+        "type": "evidence_ingestion"
+      },
+      {
+        "timestamp": "2026-10-20T11:45:00.000Z",
+        "title": "AI Object Detection Analysis Completed",
+        "description": "Automated computer vision detected concealed weapon and duffle profile with 94% confidence.",
+        "investigator": "Elena Rostova",
+        "type": "ai_analysis"
+      },
+      {
+        "timestamp": "2026-10-23T16:20:54.790Z",
+        "title": "Automated Forensic Benchmark Note",
+        "description": "System integrity and database checks concluded without anomalies.",
+        "investigator": "System Auditor",
+        "type": "benchmark"
+      },
+      {
+        "timestamp": "2026-10-25T19:27:37.916Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-8930 (\"jhgfvc\") logged. SHA-256: 18ffa08b7e0da5f7...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    ],
+    "handoverHistory": [],
+    "createdAt": "2026-10-19T00:00:00.000Z",
+    "updatedAt": "2026-10-25T19:27:37.916Z",
+    "$push": {
+      "timeline": {
+        "timestamp": "2026-10-25T19:27:37.916Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-8930 (\"jhgfvc\") logged. SHA-256: 18ffa08b7e0da5f7...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    }
+  },
+  {
+    "_id": "case_ransomware_intrusion",
+    "caseNumber": "CASE-2026-3391",
+    "title": "DarkWeb Syndicate Ransomware Intrusion",
+    "classification": "Cybercrime",
+    "priority": "High",
+    "status": "Open",
+    "incidentDate": "2026-10-21T04:12:00.000Z",
+    "incidentLocation": "Metro Healthcare Regional Data Center",
+    "description": "Critical patient management servers locked by asymmetric RSA-4096 ransomware strain attributed to DarkWeb actor \"Cipher\". Bitcoin wallet addresses intercepted during ransom demand transmission.",
+    "leadInvestigator": "usr_sarah_miller",
+    "leadInvestigatorName": "Detective Sarah Miller",
+    "assignedTeam": [
+      "usr_elena_rostova"
+    ],
+    "tags": [
+      "Cyber",
+      "Ransomware",
+      "DarkWeb",
+      "Crypto"
+    ],
+    "timeline": [
+      {
+        "timestamp": "2026-10-21T06:00:00.000Z",
+        "title": "Intrusion Investigation Initiated",
+        "description": "Server logs and memory dump snapshots secured under cryptographic custody.",
+        "investigator": "Detective Sarah Miller",
+        "type": "initialization"
+      }
+    ],
+    "handoverHistory": [],
+    "createdAt": "2026-10-21T06:30:00.000Z",
+    "updatedAt": "2026-10-23T12:00:00.000Z"
+  },
+  {
+    "_id": "case_pier_narcotics",
+    "caseNumber": "CASE-2026-8804",
+    "title": "Pier 14 Narcotics Distribution Network",
+    "classification": "Narcotics",
+    "priority": "Medium",
+    "status": "Under Review",
+    "incidentDate": "2026-10-15T01:45:00.000Z",
+    "incidentLocation": "Pier 14 Industrial Shipping Terminal",
+    "description": "Interception of maritime shipping cargo container concealing high-purity illicit narcotics and encrypted mobile satellite communications equipment.",
+    "leadInvestigator": "usr_david_chen",
+    "leadInvestigatorName": "Inspector David Chen",
+    "assignedTeam": [
+      "usr_sarah_miller"
+    ],
+    "tags": [
+      "Narcotics",
+      "Maritime",
+      "Hardware"
+    ],
+    "timeline": [
+      {
+        "timestamp": "2026-10-15T04:00:00.000Z",
+        "title": "Cargo Seizure Logged",
+        "description": "Physical evidence transferred to central evidence holding vault.",
+        "investigator": "Inspector David Chen",
+        "type": "initialization"
+      }
+    ],
+    "handoverHistory": [],
+    "createdAt": "2026-10-15T04:30:00.000Z",
+    "updatedAt": "2026-10-22T10:00:00.000Z"
+  },
+  {
+    "_id": "mvo7529qgxx6q",
+    "title": "jjewel theft",
+    "classification": "Homicide",
+    "priority": "High",
+    "status": "Open",
+    "incidentDate": "2026-10-25T19:04:04.285Z",
+    "incidentLocation": "Unspecified",
+    "description": "drrfbgnhmjk,l.",
+    "leadInvestigator": "mvlb31fz4es4m",
+    "leadInvestigatorName": "Kanya T",
+    "assignedTeam": [],
+    "tags": [],
+    "caseNumber": "CASE-2026-1552",
+    "timeline": [
+      {
+        "timestamp": "2026-10-25T19:04:04.285Z",
+        "title": "Case Initiated",
+        "description": "Case file opened with status: Open",
+        "investigator": "Kanya T",
+        "type": "initialization"
+      },
+      {
+        "timestamp": "2026-10-25T19:04:52.367Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-8633 (\"cfvgbnm\") logged. SHA-256: ebed2e616223e7b3...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    ],
+    "handoverHistory": [],
+    "createdAt": "2026-10-25T19:04:04.286Z",
+    "updatedAt": "2026-10-25T19:04:52.367Z",
+    "$push": {
+      "timeline": {
+        "timestamp": "2026-10-25T19:04:52.367Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-8633 (\"cfvgbnm\") logged. SHA-256: ebed2e616223e7b3...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    }
+  },
+  {
+    "_id": "mvo79ryjj4ibo",
+    "title": "murder",
+    "classification": "Homicide",
+    "priority": "High",
+    "status": "Open",
+    "incidentDate": "2026-10-26T00:37",
+    "incidentLocation": "london",
+    "description": "the murder was done using knife",
+    "leadInvestigator": "mvlb31fz4es4m",
+    "leadInvestigatorName": "Kanya T",
+    "assignedTeam": [],
+    "tags": [
+      "pics"
+    ],
+    "caseNumber": "CASE-2026-5104",
+    "timeline": [
+      {
+        "timestamp": "2026-10-25T19:07:44.203Z",
+        "title": "Case Initiated",
+        "description": "Case file opened with status: Open",
+        "investigator": "Kanya T",
+        "type": "initialization"
+      },
+      {
+        "timestamp": "2026-10-25T19:09:12.848Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-2797 (\"pics\") logged. SHA-256: 0d707fd4bc1c465f...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    ],
+    "handoverHistory": [],
+    "createdAt": "2026-10-25T19:07:44.203Z",
+    "updatedAt": "2026-10-25T19:09:12.848Z",
+    "$push": {
+      "timeline": {
+        "timestamp": "2026-10-25T19:09:12.848Z",
+        "title": "Digital Evidence Ingested",
+        "description": "Evidence EVD-2026-2797 (\"pics\") logged. SHA-256: 0d707fd4bc1c465f...",
+        "investigator": "Kanya T",
+        "type": "evidence_ingestion"
+      }
+    }
+  }
+]

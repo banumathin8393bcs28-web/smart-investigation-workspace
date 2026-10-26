@@ -1,0 +1,225 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Ingest New Investigation Case</h1>
+        <small class="text-muted">Register a new official forensic case into the central workspace ledger</small>
+      </div>
+      <a href="/cases" class="btn btn-gov-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> View Existing Cases
+      </a>
+    </div>
+
+    <% if (errors.general) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= errors.general %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <div class="gov-card shadow-sm border">
+      <div class="gov-card-header bg-white py-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-folder-plus text-primary fs-4"></i>
+          <div>
+            <h5 class="mb-0 fw-bold">Official Case Intake Form</h5>
+            <small class="text-muted">Case number will be atomically assigned (e.g. CASE001, CASE002...) by the server</small>
+          </div>
+        </div>
+        <div class="text-end">
+          <span class="badge bg-light text-dark border">
+            <i class="bi bi-clock me-1"></i> Official Server Timestamp Recorded at Ingestion
+          </span>
+        </div>
+      </div>
+
+      <div class="gov-card-body p-4">
+
+        <form action="/cases/new" method="POST" id="caseForm">
+
+          <!-- Section 1: Classification & Core Identifiers -->
+          <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+            1. Core Case Specifications
+          </h6>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="caseName">Case Title / Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control <%= errors.caseName ? 'is-invalid' : '' %>" id="caseName" name="caseName" value="<%= formData.caseName || '' %>" placeholder="e.g. Armed Robbery at Central Commercial Bank" required>
+              <% if (errors.caseName) { %><div class="invalid-feedback"><%= errors.caseName %></div><% } %>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="crimeType">Crime Classification <span class="text-danger">*</span></label>
+              <select class="form-select <%= errors.crimeType ? 'is-invalid' : '' %>" id="crimeType" name="crimeType" required onchange="toggleCrimeOther(this.value)">
+                <option value="">Select crime type...</option>
+                <option value="Theft" <%= formData.crimeType === 'Theft' ? 'selected' : '' %>>Theft</option>
+                <option value="Murder" <%= formData.crimeType === 'Murder' ? 'selected' : '' %>>Murder</option>
+                <option value="Robbery" <%= formData.crimeType === 'Robbery' ? 'selected' : '' %>>Robbery</option>
+                <option value="Assault" <%= formData.crimeType === 'Assault' ? 'selected' : '' %>>Assault</option>
+                <option value="Burglary" <%= formData.crimeType === 'Burglary' ? 'selected' : '' %>>Burglary</option>
+                <option value="Cybercrime" <%= formData.crimeType === 'Cybercrime' ? 'selected' : '' %>>Cybercrime</option>
+                <option value="Fraud" <%= formData.crimeType === 'Fraud' ? 'selected' : '' %>>Fraud</option>
+                <option value="Missing Person" <%= formData.crimeType === 'Missing Person' ? 'selected' : '' %>>Missing Person</option>
+                <option value="Drug-Related Crime" <%= formData.crimeType === 'Drug-Related Crime' ? 'selected' : '' %>>Drug-Related Crime</option>
+                <option value="Other" <%= formData.crimeType === 'Other' ? 'selected' : '' %>>Other</option>
+              </select>
+              <% if (errors.crimeType) { %><div class="invalid-feedback"><%= errors.crimeType %></div><% } %>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="status">Initial Status <span class="text-danger">*</span></label>
+              <select class="form-select <%= errors.status ? 'is-invalid' : '' %>" id="status" name="status" required>
+                <option value="New" <%= (!formData.status || formData.status === 'New') ? 'selected' : '' %>>New</option>
+                <option value="Under Investigation" <%= formData.status === 'Under Investigation' ? 'selected' : '' %>>Under Investigation</option>
+                <option value="Pending" <%= formData.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Transferred" <%= formData.status === 'Transferred' ? 'selected' : '' %>>Transferred</option>
+                <option value="Closed" <%= formData.status === 'Closed' ? 'selected' : '' %>>Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Other Crime Type Additional Description -->
+          <div class="row g-3 mb-3 <%= formData.crimeType === 'Other' ? '' : 'd-none' %>" id="crimeOtherRow">
+            <div class="col-md-12">
+              <label class="form-label" for="crimeTypeOther">Specify Crime Type (Other)</label>
+              <input type="text" class="form-control" id="crimeTypeOther" name="crimeTypeOther" value="<%= formData.crimeTypeOther || '' %>" placeholder="Provide description for other classification">
+            </div>
+          </div>
+
+          <!-- Section 2: Incident Date, Time & Location -->
+          <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+            2. Incident Coordinates & Timeline
+          </h6>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label" for="incidentDate">Incident Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control <%= errors.incidentDate ? 'is-invalid' : '' %>" id="incidentDate" name="incidentDate" value="<%= formData.incidentDate || '' %>" required>
+              <% if (errors.incidentDate) { %><div class="invalid-feedback"><%= errors.incidentDate %></div><% } %>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="incidentTime">Incident Time <span class="text-danger">*</span></label>
+              <input type="time" class="form-control <%= errors.incidentTime ? 'is-invalid' : '' %>" id="incidentTime" name="incidentTime" value="<%= formData.incidentTime || '' %>" required>
+              <% if (errors.incidentTime) { %><div class="invalid-feedback"><%= errors.incidentTime %></div><% } %>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="incidentLocation">Location / City <span class="text-danger">*</span></label>
+              <input type="text" class="form-control <%= errors.incidentLocation ? 'is-invalid' : '' %>" id="incidentLocation" name="incidentLocation" value="<%= formData.incidentLocation || '' %>" placeholder="e.g. New Delhi, Sector 4" required>
+              <% if (errors.incidentLocation) { %><div class="invalid-feedback"><%= errors.incidentLocation %></div><% } %>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="crimeSceneAddress">Crime-Scene Street Address</label>
+              <input type="text" class="form-control" id="crimeSceneAddress" name="crimeSceneAddress" value="<%= formData.crimeSceneAddress || '' %>" placeholder="e.g. Building 12, MG Road">
+            </div>
+          </div>
+
+          <!-- Section 3: Officer & Unit -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="reportingInvestigator">Reporting Investigator <span class="text-danger">*</span></label>
+              <input type="text" class="form-control <%= errors.reportingInvestigator ? 'is-invalid' : '' %>" id="reportingInvestigator" name="reportingInvestigator" value="<%= formData.reportingInvestigator || currentInvestigator.fullName %>" required>
+              <% if (errors.reportingInvestigator) { %><div class="invalid-feedback"><%= errors.reportingInvestigator %></div><% } %>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="department">Department / Investigative Unit</label>
+              <input type="text" class="form-control" id="department" name="department" value="<%= formData.department || 'Special Crimes & Forensics Division' %>">
+            </div>
+          </div>
+
+          <!-- Section 4: Narrative & AI Context -->
+          <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+            3. Case Narrative & AI Contextual Object Targets
+          </h6>
+
+          <div class="mb-3">
+            <label class="form-label" for="caseDescription">Detailed Incident Narrative & Description <span class="text-danger">*</span></label>
+            <textarea class="form-control <%= errors.caseDescription ? 'is-invalid' : '' %>" id="caseDescription" name="caseDescription" rows="4" placeholder="Detail the event sequence, evidence observed, witness accounts..." required><%= formData.caseDescription || '' %></textarea>
+            <small class="text-muted">The AI inspection engine extracts contextual keywords from this description (e.g. knife, weapon, vehicle, backpack, bottle, phone).</small>
+            <% if (errors.caseDescription) { %><div class="invalid-feedback"><%= errors.caseDescription %></div><% } %>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="knownObjects">Known Objects / Potential Evidence Targets</label>
+              <input type="text" class="form-control" id="knownObjects" name="knownObjects" value="<%= formData.knownObjects || '' %>" placeholder="e.g. Knife, Handbag, Blue Sedan, Phone">
+              <small class="text-muted">Specific targets for AI computer vision object inspection.</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="preliminaryFindings">Preliminary Findings</label>
+              <input type="text" class="form-control" id="preliminaryFindings" name="preliminaryFindings" value="<%= formData.preliminaryFindings || '' %>" placeholder="Initial forensic observations">
+            </div>
+          </div>
+
+          <!-- Section 5: Persons Involved (Optional) -->
+          <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+            4. Involved Persons & Ancillary Information (Optional)
+          </h6>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label" for="victimDetails">Victim Details</label>
+              <textarea class="form-control" id="victimDetails" name="victimDetails" rows="2" placeholder="Name, age, condition, status..."><%= formData.victimDetails || '' %></textarea>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label" for="suspectDetails">Suspect Details</label>
+              <textarea class="form-control" id="suspectDetails" name="suspectDetails" rows="2" placeholder="Known aliases, physical descriptors..."><%= formData.suspectDetails || '' %></textarea>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label" for="witnessDetails">Witness Information</label>
+              <textarea class="form-control" id="witnessDetails" name="witnessDetails" rows="2" placeholder="Witness statements, contact info..."><%= formData.witnessDetails || '' %></textarea>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="additionalNotes">Additional Case Notes</label>
+            <textarea class="form-control" id="additionalNotes" name="additionalNotes" rows="2" placeholder="Administrative remarks, handling directives..."><%= formData.additionalNotes || '' %></textarea>
+          </div>
+
+          <!-- Ingest Case Button & Duplicate Submission Prevention -->
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="/cases" class="btn btn-gov-secondary">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-gov-primary px-4 py-2" id="ingestBtn">
+              <i class="bi bi-shield-check me-1"></i> Ingest Case
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleCrimeOther(val) {
+  const row = document.getElementById('crimeOtherRow');
+  if (val === 'Other') {
+    row.classList.remove('d-none');
+  } else {
+    row.classList.add('d-none');
+  }
+}
+
+// Prevent duplicate submissions
+document.getElementById('caseForm').addEventListener('submit', function() {
+  const btn = document.getElementById('ingestBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ingesting Case...';
+});
+</script>
+
+<%- include('../partials/footer') %>

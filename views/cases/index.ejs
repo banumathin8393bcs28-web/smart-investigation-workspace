@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h4 mb-1 fw-bold text-dark">Authorized Investigation Cases</h1>
+        <small class="text-muted">Master registry of authorized forensic investigation cases</small>
+      </div>
+      <a href="/cases/new" class="btn btn-gov-primary btn-sm">
+        <i class="bi bi-folder-plus me-1"></i> Ingest New Case
+      </a>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="gov-card mb-4">
+      <div class="gov-card-body p-3">
+        <form action="/cases" method="GET" class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small mb-1" for="search">Keyword / Case Number</label>
+            <input type="text" class="form-control form-control-sm" id="search" name="search" value="<%= filters.search %>" placeholder="Search title, CASE001, location...">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label small mb-1" for="crimeType">Crime Classification</label>
+            <select class="form-select form-select-sm" id="crimeType" name="crimeType">
+              <option value="All" <%= filters.crimeType === 'All' ? 'selected' : '' %>>All Classifications</option>
+              <option value="Theft" <%= filters.crimeType === 'Theft' ? 'selected' : '' %>>Theft</option>
+              <option value="Murder" <%= filters.crimeType === 'Murder' ? 'selected' : '' %>>Murder</option>
+              <option value="Robbery" <%= filters.crimeType === 'Robbery' ? 'selected' : '' %>>Robbery</option>
+              <option value="Assault" <%= filters.crimeType === 'Assault' ? 'selected' : '' %>>Assault</option>
+              <option value="Burglary" <%= filters.crimeType === 'Burglary' ? 'selected' : '' %>>Burglary</option>
+              <option value="Cybercrime" <%= filters.crimeType === 'Cybercrime' ? 'selected' : '' %>>Cybercrime</option>
+              <option value="Fraud" <%= filters.crimeType === 'Fraud' ? 'selected' : '' %>>Fraud</option>
+              <option value="Missing Person" <%= filters.crimeType === 'Missing Person' ? 'selected' : '' %>>Missing Person</option>
+              <option value="Drug-Related Crime" <%= filters.crimeType === 'Drug-Related Crime' ? 'selected' : '' %>>Drug-Related Crime</option>
+              <option value="Other" <%= filters.crimeType === 'Other' ? 'selected' : '' %>>Other</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label small mb-1" for="status">Status</label>
+            <select class="form-select form-select-sm" id="status" name="status">
+              <option value="All" <%= filters.status === 'All' ? 'selected' : '' %>>All Statuses</option>
+              <option value="New" <%= filters.status === 'New' ? 'selected' : '' %>>New</option>
+              <option value="Under Investigation" <%= filters.status === 'Under Investigation' ? 'selected' : '' %>>Under Investigation</option>
+              <option value="Pending" <%= filters.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="Transferred" <%= filters.status === 'Transferred' ? 'selected' : '' %>>Transferred</option>
+              <option value="Closed" <%= filters.status === 'Closed' ? 'selected' : '' %>>Closed</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label small mb-1" for="incidentDate">Incident Date</label>
+            <input type="date" class="form-control form-control-sm" id="incidentDate" name="incidentDate" value="<%= filters.incidentDate %>">
+          </div>
+
+          <div class="col-md-2 d-flex gap-1">
+            <button type="submit" class="btn btn-gov-primary btn-sm flex-grow-1">
+              <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+            <a href="/cases" class="btn btn-gov-secondary btn-sm" title="Clear Filters">
+              <i class="bi bi-x-circle"></i>
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cases Data Table -->
+    <div class="gov-card">
+      <div class="gov-card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2"></i> Case Directory (<%= cases.length %> Records)</span>
+      </div>
+      <div class="gov-card-body p-0">
+        <% if (cases.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-gov mb-0">
+              <thead>
+                <tr>
+                  <th>Case #</th>
+                  <th>Case Title</th>
+                  <th>Crime Type</th>
+                  <th>Status</th>
+                  <th>Incident Date</th>
+                  <th>Location</th>
+                  <th>Assigned Officer</th>
+                  <th>Creation Date & Time</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% cases.forEach(c => { %>
+                  <tr>
+                    <td>
+                      <a href="/cases/<%= c._id %>" class="fw-bold text-decoration-none text-primary">
+                        <%= c.caseNumber %>
+                      </a>
+                    </td>
+                    <td>
+                      <a href="/cases/<%= c._id %>" class="fw-semibold text-dark text-decoration-none">
+                        <%= c.caseName %>
+                      </a>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-dark border"><%= c.crimeType %></span>
+                    </td>
+                    <td>
+                      <span class="badge <%= c.status === 'Closed' ? 'bg-secondary' : (c.status === 'Under Investigation' ? 'bg-primary' : (c.status === 'Transferred' ? 'bg-info text-dark' : 'bg-warning text-dark')) %>">
+                        <%= c.status %>
+                      </span>
+                    </td>
+                    <td><%= formatTimestamp(c.incidentDate, { includeSeconds: false }) %></td>
+                    <td><%= c.incidentLocation %></td>
+                    <td><%= c.assignedName %></td>
+                    <td class="small text-muted"><%= formatTimestamp(c.creationTimestamp) %></td>
+                    <td class="small text-muted"><%= formatTimestamp(c.lastUpdatedTimestamp) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="p-5 text-center text-muted">
+            <i class="bi bi-search fs-2 mb-2 d-block"></i>
+            No matching investigation records found. Adjust your filter criteria or ingest a new case.
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

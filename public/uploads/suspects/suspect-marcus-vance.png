@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="240" viewBox="0 0 200 240">
+  <rect width="200" height="240" fill="#111827"/>
+  <rect x="0" y="0" width="200" height="240" fill="none" stroke="#ef4444" stroke-width="4"/>
+  <circle cx="100" cy="85" r="40" fill="#334155"/>
+  <path d="M 30 210 C 30 145, 170 145, 170 210 Z" fill="#1e293b"/>
+  <text x="100" y="90" fill="#fff" font-size="16" font-family="sans-serif" font-weight="bold" text-anchor="middle">M. VANCE</text>
+  <rect x="30" y="195" width="140" height="30" fill="#991b1b"/>
+  <text x="100" y="215" fill="#fff" font-size="12" font-family="sans-serif" font-weight="bold" text-anchor="middle">WANTED // ARMED</text>
+</svg>

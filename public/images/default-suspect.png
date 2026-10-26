@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="240" viewBox="0 0 200 240">
+  <rect width="200" height="240" fill="#0f172a"/>
+  <!-- Height Grid Lines -->
+  <line x1="10" y1="40" x2="190" y2="40" stroke="#334155" stroke-width="1"/>
+  <line x1="10" y1="70" x2="190" y2="70" stroke="#334155" stroke-width="1"/>
+  <line x1="10" y1="100" x2="190" y2="100" stroke="#334155" stroke-width="1"/>
+  <line x1="10" y1="130" x2="190" y2="130" stroke="#334155" stroke-width="1"/>
+  <text x="15" y="65" fill="#64748b" font-size="10" font-family="monospace">6' 0"</text>
+  <text x="15" y="95" fill="#64748b" font-size="10" font-family="monospace">5' 8"</text>
+  <circle cx="100" cy="90" r="45" fill="#475569"/>
+  <path d="M 35 220 C 35 155, 165 155, 165 220 Z" fill="#334155"/>
+  <rect x="50" y="205" width="100" height="25" fill="#000" stroke="#ef4444" stroke-width="2"/>
+  <text x="100" y="222" fill="#fff" font-size="12" font-family="sans-serif" font-weight="bold" text-anchor="middle">SUSPECT #892</text>
+</svg>

@@ -1,0 +1,66 @@
+[
+  {
+    "_id": "susp_marcus_vance",
+    "fullName": "Marcus Vance",
+    "alias": "Ghost",
+    "nationalId": "SSN-849-21-9941",
+    "status": "Wanted",
+    "riskLevel": "Extreme",
+    "photo": "/uploads/suspects/suspect-marcus-vance.png",
+    "phone": "+1 555-902-4411",
+    "address": "Last sighting: Industrial Warehouse District, Pier 12",
+    "physicalTraits": {
+      "height": "6' 1\" (185 cm)",
+      "eyeColor": "Hazel",
+      "hairColor": "Dark Brown / Shaved",
+      "identifyingMarks": "Serpent tattoo wrapped around left forearm; 3-inch scar over right brow."
+    },
+    "priorOffenses": [
+      "2019 - Grand Larceny & Evading Arrest",
+      "2021 - Armed Commercial Robbery (Served 3 Years)",
+      "2024 - Aggravated Assault with Deadly Weapon"
+    ],
+    "connectedCases": [
+      "case_vault_robbery"
+    ],
+    "notes": "Considered armed and dangerous. Known to utilize heavy tactical firearms and signal jamming hardware.",
+    "interrogationNotes": [
+      {
+        "date": "2026-10-20T16:00:00.000Z",
+        "investigator": "Inspector David Chen",
+        "notes": "Witness interview with security guard confirms suspect physique and vocal patterns match Marcus Vance.",
+        "voiceRecorded": true
+      }
+    ],
+    "createdAt": "2026-10-19T08:00:00.000Z",
+    "updatedAt": "2026-10-23T14:00:00.000Z"
+  },
+  {
+    "_id": "susp_dmitri_volkov",
+    "fullName": "Dmitri Volkov",
+    "alias": "Cipher",
+    "nationalId": "ID-882-10-5412",
+    "status": "Under Surveillance",
+    "riskLevel": "High",
+    "photo": "/images/default-suspect.png",
+    "phone": "+1 555-321-7788",
+    "address": "744 Metro Heights Apt 8B",
+    "physicalTraits": {
+      "height": "5' 9\" (175 cm)",
+      "eyeColor": "Blue",
+      "hairColor": "Blonde / Short",
+      "identifyingMarks": "Barcode tattoo behind left ear."
+    },
+    "priorOffenses": [
+      "2020 - Computer Fraud & Network Penetration",
+      "2023 - Possession of Intercepted Cryptographic Keys"
+    ],
+    "connectedCases": [
+      "case_ransomware_intrusion"
+    ],
+    "notes": "Affiliated with international cyber extortion forums. Operates anonymous bulletproof VPN gateways.",
+    "interrogationNotes": [],
+    "createdAt": "2026-10-21T09:00:00.000Z",
+    "updatedAt": "2026-10-23T11:00:00.000Z"
+  }
+]

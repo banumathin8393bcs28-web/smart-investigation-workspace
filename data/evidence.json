@@ -1,0 +1,686 @@
+[
+  {
+    "_id": "evd_cctv_vault",
+    "evidenceNumber": "EVD-2026-1001",
+    "title": "CCTV Camera #4 - Vault Perimeter Breach",
+    "caseId": "case_vault_robbery",
+    "fileType": "image",
+    "originalFilename": "evidence-cctv-vault.png",
+    "mimeType": "image/png",
+    "fileSize": 142850,
+    "originalPath": "/uploads/originals/evidence-cctv-vault.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-cctv-vault.png",
+    "sha256Hash": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4",
+    "lastVerifiedHash": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedAt": "2026-10-23T16:20:54.779Z",
+    "duplicateOf": null,
+    "uploadedBy": "usr_sarah_miller",
+    "uploaderName": "Detective Sarah Miller",
+    "uploaderBadge": "INV-4029",
+    "description": "High-definition digital still extracted from Camera #4 positioned over primary vault access hall. Depicts primary armed perpetrator in tactical balaclava.",
+    "sourceLocation": "Vault Security Server #01",
+    "collectionDate": "2026-10-18T22:34:10.000Z",
+    "accessLevel": "Standard",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-20T11:45:00.000Z",
+      "model": "Ultralytics YOLOv8-Forensic",
+      "summary": "Detected 2 forensic objects with high confidence.",
+      "detections": [
+        {
+          "id": "det_gun_01",
+          "label": "Weapon - Semi-Automatic Handgun",
+          "category": "weapon",
+          "confidence": 0.94,
+          "bbox": [
+            24,
+            38,
+            22,
+            18
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Verified Relevant",
+          "notes": "Metallic firearm profile identified in suspect right-hand quadrant."
+        },
+        {
+          "id": "det_person_01",
+          "label": "Suspect - Clothed Figure (Masked)",
+          "category": "person",
+          "confidence": 0.92,
+          "bbox": [
+            32,
+            12,
+            34,
+            76
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Verified Relevant",
+          "notes": "Subject height estimated at 6ft 1in matching suspect Vance profile."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": "Detective Sarah Miller",
+        "reviewedAt": "2026-10-21T09:30:00.000Z",
+        "status": "Approved & Verified",
+        "verdictNotes": "Weapon profile correlates with 9mm ballistics casing recovered from exit stairwell."
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-19T02:00:00.000Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Detective Sarah Miller",
+        "badgeId": "INV-4029",
+        "notes": "Original evidence logged and SHA-256 hash calculated. Standardized analysis duplicate preserved.",
+        "hashSnapshot": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4"
+      },
+      {
+        "timestamp": "2026-10-21T09:30:00.000Z",
+        "action": "INVESTIGATOR_AI_ATTESTATION",
+        "investigator": "Detective Sarah Miller",
+        "badgeId": "INV-4029",
+        "notes": "Investigator completed forensic verification: Status marked as \"Approved & Verified\".",
+        "hashSnapshot": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4"
+      },
+      {
+        "timestamp": "2026-10-23T16:20:54.780Z",
+        "action": "INTEGRITY_VERIFICATION",
+        "investigator": "Automated Test",
+        "badgeId": "TEST-01",
+        "notes": "Cryptographic SHA-256 checksum matched original baseline (a75679fc7a171175...). File is authentic and unaltered.",
+        "hashSnapshot": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4"
+      }
+    ],
+    "createdAt": "2026-10-19T02:00:00.000Z",
+    "updatedAt": "2026-10-23T16:20:54.781Z",
+    "$push": {
+      "chainOfCustody": {
+        "timestamp": "2026-10-23T16:20:54.780Z",
+        "action": "INTEGRITY_VERIFICATION",
+        "investigator": "Automated Test",
+        "badgeId": "TEST-01",
+        "notes": "Cryptographic SHA-256 checksum matched original baseline (a75679fc7a171175...). File is authentic and unaltered.",
+        "hashSnapshot": "a75679fc7a171175f21721032d6668bcb0097760cfbb5bc5d18d1765db386fe4"
+      }
+    }
+  },
+  {
+    "_id": "evd_getaway_car",
+    "evidenceNumber": "EVD-2026-1002",
+    "title": "Getaway Vehicle - Exterior Traffic Surveillance",
+    "caseId": "case_vault_robbery",
+    "fileType": "image",
+    "originalFilename": "evidence-getaway-car.png",
+    "mimeType": "image/png",
+    "fileSize": 138400,
+    "originalPath": "/uploads/originals/evidence-getaway-car.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-getaway-car.png",
+    "sha256Hash": "056203c850d46d606898a7ca55c90f12b8de96e703e464de84a537c6b31058f3",
+    "lastVerifiedHash": "056203c850d46d606898a7ca55c90f12b8de96e703e464de84a537c6b31058f3",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedAt": "2026-10-23T14:30:00.000Z",
+    "duplicateOf": null,
+    "uploadedBy": "usr_david_chen",
+    "uploaderName": "Inspector David Chen",
+    "uploaderBadge": "INV-7721",
+    "description": "Department of Transportation automated traffic camera at 5th Ave and Grand. Captured dark sedan speeding away from scene 3 minutes post-alarm.",
+    "sourceLocation": "DOT Intercept Node #124",
+    "collectionDate": "2026-10-18T22:37:05.000Z",
+    "accessLevel": "Standard",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-20T14:00:00.000Z",
+      "model": "Ultralytics YOLOv8-Forensic",
+      "summary": "Detected 1 vehicle object.",
+      "detections": [
+        {
+          "id": "det_car_01",
+          "label": "Vehicle - Dark Sedan",
+          "category": "vehicle",
+          "confidence": 0.96,
+          "bbox": [
+            15,
+            25,
+            65,
+            45
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Verified Relevant",
+          "notes": "Late model black sedan with tinted windows."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": "Inspector David Chen",
+        "reviewedAt": "2026-10-21T10:15:00.000Z",
+        "status": "Approved & Verified",
+        "verdictNotes": "Vehicle matches make registered to known associate of Marcus Vance."
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-19T05:00:00.000Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Inspector David Chen",
+        "badgeId": "INV-7721",
+        "notes": "DOT video frame extracted and verified.",
+        "hashSnapshot": "056203c850d46d606898a7ca55c90f12b8de96e703e464de84a537c6b31058f3"
+      }
+    ],
+    "createdAt": "2026-10-19T05:00:00.000Z",
+    "updatedAt": "2026-10-23T14:30:00.000Z"
+  },
+  {
+    "_id": "evd_firearm",
+    "evidenceNumber": "EVD-2026-1003",
+    "title": "Recovered Tactical 9mm Handgun",
+    "caseId": "case_vault_robbery",
+    "fileType": "image",
+    "originalFilename": "evidence-firearm.png",
+    "mimeType": "image/png",
+    "fileSize": 139900,
+    "originalPath": "/uploads/originals/evidence-firearm.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-firearm.png",
+    "sha256Hash": "75349849885973790a2da69537eb67bb013eaff50dacb98ba33a3bceb869a369",
+    "lastVerifiedHash": "75349849885973790a2da69537eb67bb013eaff50dacb98ba33a3bceb869a369",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedAt": "2026-10-23T14:30:00.000Z",
+    "duplicateOf": null,
+    "uploadedBy": "usr_sarah_miller",
+    "uploaderName": "Detective Sarah Miller",
+    "uploaderBadge": "INV-4029",
+    "description": "Physical firearm dropped near loading dock perimeter during flight. Serial number partially defaced.",
+    "sourceLocation": "Loading Dock Alleyway",
+    "collectionDate": "2026-10-19T01:15:00.000Z",
+    "accessLevel": "Restricted",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-21T16:00:00.000Z",
+      "model": "Ultralytics YOLOv8-Forensic",
+      "summary": "Detected 1 ballistic weapon marker.",
+      "detections": [
+        {
+          "id": "det_firearm_02",
+          "label": "Weapon - Semi-Automatic Handgun",
+          "category": "weapon",
+          "confidence": 0.98,
+          "bbox": [
+            20,
+            30,
+            60,
+            40
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Verified Relevant",
+          "notes": "High-contrast mechanical firearm profile confirmed."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": "Elena Rostova",
+        "reviewedAt": "2026-10-22T09:00:00.000Z",
+        "status": "Approved & Verified",
+        "verdictNotes": "Weapon sent to ballistics lab for striation matching."
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-19T06:00:00.000Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Detective Sarah Miller",
+        "badgeId": "INV-4029",
+        "notes": "Evidence photographed and cataloged in forensics lab.",
+        "hashSnapshot": "75349849885973790a2da69537eb67bb013eaff50dacb98ba33a3bceb869a369"
+      }
+    ],
+    "createdAt": "2026-10-19T06:00:00.000Z",
+    "updatedAt": "2026-10-23T14:30:00.000Z"
+  },
+  {
+    "_id": "evd_phone",
+    "evidenceNumber": "EVD-2026-1004",
+    "title": "Intercepted Cellphone Hardware Extraction",
+    "caseId": "case_ransomware_intrusion",
+    "fileType": "image",
+    "originalFilename": "evidence-phone.png",
+    "mimeType": "image/png",
+    "fileSize": 137800,
+    "originalPath": "/uploads/originals/evidence-phone.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-phone.png",
+    "sha256Hash": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16",
+    "lastVerifiedHash": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedAt": "2026-10-25T18:02:58.594Z",
+    "duplicateOf": null,
+    "uploadedBy": "usr_elena_rostova",
+    "uploaderName": "Elena Rostova",
+    "uploaderBadge": "INV-3310",
+    "description": "Burner smartphone seized during search warrant. Contains encrypted messaging apps.",
+    "sourceLocation": "Suspect Residence",
+    "collectionDate": "2026-10-21T10:00:00.000Z",
+    "accessLevel": "Restricted",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-25T18:03:24.291Z",
+      "model": "YOLOv8-Forensic-Custom (Node Engine)",
+      "summary": "Detected 1 forensic objects with high confidence. Ready for investigator review.",
+      "detections": [
+        {
+          "id": "det_v3em3xm",
+          "label": "Electronic Device - Smartphone",
+          "category": "electronics",
+          "confidence": 0.91,
+          "bbox": [
+            42,
+            52,
+            14,
+            18
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Under Review",
+          "notes": "Active handheld digital device with illuminated screen."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "status": "Pending Review",
+        "verdictNotes": ""
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-21T14:00:00.000Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Elena Rostova",
+        "badgeId": "INV-3310",
+        "notes": "Hardware bagged in Faraday shield and cataloged.",
+        "hashSnapshot": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16"
+      },
+      {
+        "timestamp": "2026-10-25T18:02:58.597Z",
+        "action": "INTEGRITY_VERIFICATION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Cryptographic SHA-256 checksum matched original baseline (d7d5ea7e5c1a1a16...). File is authentic and unaltered.",
+        "hashSnapshot": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16"
+      },
+      {
+        "timestamp": "2026-10-25T18:03:24.293Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 1 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16"
+      }
+    ],
+    "createdAt": "2026-10-21T14:00:00.000Z",
+    "updatedAt": "2026-10-25T18:03:24.293Z",
+    "$push": {
+      "chainOfCustody": {
+        "timestamp": "2026-10-25T18:03:24.293Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 1 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "d7d5ea7e5c1a1a1615b44d9a2148c3f5551108d08d5e208c15f16b84200cff16"
+      }
+    }
+  },
+  {
+    "_id": "mvo763d911jpn",
+    "title": "cfvgbnm",
+    "caseId": "mvo7529qgxx6q",
+    "fileType": "image",
+    "originalFilename": "Screenshot 2026-10-20 001601.png",
+    "mimeType": "image/png",
+    "fileSize": 482766,
+    "originalPath": "/uploads/originals/evidence-1792955092352-11900635.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-1792955092352-11900635.png",
+    "sha256Hash": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74",
+    "duplicateOf": null,
+    "uploadedBy": "mvlb31fz4es4m",
+    "uploaderName": "Kanya T",
+    "uploaderBadge": "INV-2716",
+    "description": "xcvbnm,dcfvb",
+    "sourceLocation": "dfgh",
+    "collectionDate": "2026-10-26T00:34",
+    "accessLevel": "Standard",
+    "evidenceNumber": "EVD-2026-8633",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedHash": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74",
+    "lastVerifiedAt": "2026-10-25T19:05:22.072Z",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-25T19:05:43.552Z",
+      "model": "YOLOv8-Forensic-Custom (Node Engine)",
+      "summary": "Detected 2 forensic objects with high confidence. Ready for investigator review.",
+      "detections": [
+        {
+          "id": "det_v66yian",
+          "label": "Primary Subject of Interest",
+          "category": "person",
+          "confidence": 0.88,
+          "bbox": [
+            28,
+            15,
+            38,
+            72
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Under Review",
+          "notes": "Unidentified subject identified in focal visual zone."
+        },
+        {
+          "id": "det_pjgk48w",
+          "label": "Suspicious Handheld Object",
+          "category": "item",
+          "confidence": 0.84,
+          "bbox": [
+            58,
+            48,
+            18,
+            20
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Under Review",
+          "notes": "High-contrast object requiring investigator manual confirmation."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "status": "Pending Review",
+        "verdictNotes": ""
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-25T19:04:52.365Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Original evidence logged and SHA-256 hash calculated. Standardized analysis duplicate preserved.",
+        "hashSnapshot": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74"
+      },
+      {
+        "timestamp": "2026-10-25T19:05:22.074Z",
+        "action": "INTEGRITY_VERIFICATION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Cryptographic SHA-256 checksum matched original baseline (ebed2e616223e7b3...). File is authentic and unaltered.",
+        "hashSnapshot": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74"
+      },
+      {
+        "timestamp": "2026-10-25T19:05:43.555Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 2 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74"
+      },
+      {
+        "timestamp": "2026-10-25T19:06:05.713Z",
+        "action": "INVESTIGATOR_AI_ATTESTATION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Investigator completed forensic verification: Status marked as \"Approved & Verified\". Verdict: AI findings manually audited and confirmed by investigator.",
+        "hashSnapshot": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74"
+      }
+    ],
+    "createdAt": "2026-10-25T19:04:52.365Z",
+    "updatedAt": "2026-10-25T19:06:05.713Z",
+    "$push": {
+      "chainOfCustody": {
+        "timestamp": "2026-10-25T19:06:05.713Z",
+        "action": "INVESTIGATOR_AI_ATTESTATION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Investigator completed forensic verification: Status marked as \"Approved & Verified\". Verdict: AI findings manually audited and confirmed by investigator.",
+        "hashSnapshot": "ebed2e616223e7b3e9ce71465aa573597f333d4e001d8f0e05d3a8ff57f8dd74"
+      }
+    },
+    "aiAnalysis.detections": [
+      {
+        "id": "det_v66yian",
+        "label": "Primary Subject of Interest",
+        "category": "person",
+        "confidence": 0.88,
+        "bbox": [
+          28,
+          15,
+          38,
+          72
+        ],
+        "frameTimestamp": null,
+        "investigatorStatus": "Under Review",
+        "notes": "Unidentified subject identified in focal visual zone."
+      },
+      {
+        "id": "det_pjgk48w",
+        "label": "Suspicious Handheld Object",
+        "category": "item",
+        "confidence": 0.84,
+        "bbox": [
+          58,
+          48,
+          18,
+          20
+        ],
+        "frameTimestamp": null,
+        "investigatorStatus": "Under Review",
+        "notes": "High-contrast object requiring investigator manual confirmation."
+      }
+    ],
+    "aiAnalysis.investigatorReview": {
+      "reviewedBy": "Kanya T",
+      "reviewedByBadge": "INV-2716",
+      "reviewedAt": "2026-10-25T19:06:05.711Z",
+      "status": "Approved & Verified",
+      "verdictNotes": "AI findings manually audited and confirmed by investigator."
+    }
+  },
+  {
+    "_id": "mvo7bocuiqokq",
+    "title": "pics",
+    "caseId": "mvo79ryjj4ibo",
+    "fileType": "image",
+    "originalFilename": "Screenshot 2026-10-26 003820.png",
+    "mimeType": "image/png",
+    "fileSize": 107760,
+    "originalPath": "/uploads/originals/evidence-1792955352836-181843186.png",
+    "analysisPath": "/uploads/analysis/analysis_evidence-1792955352836-181843186.png",
+    "sha256Hash": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f",
+    "duplicateOf": null,
+    "uploadedBy": "mvlb31fz4es4m",
+    "uploaderName": "Kanya T",
+    "uploaderBadge": "INV-2716",
+    "description": "a knife was flood with blood",
+    "sourceLocation": "srt street",
+    "collectionDate": "2026-10-26T00:38",
+    "accessLevel": "Standard",
+    "evidenceNumber": "EVD-2026-2797",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedHash": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f",
+    "lastVerifiedAt": "2026-10-25T19:09:12.846Z",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-25T19:10:15.169Z",
+      "model": "YOLOv8-Forensic-Custom (Node Engine)",
+      "summary": "Detected 1 forensic objects with high confidence. Ready for investigator review.",
+      "detections": [
+        {
+          "id": "det_thuthl9",
+          "label": "Weapon - Edged Combat Knife",
+          "category": "weapon",
+          "confidence": 0.89,
+          "bbox": [
+            55,
+            60,
+            16,
+            22
+          ],
+          "frameTimestamp": null,
+          "investigatorStatus": "Under Review",
+          "notes": "Serrated fixed-blade weapon visible on ground surface."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "status": "Pending Review",
+        "verdictNotes": ""
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-25T19:09:12.846Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Original evidence logged and SHA-256 hash calculated. Standardized analysis duplicate preserved.",
+        "hashSnapshot": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f"
+      },
+      {
+        "timestamp": "2026-10-25T19:09:21.649Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 1 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f"
+      },
+      {
+        "timestamp": "2026-10-25T19:10:15.171Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 1 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f"
+      }
+    ],
+    "createdAt": "2026-10-25T19:09:12.846Z",
+    "updatedAt": "2026-10-25T19:10:15.171Z",
+    "$push": {
+      "chainOfCustody": {
+        "timestamp": "2026-10-25T19:10:15.171Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 1 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "0d707fd4bc1c465fa3a0b85dd76cca8017494c9f68d6de741053adad8861f10f"
+      }
+    }
+  },
+  {
+    "_id": "mvo7zd16svv0c",
+    "title": "jhgfvc",
+    "caseId": "case_vault_robbery",
+    "fileType": "video",
+    "originalFilename": "Screen Recording 2026-10-26 005656.mp4",
+    "mimeType": "video/mp4",
+    "fileSize": 1530427,
+    "originalPath": "/uploads/originals/evidence-1792956457896-971548090.mp4",
+    "analysisPath": "/uploads/analysis/analysis_evidence-1792956457896-971548090.mp4",
+    "sha256Hash": "18ffa08b7e0da5f7c8e58cc20e71a280c7e9684fe252cf20d8cc92077977eeb3",
+    "duplicateOf": null,
+    "uploadedBy": "mvlb31fz4es4m",
+    "uploaderName": "Kanya T",
+    "uploaderBadge": "INV-2716",
+    "description": "file picture",
+    "sourceLocation": "bfgvdcx",
+    "collectionDate": "2026-10-26T00:57",
+    "accessLevel": "Standard",
+    "evidenceNumber": "EVD-2026-8930",
+    "integrityStatus": "Verified Intact",
+    "lastVerifiedHash": "18ffa08b7e0da5f7c8e58cc20e71a280c7e9684fe252cf20d8cc92077977eeb3",
+    "lastVerifiedAt": "2026-10-25T19:27:37.914Z",
+    "aiAnalysis": {
+      "analyzed": true,
+      "analyzedAt": "2026-10-25T19:27:46.434Z",
+      "model": "YOLOv8-Forensic-Custom (Node Engine)",
+      "summary": "Detected 3 forensic objects with high confidence. Ready for investigator review.",
+      "detections": [
+        {
+          "id": "det_9ygjycx",
+          "label": "Primary Subject of Interest",
+          "category": "person",
+          "confidence": 0.88,
+          "bbox": [
+            28,
+            15,
+            38,
+            72
+          ],
+          "frameTimestamp": "00:01.50",
+          "investigatorStatus": "Under Review",
+          "notes": "Unidentified subject identified in focal visual zone."
+        },
+        {
+          "id": "det_cqfblah",
+          "label": "Suspicious Handheld Object",
+          "category": "item",
+          "confidence": 0.84,
+          "bbox": [
+            58,
+            48,
+            18,
+            20
+          ],
+          "frameTimestamp": "00:03.40",
+          "investigatorStatus": "Under Review",
+          "notes": "High-contrast object requiring investigator manual confirmation."
+        },
+        {
+          "id": "det_5jttxw6",
+          "label": "Motion Anomaly / Escape Route",
+          "category": "movement",
+          "confidence": 0.79,
+          "bbox": [
+            70,
+            20,
+            24,
+            60
+          ],
+          "frameTimestamp": "00:06.10",
+          "investigatorStatus": "Under Review",
+          "notes": "Rapid directional transition observed toward perimeter exit."
+        }
+      ],
+      "investigatorReview": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "status": "Pending Review",
+        "verdictNotes": ""
+      }
+    },
+    "chainOfCustody": [
+      {
+        "timestamp": "2026-10-25T19:27:37.914Z",
+        "action": "EVIDENCE_INGESTION",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Original evidence logged and SHA-256 hash calculated. Standardized analysis duplicate preserved.",
+        "hashSnapshot": "18ffa08b7e0da5f7c8e58cc20e71a280c7e9684fe252cf20d8cc92077977eeb3"
+      },
+      {
+        "timestamp": "2026-10-25T19:27:46.437Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 3 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "18ffa08b7e0da5f7c8e58cc20e71a280c7e9684fe252cf20d8cc92077977eeb3"
+      }
+    ],
+    "createdAt": "2026-10-25T19:27:37.914Z",
+    "updatedAt": "2026-10-25T19:27:46.438Z",
+    "$push": {
+      "chainOfCustody": {
+        "timestamp": "2026-10-25T19:27:46.437Z",
+        "action": "AI_FORENSIC_ANALYSIS",
+        "investigator": "Kanya T",
+        "badgeId": "INV-2716",
+        "notes": "Executed AI object detection using YOLOv8-Forensic-Custom (Node Engine). Identified 3 candidate evidentiary markers awaiting human review.",
+        "hashSnapshot": "18ffa08b7e0da5f7c8e58cc20e71a280c7e9684fe252cf20d8cc92077977eeb3"
+      }
+    }
+  }
+]

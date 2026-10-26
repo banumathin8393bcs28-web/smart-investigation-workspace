@@ -1,0 +1,177 @@
+<%- include('../partials/header') %>
+
+<!-- Top Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h1 class="mb-1"><i class="bi bi-images text-warning"></i> Digital Evidence Media Gallery</h1>
+    <p class="text-muted fs-5 mb-0">High-resolution forensic visual gallery for crime-scene images and surveillance videos.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/evidence/upload" class="btn btn-primary"><i class="bi bi-cloud-arrow-up"></i> Ingest New Media</a>
+    <a href="/evidence/requests" class="btn btn-outline"><i class="bi bi-arrow-left-right"></i> Transfer Requests</a>
+  </div>
+</div>
+
+<!-- Filter & Search Controls -->
+<div class="forensic-card p-3 mb-4">
+  <form action="/evidence/gallery" method="GET" class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <select class="form-select" name="caseId">
+        <option value="">All Associated Cases</option>
+        <% cases.forEach(c => { %>
+          <option value="<%= c._id %>" <%= currentFilter.caseId === c._id.toString() ? 'selected' : '' %>>
+            <%= c.caseNumber %> - <%= c.title %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select class="form-select" name="type">
+        <option value="all" <%= currentFilter.type === 'all' ? 'selected' : '' %>>All Media Formats (Images & Videos)</option>
+        <option value="image" <%= currentFilter.type === 'image' ? 'selected' : '' %>>Images Only</option>
+        <option value="video" <%= currentFilter.type === 'video' ? 'selected' : '' %>>Videos Only</option>
+        <option value="document" <%= currentFilter.type === 'document' ? 'selected' : '' %>>Documents & Audio</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select class="form-select" name="integrity">
+        <option value="all" <%= currentFilter.integrity === 'all' ? 'selected' : '' %>>All Integrity Baselines</option>
+        <option value="Verified Intact" <%= currentFilter.integrity === 'Verified Intact' ? 'selected' : '' %>>Verified Intact Only</option>
+        <option value="Tampered" <%= currentFilter.integrity === 'Tampered' ? 'selected' : '' %>>Tampered / Mismatched</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-outline"><i class="bi bi-filter"></i> Apply Filter</button>
+    </div>
+  </form>
+</div>
+
+<!-- Gallery Grid -->
+<% if (evidenceItems.length === 0) { %>
+  <div class="forensic-card text-center py-5 text-muted">
+    <i class="bi bi-camera-reels fs-1 mb-2 d-block"></i>
+    <p class="fs-5">No digital evidence media found matching the active gallery filter.</p>
+    <a href="/evidence/upload" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Upload Evidence Media</a>
+  </div>
+<% } else { %>
+  <div class="gallery-grid">
+    <% evidenceItems.forEach(ev => { %>
+      <div class="gallery-card">
+        <!-- Media Thumbnail -->
+        <div class="gallery-media-thumb">
+          <% if (ev.fileType === 'image') { %>
+            <img 
+              src="<%= ev.originalPath %>" 
+              alt="<%= ev.title %>"
+              loading="lazy"
+              onclick="openLightbox('<%= ev.originalPath %>', 'image', '<%= ev.title %>', '<%= ev.evidenceNumber %>', '<%= ev.sha256Hash %>')"
+              style="cursor: pointer;"
+            >
+            <span class="media-type-badge"><i class="bi bi-image"></i> IMAGE</span>
+          <% } else if (ev.fileType === 'video') { %>
+            <video 
+              src="<%= ev.originalPath %>" 
+              preload="metadata" 
+              controls
+              style="width: 100%; height: 100%; object-fit: cover;"
+            ></video>
+            <span class="media-type-badge"><i class="bi bi-play-circle-fill text-danger"></i> VIDEO</span>
+          <% } else { %>
+            <div class="text-center p-4 text-secondary">
+              <i class="bi bi-file-earmark-lock text-info" style="font-size: 3rem;"></i>
+              <div class="mt-2 text-white fw-bold"><%= ev.fileType.toUpperCase() %></div>
+            </div>
+            <span class="media-type-badge"><i class="bi bi-file-text"></i> DOC</span>
+          <% } %>
+
+          <!-- Integrity badge overlay -->
+          <div class="integrity-badge-overlay">
+            <span class="badge <%= ev.integrityStatus === 'Verified Intact' ? 'badge-intact' : 'badge-tampered' %>">
+              <i class="bi <%= ev.integrityStatus === 'Verified Intact' ? 'bi-shield-check' : 'bi-shield-slash' %>"></i> <%= ev.integrityStatus %>
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="gallery-card-body">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold text-info"><%= ev.evidenceNumber %></span>
+            <span class="text-muted small"><%= (ev.fileSize / (1024 * 1024)).toFixed(2) %> MB</span>
+          </div>
+
+          <h4 class="gallery-card-title" title="<%= ev.title %>"><%= ev.title %></h4>
+          
+          <div class="gallery-card-meta">
+            <i class="bi bi-calendar3"></i> <%= new Date(ev.collectionDate || ev.createdAt).toLocaleDateString() %> • <%= ev.sourceLocation || 'Field' %>
+          </div>
+
+          <!-- SHA-256 Hash Digest -->
+          <div class="mb-3">
+            <div class="text-muted small mb-1">SHA-256 Cryptographic Digest:</div>
+            <div class="sha256-code text-truncate" title="<%= ev.sha256Hash %>">
+              <%= ev.sha256Hash %>
+            </div>
+          </div>
+
+          <!-- AI Status Tag -->
+          <div class="mb-3">
+            <% if (ev.aiAnalysis && ev.aiAnalysis.analyzed) { %>
+              <span class="badge badge-open text-info border-info">
+                <i class="bi bi-cpu-fill"></i> AI Detected (<%= ev.aiAnalysis.detections?.length || 0 %> objects)
+              </span>
+            <% } else { %>
+              <span class="badge badge-open text-muted border-secondary">
+                <i class="bi bi-cpu"></i> AI Pending
+              </span>
+            <% } %>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="d-flex gap-2 mt-auto">
+            <a href="/evidence/<%= ev._id %>" class="btn btn-outline flex-grow-1"><i class="bi bi-search"></i> Inspect</a>
+            <a href="/ai/analyze/<%= ev._id %>" class="btn btn-primary"><i class="bi bi-cpu"></i> AI Analysis</a>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<!-- Fullscreen Lightbox Modal for Picture Preview -->
+<div class="modal fade" id="lightboxModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-secondary">
+      <div class="modal-header border-secondary">
+        <div>
+          <h5 class="modal-title" id="lightbox-title">Media Inspection</h5>
+          <span class="text-info small" id="lightbox-evidence-num"></span>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-2">
+        <img id="lightbox-img" src="" alt="Enlarged Evidence" class="img-fluid rounded" style="max-height: 75vh;">
+      </div>
+      <div class="modal-footer border-secondary justify-content-between">
+        <div class="sha256-code" id="lightbox-hash" style="max-width: 70%;"></div>
+        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openLightbox(src, type, title, evNum, hash) {
+    if (type !== 'image') return;
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-title').textContent = title;
+    document.getElementById('lightbox-evidence-num').textContent = evNum;
+    document.getElementById('lightbox-hash').textContent = 'SHA-256: ' + hash;
+    const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+    modal.show();
+  }
+</script>
+
+<%- include('../partials/footer') %>

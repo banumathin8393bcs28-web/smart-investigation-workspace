@@ -1,0 +1,190 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-3 mb-1">
+      <h1 class="mb-0 text-white"><%= suspect.fullName %></h1>
+      <span class="badge <%= suspect.riskLevel === 'Extreme' || suspect.riskLevel === 'High' ? 'badge-critical' : 'badge-open' %> fs-6">
+        <%= suspect.riskLevel %> RISK
+      </span>
+      <span class="badge <%= suspect.status === 'Wanted' ? 'badge-tampered' : 'badge-open' %> fs-6">
+        <%= suspect.status %>
+      </span>
+    </div>
+    <p class="text-muted fs-5 mb-0">Alias: "<%= suspect.alias || 'None' %>" • National ID: <%= suspect.nationalId || 'Unrecorded' %></p>
+  </div>
+  <a href="/suspects" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Suspect Registry</a>
+</div>
+
+<% if (success) { %>
+  <div class="alert alert-success" role="alert">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <div><%= success %></div>
+  </div>
+<% } %>
+
+<% if (error) { %>
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div><%= error %></div>
+  </div>
+<% } %>
+
+<div class="row g-4">
+  <!-- Left Column: Mugshot, Bio, Physical Traits -->
+  <div class="col-lg-4">
+    <div class="forensic-card text-center mb-4">
+      <img 
+        src="<%= suspect.photo || '/images/default-suspect.png' %>" 
+        alt="<%= suspect.fullName %>" 
+        class="rounded border border-secondary shadow mb-3"
+        style="width: 180px; height: 210px; object-fit: cover;"
+      >
+      <h3 class="text-white mb-1"><%= suspect.fullName %></h3>
+      <div class="badge badge-critical mb-3"><%= suspect.status %></div>
+
+      <div class="p-3 rounded bg-dark border border-secondary text-start small">
+        <div class="mb-2"><strong>Phone:</strong> <%= suspect.phone || 'N/A' %></div>
+        <div class="mb-2"><strong>Last Known Address:</strong> <%= suspect.address || 'Unknown' %></div>
+        <div><strong>Record Created:</strong> <%= new Date(suspect.createdAt).toLocaleDateString() %></div>
+      </div>
+    </div>
+
+    <!-- Physical Traits Card -->
+    <div class="forensic-card">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-person-bounding-box text-info"></i> Physical Traits
+        </div>
+      </div>
+      <ul class="list-unstyled mb-0">
+        <li class="mb-2"><strong>Height:</strong> <span class="text-light"><%= suspect.physicalTraits?.height || 'N/A' %></span></li>
+        <li class="mb-2"><strong>Eye Color:</strong> <span class="text-light"><%= suspect.physicalTraits?.eyeColor || 'N/A' %></span></li>
+        <li class="mb-2"><strong>Hair Color:</strong> <span class="text-light"><%= suspect.physicalTraits?.hairColor || 'N/A' %></span></li>
+        <li class="mb-0"><strong>Marks / Tattoos:</strong> <span class="text-info"><%= suspect.physicalTraits?.identifyingMarks || 'None' %></span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right Column: Cases, Prior Offenses, Interrogation Voice Notes -->
+  <div class="col-lg-8">
+    <!-- Linked Cases -->
+    <div class="forensic-card mb-4">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-folder-check text-primary"></i> Linked Criminal Cases (<%= linkedCases.length %>)
+        </div>
+      </div>
+
+      <% if (linkedCases.length === 0) { %>
+        <p class="text-muted mb-3">No cases directly linked to this suspect.</p>
+      <% } else { %>
+        <div class="table-responsive mb-3">
+          <table class="table-dark-custom">
+            <thead>
+              <tr>
+                <th>Case #</th>
+                <th>Title</th>
+                <th>Classification</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% linkedCases.forEach(c => { %>
+                <tr>
+                  <td class="fw-bold text-info"><%= c.caseNumber %></td>
+                  <td><%= c.title %></td>
+                  <td><%= c.classification %></td>
+                  <td><span class="badge badge-open"><%= c.status %></span></td>
+                  <td><a href="/cases/<%= c._id %>" class="btn btn-sm btn-outline">View Case</a></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+
+      <!-- Form to link another case -->
+      <form action="/suspects/<%= suspect._id %>/link-case" method="POST" class="row g-2 align-items-center">
+        <div class="col-md-9">
+          <select class="form-select" name="caseId" required>
+            <option value="">-- Connect with Existing Case File --</option>
+            <% allCases.forEach(ac => { %>
+              <% if (!suspect.connectedCases || !suspect.connectedCases.includes(ac._id.toString())) { %>
+                <option value="<%= ac._id %>"><%= ac.caseNumber %> - <%= ac.title %></option>
+              <% } %>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-3 d-grid">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-link-45deg"></i> Link Case</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Prior Offenses -->
+    <div class="forensic-card mb-4">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-journal-text text-warning"></i> Prior Criminal Record / Rap Sheet
+        </div>
+      </div>
+      <% if (!suspect.priorOffenses || suspect.priorOffenses.length === 0) { %>
+        <p class="text-muted mb-0">No prior convictions recorded.</p>
+      <% } else { %>
+        <ul class="list-group list-group-flush bg-transparent">
+          <% suspect.priorOffenses.forEach(off => { %>
+            <li class="list-group-item bg-transparent text-light border-secondary px-0 py-2">
+              <i class="bi bi-dot text-danger fs-4 align-middle"></i> <%= off %>
+            </li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </div>
+
+    <!-- Interrogation Voice Notes & Statements -->
+    <div class="forensic-card">
+      <div class="forensic-card-header">
+        <div class="forensic-card-title">
+          <i class="bi bi-mic text-danger"></i> Interrogation Statements & Voice Notes
+        </div>
+      </div>
+
+      <!-- Add Interrogation Note with Web Speech API -->
+      <form action="/suspects/<%= suspect._id %>/interrogation" method="POST" class="mb-4">
+        <input type="hidden" name="voiceRecorded" id="interrogation-voice-flag" value="false">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label for="interrogationNotes" class="form-label mb-0">Record Interrogation Statement / Deposition</label>
+          <button type="button" class="voice-dictate-btn" data-target="#interrogationNotes" onclick="document.getElementById('interrogation-voice-flag').value = 'true';">
+            <i class="bi bi-mic"></i> Start Voice Dictation
+          </button>
+        </div>
+        <textarea class="form-control mb-3" id="interrogationNotes" name="notes" rows="4" required placeholder="Dictate or type suspect statements, alibis, interrogation responses..."></textarea>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Save Interrogation Record</button>
+      </form>
+
+      <!-- Existing Notes List -->
+      <% if (!suspect.interrogationNotes || suspect.interrogationNotes.length === 0) { %>
+        <p class="text-muted mb-0">No interrogation sessions logged yet.</p>
+      <% } else { %>
+        <div class="timeline-container">
+          <% (suspect.interrogationNotes || []).reverse().forEach(n => { %>
+            <div class="p-3 mb-2 rounded bg-dark border border-secondary-subtle">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="text-info fw-bold"><i class="bi bi-person-badge"></i> <%= n.investigator %></span>
+                <span class="text-muted small"><%= new Date(n.date).toLocaleString() %></span>
+              </div>
+              <p class="text-light mb-1" style="white-space: pre-line;"><%= n.notes %></p>
+              <% if (n.voiceRecorded) { %>
+                <span class="badge badge-open text-primary"><i class="bi bi-mic-fill"></i> Voice Dictated</span>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

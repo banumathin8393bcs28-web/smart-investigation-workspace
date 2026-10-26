@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h1 class="mb-1"><i class="bi bi-arrow-left-right text-success"></i> Evidence Access & Transfer Requests</h1>
+    <p class="text-muted fs-5 mb-0">Review inter-agency evidence transfer requests, chain-of-custody handovers, and supervisory approvals.</p>
+  </div>
+  <a href="/evidence/gallery" class="btn btn-outline"><i class="bi bi-images"></i> Media Gallery</a>
+</div>
+
+<% if (success) { %>
+  <div class="alert alert-success" role="alert">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <div><%= success %></div>
+  </div>
+<% } %>
+
+<% if (error) { %>
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div><%= error %></div>
+  </div>
+<% } %>
+
+<div class="forensic-card">
+  <% if (requests.length === 0) { %>
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+      <p class="fs-5">No evidence access or transfer requests logged.</p>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table-dark-custom">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Requested By</th>
+            <th>Evidence Item</th>
+            <th>Associated Case</th>
+            <th>Purpose</th>
+            <th>Status</th>
+            <th>Decision / Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(r => { %>
+            <tr>
+              <td class="text-muted small"><%= new Date(r.createdAt).toLocaleDateString() %></td>
+              <td>
+                <span class="text-white fw-bold"><%= r.requestedByName %></span>
+                <div class="text-muted small"><%= r.requestedByBadge %></div>
+              </td>
+              <td>
+                <a href="/evidence/<%= r.evidenceId %>" class="text-info fw-bold">
+                  <%= r.evidence?.evidenceNumber || 'EVD' %> - <%= r.evidence?.title || 'Evidence File' %>
+                </a>
+              </td>
+              <td>
+                <span class="text-secondary"><%= r.caseItem?.caseNumber || 'N/A' %></span>
+              </td>
+              <td style="max-width: 250px;"><%= r.purpose %></td>
+              <td>
+                <span class="badge <%= r.status === 'Approved' ? 'badge-intact' : (r.status === 'Pending' ? 'badge-progress' : 'badge-tampered') %>">
+                  <%= r.status %>
+                </span>
+              </td>
+              <td>
+                <% if (r.status === 'Pending') { %>
+                  <form action="/evidence/requests/<%= r._id %>/respond" method="POST" class="d-flex gap-2">
+                    <input type="hidden" name="responseNotes" value="Authorized by case lead">
+                    <button type="submit" name="status" value="Approved" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Approve</button>
+                    <button type="submit" name="status" value="Rejected" class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i> Reject</button>
+                  </form>
+                <% } else { %>
+                  <div class="text-muted small">
+                    Decided by <%= r.respondedBy || 'Supervisor' %> on <%= r.respondedAt ? new Date(r.respondedAt).toLocaleDateString() : '' %>
+                  </div>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

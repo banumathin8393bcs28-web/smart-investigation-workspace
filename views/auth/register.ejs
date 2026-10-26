@@ -1,0 +1,215 @@
+<%- include('../partials/header') %>
+
+<div class="container py-4 my-auto">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+
+      <div class="gov-card shadow-sm border">
+        <div class="gov-card-header bg-white py-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-plus text-primary fs-4"></i>
+            <div>
+              <h2 class="h5 mb-0 fw-bold">Investigator Registration</h2>
+              <small class="text-muted">Register an authorized government investigation account</small>
+            </div>
+          </div>
+          <a href="/auth/login" class="btn btn-outline-secondary btn-sm">Existing Account? Login</a>
+        </div>
+
+        <div class="gov-card-body p-4">
+
+          <% if (errors.general) { %>
+            <div class="alert alert-danger alert-gov mb-3">
+              <i class="bi bi-exclamation-circle-fill me-2"></i> <%= errors.general %>
+            </div>
+          <% } %>
+
+          <form action="/auth/register" method="POST" enctype="multipart/form-data" novalidate>
+
+            <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Personal & Professional Profile
+            </h6>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="fullName">Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.fullName ? 'is-invalid' : '' %>" id="fullName" name="fullName" value="<%= formData.fullName || '' %>" placeholder="e.g. Detective John Miller" required>
+                <% if (errors.fullName) { %><div class="invalid-feedback"><%= errors.fullName %></div><% } %>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="role">Designation / Official Role <span class="text-danger">*</span></label>
+                <select class="form-select <%= errors.role ? 'is-invalid' : '' %>" id="role" name="role" required>
+                  <option value="">Select official role...</option>
+                  <option value="Lead Investigator" <%= formData.role === 'Lead Investigator' ? 'selected' : '' %>>Lead Investigator</option>
+                  <option value="Senior Detective" <%= formData.role === 'Senior Detective' ? 'selected' : '' %>>Senior Detective</option>
+                  <option value="Forensic Analyst" <%= formData.role === 'Forensic Analyst' ? 'selected' : '' %>>Forensic Analyst</option>
+                  <option value="Cybercrime Investigator" <%= formData.role === 'Cybercrime Investigator' ? 'selected' : '' %>>Cybercrime Investigator</option>
+                  <option value="Ballistics Expert" <%= formData.role === 'Ballistics Expert' ? 'selected' : '' %>>Ballistics Expert</option>
+                  <option value="Crime Scene Officer" <%= formData.role === 'Crime Scene Officer' ? 'selected' : '' %>>Crime Scene Officer</option>
+                </select>
+                <% if (errors.role) { %><div class="invalid-feedback"><%= errors.role %></div><% } %>
+              </div>
+            </div>
+
+            <!-- Profile Photo Upload & Preview -->
+            <div class="row g-3 mb-3 align-items-center">
+              <div class="col-md-8">
+                <label class="form-label" for="profilePhoto">Official Profile Photograph</label>
+                <input type="file" class="form-control image-preview-input <%= errors.profilePhoto ? 'is-invalid' : '' %>" id="profilePhoto" name="profilePhoto" accept="image/jpeg,image/png,image/webp" data-preview="photoPreview">
+                <small class="text-muted">JPG, PNG, or WebP (max 5MB).</small>
+                <% if (errors.profilePhoto) { %><div class="invalid-feedback"><%= errors.profilePhoto %></div><% } %>
+              </div>
+              <div class="col-md-4 text-center">
+                <img id="photoPreview" src="/images/default-avatar.png" alt="Preview" class="gov-avatar-md d-none">
+              </div>
+            </div>
+
+            <!-- DOB, Age, Gender -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label" for="dobInput">Date of Birth <span class="text-danger">*</span></label>
+                <input type="date" class="form-control <%= errors.dob ? 'is-invalid' : '' %>" id="dobInput" name="dob" value="<%= formData.dob || '' %>" required>
+                <% if (errors.dob) { %><div class="invalid-feedback"><%= errors.dob %></div><% } %>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label" for="ageInput">Age (Calculated) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control <%= errors.age ? 'is-invalid' : '' %>" id="ageInput" name="age" value="<%= formData.age || '' %>" min="18" max="80" placeholder="Auto-calculated" required>
+                <% if (errors.age) { %><div class="invalid-feedback"><%= errors.age %></div><% } %>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label" for="gender">Gender <span class="text-danger">*</span></label>
+                <select class="form-select <%= errors.gender ? 'is-invalid' : '' %>" id="gender" name="gender" required>
+                  <option value="">Select gender...</option>
+                  <option value="Male" <%= formData.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                  <option value="Female" <%= formData.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                  <option value="Other" <%= formData.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                  <option value="Prefer not to say" <%= formData.gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
+                </select>
+                <% if (errors.gender) { %><div class="invalid-feedback"><%= errors.gender %></div><% } %>
+              </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Contact & Official Identity
+            </h6>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="email">Official Government Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control <%= errors.email ? 'is-invalid' : '' %>" id="email" name="email" value="<%= formData.email || '' %>" placeholder="name.unit@gov.in" required>
+                <small class="text-muted">Must strictly follow xxx.yyy@gov.in pattern.</small>
+                <% if (errors.email) { %><div class="invalid-feedback"><%= errors.email %></div><% } %>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="phone">Phone Number <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.phone ? 'is-invalid' : '' %>" id="phone" name="phone" value="<%= formData.phone || '' %>" placeholder="+91 9876543210" required>
+                <% if (errors.phone) { %><div class="invalid-feedback"><%= errors.phone %></div><% } %>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="username">Official Username <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.username ? 'is-invalid' : '' %>" id="username" name="username" value="<%= formData.username || '' %>" placeholder="e.g. det_miller" required>
+                <% if (errors.username) { %><div class="invalid-feedback"><%= errors.username %></div><% } %>
+              </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Security & Credentials
+            </h6>
+
+            <!-- Password Rules & Inputs -->
+            <div class="row g-3 mb-2">
+              <div class="col-md-6">
+                <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="password" class="form-control <%= errors.password ? 'is-invalid' : '' %>" id="password" name="password" required>
+                  <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="password">
+                    <i class="bi bi-eye"></i> Show
+                  </button>
+                  <% if (errors.password) { %><div class="invalid-feedback"><%= errors.password %></div><% } %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="retypePassword">Retype Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="password" class="form-control <%= errors.retypePassword ? 'is-invalid' : '' %>" id="retypePassword" name="retypePassword" required>
+                  <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="retypePassword">
+                    <i class="bi bi-eye"></i> Show
+                  </button>
+                  <% if (errors.retypePassword) { %><div class="invalid-feedback"><%= errors.retypePassword %></div><% } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-light border py-2 mb-3">
+              <small class="text-muted d-block">
+                <strong>Password Policy:</strong> At least 8 characters, with at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol (!@#$%^&*...).
+              </small>
+            </div>
+
+            <!-- Security Question & Answer -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-7">
+                <label class="form-label" for="securityQuestion">Personal Security Question <span class="text-danger">*</span></label>
+                <select class="form-select <%= errors.securityQuestion ? 'is-invalid' : '' %>" id="securityQuestion" name="securityQuestion" required>
+                  <option value="">Select a security question...</option>
+                  <option value="What is your childhood nickname?" <%= formData.securityQuestion === 'What is your childhood nickname?' ? 'selected' : '' %>>What is your childhood nickname?</option>
+                  <option value="What was the name of your first school?" <%= formData.securityQuestion === 'What was the name of your first school?' ? 'selected' : '' %>>What was the name of your first school?</option>
+                  <option value="What is the name of your first pet?" <%= formData.securityQuestion === 'What is the name of your first pet?' ? 'selected' : '' %>>What is the name of your first pet?</option>
+                  <option value="What is your favourite childhood place?" <%= formData.securityQuestion === 'What is your favourite childhood place?' ? 'selected' : '' %>>What is your favourite childhood place?</option>
+                  <option value="What is your favourite book?" <%= formData.securityQuestion === 'What is your favourite book?' ? 'selected' : '' %>>What is your favourite book?</option>
+                </select>
+                <% if (errors.securityQuestion) { %><div class="invalid-feedback"><%= errors.securityQuestion %></div><% } %>
+              </div>
+
+              <div class="col-md-5">
+                <label class="form-label" for="securityAnswer">One-Word Security Answer <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.securityAnswer ? 'is-invalid' : '' %>" id="securityAnswer" name="securityAnswer" value="<%= formData.securityAnswer || '' %>" placeholder="Single word only" required>
+                <small class="text-muted">Must be exactly one word. Answer is hashed with bcrypt before saving.</small>
+                <% if (errors.securityAnswer) { %><div class="invalid-feedback"><%= errors.securityAnswer %></div><% } %>
+              </div>
+            </div>
+
+            <!-- Server-side CAPTCHA -->
+            <div class="row g-3 mb-4 align-items-center">
+              <div class="col-sm-5">
+                <label class="form-label" for="captcha">Security CAPTCHA <span class="text-danger">*</span></label>
+                <input type="text" class="form-control <%= errors.captcha ? 'is-invalid' : '' %>" id="captcha" name="captcha" placeholder="Enter characters" required>
+                <% if (errors.captcha) { %><div class="invalid-feedback"><%= errors.captcha %></div><% } %>
+              </div>
+              <div class="col-sm-7 d-flex align-items-center gap-2 pt-3 pt-sm-4">
+                <div class="border rounded p-1 bg-light">
+                  <span id="captchaContainer"><%- captchaSvg %></span>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="location.reload()" title="Refresh CAPTCHA">
+                  <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <a href="/auth/login" class="text-decoration-none small">
+                <i class="bi bi-box-arrow-in-right"></i> Already registered? Log in here
+              </a>
+              <button type="submit" class="btn btn-gov-primary px-4 py-2">
+                <i class="bi bi-check2-circle me-1"></i> Complete Registration
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

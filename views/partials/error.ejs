@@ -1,0 +1,27 @@
+<%- include('header') %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="gov-card border-danger">
+        <div class="gov-card-header bg-danger text-white">
+          <i class="bi bi-exclamation-octagon-fill me-2"></i> <%= typeof title !== 'undefined' ? title : 'Security / System Fault' %>
+        </div>
+        <div class="gov-card-body p-4 text-center">
+          <p class="text-danger fw-bold mb-3 fs-5"><%= typeof message !== 'undefined' ? message : 'An unexpected error occurred.' %></p>
+          <p class="text-muted small mb-4">This action has been audited and logged to the central security journal.</p>
+          <div class="d-flex justify-content-center gap-2">
+            <a href="javascript:history.back()" class="btn btn-gov-secondary">
+              <i class="bi bi-arrow-left"></i> Go Back
+            </a>
+            <a href="/dashboard" class="btn btn-gov-primary">
+              <i class="bi bi-house"></i> Return to Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('footer') %>

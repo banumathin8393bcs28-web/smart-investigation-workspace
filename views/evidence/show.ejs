@@ -1,0 +1,349 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-dark fs-6"><%= evidence.evidenceIdentifier %></span>
+          <h1 class="h4 mb-0 fw-bold text-dark"><%= evidence.originalFilename %></h1>
+          <span class="badge <%= evidence.inspectionStatus === 'Inspected' ? 'bg-success' : 'bg-secondary' %>">
+            <%= evidence.inspectionStatus %>
+          </span>
+        </div>
+        <small class="text-muted">
+          Associated Case: <a href="/cases/<%= caseDoc._id %>" class="text-primary fw-semibold"><%= caseDoc.caseNumber %>: <%= caseDoc.caseName %></a> &bull;
+          Uploaded: <%= formatTimestamp(evidence.uploadTimestamp) %> by <%= evidence.uploaderName %>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Return to Case
+        </a>
+        <a href="/evidence/<%= evidence._id %>/file" class="btn btn-gov-primary btn-sm" download>
+          <i class="bi bi-download me-1"></i> Download Original Bytes
+        </a>
+      </div>
+    </div>
+
+    <!-- Flash message -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <div class="row g-4">
+
+      <!-- Left Column: Image Previews & AI Inspection -->
+      <div class="col-lg-6">
+
+        <!-- Image Card -->
+        <div class="gov-card mb-4">
+          <div class="gov-card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-image me-2"></i> Evidence Photography Artifact</span>
+            <span class="text-muted small">MIME: <%= evidence.fileMimeType %></span>
+          </div>
+          <div class="gov-card-body text-center p-3 bg-light">
+            <%
+              const latestSuccessInspection = inspections.find(i => i.inspectionStatus === 'Success');
+            %>
+            <div class="ai-preview-box">
+              <% if (latestSuccessInspection && latestSuccessInspection.annotatedImageReference) { %>
+                <img src="/evidence/<%= evidence._id %>/annotated" alt="Annotated Evidence" class="img-fluid rounded border shadow-sm" style="max-height: 420px; object-fit: contain;">
+                <div class="small text-danger fw-semibold mt-1">
+                  <i class="bi bi-bounding-box me-1"></i> Displaying YOLOv8 AI Detection Overlay (Original image remains pristine)
+                </div>
+              <% } else { %>
+                <img src="/evidence/<%= evidence._id %>/file" alt="Evidence" class="img-fluid rounded border shadow-sm" style="max-height: 420px; object-fit: contain;">
+                <div class="small text-muted mt-1">
+                  <i class="bi bi-check-circle text-success me-1"></i> Original Raw Evidence Photograph
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Object Detection Control -->
+        <div class="gov-card mb-4 border-primary">
+          <div class="gov-card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-cpu-fill me-2"></i> AI Computer Vision Object Detection</span>
+            <span class="badge bg-light text-dark">Ultralytics YOLOv8</span>
+          </div>
+          <div class="gov-card-body p-3">
+            <p class="small text-muted mb-2">
+              The AI inspection engine correlates case context (e.g. <em><%= caseDoc.knownObjects || caseDoc.caseDescription.substring(0, 80) %>...</em>) with official YOLOv8 neural network inference to detect weapons, vehicles, bags, tools, bottles, and persons.
+            </p>
+
+            <form action="/evidence/<%= evidence._id %>/inspect" method="POST" class="row g-2 align-items-end">
+              <div class="col-sm-6">
+                <label class="form-label small" for="confidenceThreshold">Confidence Threshold</label>
+                <select class="form-select form-select-sm" id="confidenceThreshold" name="confidenceThreshold">
+                  <option value="0.15">15% (Permissive Forensic Scan)</option>
+                  <option value="0.25" selected>25% (Standard Baseline)</option>
+                  <option value="0.40">40% (High Confidence)</option>
+                  <option value="0.60">60% (Strict Positive)</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <button type="submit" class="btn btn-gov-primary btn-sm w-100 py-1" id="inspectBtn">
+                  <i class="bi bi-search me-1"></i> Run AI Inspection
+                </button>
+              </div>
+            </form>
+
+            <div class="alert alert-light border py-2 px-3 mt-3 mb-0" style="font-size: 11px; line-height: 1.4;">
+              <strong>Model Limitation Note:</strong> Standard YOLO models detect only supported classes. Detections assist investigator triage and do not prove an object was used to commit a crime. Non-detection does not prove absence.
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Inspection History -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <span><i class="bi bi-clock-history me-2"></i> AI Inspection Execution History</span>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (inspections.length > 0) { %>
+              <ul class="list-group list-group-flush small">
+                <% inspections.forEach(insp => { %>
+                  <li class="list-group-item p-3">
+                    <div class="d-flex justify-content-between mb-1">
+                      <strong><%= insp.modelName %> <%= insp.modelVersion %></strong>
+                      <span class="text-muted"><%= formatTimestamp(insp.inspectionTimestamp) %></span>
+                    </div>
+                    <div class="mb-1">
+                      Status:
+                      <span class="badge <%= insp.inspectionStatus === 'Success' ? 'bg-success' : (insp.inspectionStatus === 'No Objects Detected' ? 'bg-warning text-dark' : 'bg-danger') %>">
+                        <%= insp.inspectionStatus %>
+                      </span>
+                      &bull; Threshold: <%= (insp.confidenceThreshold * 100).toFixed(0) %>%
+                      &bull; Officer: <%= insp.inspectedByName %>
+                    </div>
+                    <div class="text-secondary mb-2"><%= insp.summaryMessage %></div>
+
+                    <% if (insp.detections && insp.detections.length > 0) { %>
+                      <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                          <thead class="table-light">
+                            <tr>
+                              <th>Detected Class</th>
+                              <th>Confidence</th>
+                              <th>Context Match</th>
+                              <th>Bounding Coordinates (x, y, w, h)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% insp.detections.forEach(d => { %>
+                              <tr>
+                                <td><strong class="text-dark"><%= d.label %></strong></td>
+                                <td><%= (d.confidence * 100).toFixed(1) %>%</td>
+                                <td>
+                                  <% if (d.isContextMatch) { %>
+                                    <span class="badge bg-danger">Context Match</span>
+                                  <% } else { %>
+                                    <span class="badge bg-light text-muted border">General</span>
+                                  <% } %>
+                                </td>
+                                <td>[<%= d.boundingBox.x %>%, <%= d.boundingBox.y %>%, <%= d.boundingBox.width %>%, <%= d.boundingBox.height %>%]</td>
+                              </tr>
+                            <% }) %>
+                          </tbody>
+                        </table>
+                      </div>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <div class="p-3 text-muted text-center small">No AI inspections recorded yet. Click <strong>Run AI Inspection</strong> above.</div>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Metadata, SHA-256 Integrity, EXIF & Description -->
+      <div class="col-lg-6">
+
+        <!-- SHA-256 Hash Card -->
+        <div class="gov-card mb-4 border-success">
+          <div class="gov-card-header bg-success text-white">
+            <span><i class="bi bi-shield-check me-2"></i> Cryptographic Evidence Integrity (SHA-256)</span>
+          </div>
+          <div class="gov-card-body p-3">
+            <label class="form-label small text-muted mb-1">Authoritative Original Byte Hash (Calculated from raw upload):</label>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <input type="text" class="form-control form-control-sm font-monospace text-dark fw-bold bg-light" value="<%= evidence.sha256Hash %>" readonly id="hashInput">
+              <button class="btn btn-gov-secondary btn-sm text-nowrap btn-copy-hash" data-hash="<%= evidence.sha256Hash %>">
+                <i class="bi bi-clipboard me-1"></i> Copy Hash
+              </button>
+            </div>
+            <small class="text-muted" style="font-size: 11px;">
+              <i class="bi bi-info-circle me-1"></i> This SHA-256 hash was generated immediately upon file reception. Any tampering, resizing, or alteration of original bytes will invalidate this cryptographic signature.
+            </small>
+          </div>
+        </div>
+
+        <!-- Editable Evidence Description -->
+        <div class="gov-card mb-4">
+          <div class="gov-card-header">
+            <span><i class="bi bi-card-text me-2"></i> Evidentiary Description & Notes</span>
+            <span class="text-muted small">Updated: <%= formatTimestamp(evidence.lastModifiedTimestamp) %></span>
+          </div>
+          <div class="gov-card-body p-3">
+            <form action="/evidence/<%= evidence._id %>/edit-description" method="POST">
+              <div class="mb-3">
+                <textarea class="form-control form-control-sm" name="description" rows="3" placeholder="Enter detailed evidence observations, scene location, physical condition..."><%= evidence.description %></textarea>
+              </div>
+              <button type="submit" class="btn btn-gov-secondary btn-sm">
+                <i class="bi bi-check2 me-1"></i> Save Description Update
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- File Properties (Sharp) Table -->
+        <div class="gov-card mb-4">
+          <div class="gov-card-header">
+            <span><i class="bi bi-sliders me-2"></i> Physical Image Properties (Sharp Analysis)</span>
+          </div>
+          <div class="gov-card-body p-0">
+            <table class="table table-gov table-sm mb-0">
+              <tbody>
+                <tr>
+                  <th style="width: 40%;">Original Filename:</th>
+                  <td><%= evidence.originalFilename %></td>
+                </tr>
+                <tr>
+                  <th>Evidence Identifier:</th>
+                  <td class="fw-bold"><%= evidence.evidenceIdentifier %></td>
+                </tr>
+                <tr>
+                  <th>Detected MIME Type:</th>
+                  <td><%= evidence.fileMimeType %></td>
+                </tr>
+                <tr>
+                  <th>File Size:</th>
+                  <td><%= (evidence.fileSize / 1024).toFixed(2) %> KB (<%= evidence.fileSize.toLocaleString() %> bytes)</td>
+                </tr>
+                <tr>
+                  <th>Resolution / Dimensions:</th>
+                  <td><%= evidence.imageProperties.width %> &times; <%= evidence.imageProperties.height %> pixels</td>
+                </tr>
+                <tr>
+                  <th>Color Space & Channels:</th>
+                  <td><%= evidence.imageProperties.colorSpace.toUpperCase() %> (<%= evidence.imageProperties.channels %> channels)</td>
+                </tr>
+                <tr>
+                  <th>Format / Encoding:</th>
+                  <td><%= evidence.imageProperties.format %></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- EXIF Metadata (exif-parser) Table -->
+        <div class="gov-card mb-4">
+          <div class="gov-card-header">
+            <span><i class="bi bi-camera me-2"></i> Embedded EXIF Forensic Metadata (Exif-parser)</span>
+            <span class="badge <%= evidence.availableMetadata.hasExif ? 'bg-success' : 'bg-secondary' %>">
+              <%= evidence.availableMetadata.hasExif ? 'EXIF Detected' : 'No EXIF' %>
+            </span>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (evidence.availableMetadata.hasExif) { %>
+              <table class="table table-gov table-sm mb-0">
+                <tbody>
+                  <tr>
+                    <th style="width: 40%;">Camera Manufacturer:</th>
+                    <td><%= evidence.availableMetadata.make %></td>
+                  </tr>
+                  <tr>
+                    <th>Camera Model:</th>
+                    <td><%= evidence.availableMetadata.model %></td>
+                  </tr>
+                  <tr>
+                    <th>Capture Date & Time:</th>
+                    <td><%= evidence.availableMetadata.dateTimeOriginal %></td>
+                  </tr>
+                  <tr>
+                    <th>Image Orientation:</th>
+                    <td>Tag <%= evidence.availableMetadata.orientation %></td>
+                  </tr>
+                  <tr>
+                    <th>GPS Coordinates:</th>
+                    <td>
+                      <% if (evidence.availableMetadata.latitude && evidence.availableMetadata.longitude) { %>
+                        <%= evidence.availableMetadata.latitude.toFixed(6) %>, <%= evidence.availableMetadata.longitude.toFixed(6) %>
+                      <% } else { %>
+                        <span class="text-muted">No GPS coordinates recorded in EXIF tags.</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Metadata Summary:</th>
+                    <td class="small"><%= evidence.availableMetadata.rawExifSummary %></td>
+                  </tr>
+                </tbody>
+              </table>
+            <% } else { %>
+              <div class="p-4 text-center text-muted">
+                <i class="bi bi-slash-circle fs-3 mb-1 d-block"></i>
+                No EXIF metadata available.
+                <small class="d-block mt-1">Metadata may have been stripped during capture, transfer, or device compression.</small>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Custody Quick Action for Evidence -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <span><i class="bi bi-shield me-2"></i> Record Physical Custody Action for this Item</span>
+          </div>
+          <div class="gov-card-body p-3">
+            <form action="/custody/evidence-action" method="POST" class="row g-2">
+              <input type="hidden" name="evidenceId" value="<%= evidence._id %>">
+              <div class="col-sm-5">
+                <label class="form-label small">Action Type</label>
+                <select class="form-select form-select-sm" name="action" required>
+                  <option value="Evidence Viewed">Evidence Viewed</option>
+                  <option value="Evidence Sealed">Evidence Sealed</option>
+                  <option value="Evidence Returned">Evidence Returned</option>
+                  <option value="Evidence Transferred">Evidence Transferred</option>
+                  <option value="Other">Other Audit Inspection</option>
+                </select>
+              </div>
+              <div class="col-sm-7">
+                <label class="form-label small">Reason / Audit Justification</label>
+                <input type="text" class="form-control form-control-sm" name="reason" placeholder="e.g. Microscopic inspection in lab" required>
+              </div>
+              <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-gov-secondary btn-sm">
+                  <i class="bi bi-journal-plus me-1"></i> Append Custody Ledger Event
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>
