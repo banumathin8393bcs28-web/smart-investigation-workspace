@@ -153,7 +153,7 @@ async function inspectEvidenceImage({ evidence, caseDoc, investigator, confidenc
 
       detectionResponse = await new Promise((resolve, reject) => {
         execFile('python', [scriptPath, '--cli', evidence.protectedStoragePath, String(confidenceThreshold)], {
-          timeout: 15000,
+          timeout: 40000,
           maxBuffer: 10 * 1024 * 1024
         }, (err, stdout, stderr) => {
           if (err) return reject(err);

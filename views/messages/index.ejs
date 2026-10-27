@@ -3,11 +3,11 @@
 <div class="gov-app-wrapper">
   <%- include('../partials/sidebar') %>
 
-  <main class="gov-main-content d-flex flex-column" style="height: calc(100vh - 50px - 40px); overflow: hidden;">
+  <main class="gov-main-content d-flex flex-column" style="height: calc(100vh - var(--gov-topbar-height) - 45px); overflow: hidden;">
 
     <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-shrink-0">
       <div>
-        <h1 class="h4 mb-0 fw-bold text-dark">Investigator Communication Workstation</h1>
+        <h1 class="h4 mb-0 fw-bold text-dark">Investigator Communication</h1>
         <small class="text-muted">Encrypted, authenticated real-time channel between authorized investigators</small>
       </div>
       <a href="/contacts/add" class="btn btn-gov-secondary btn-sm">
@@ -15,13 +15,14 @@
       </a>
     </div>
 
-    <!-- Chat Layout: Left Contacts Panel + Right Conversation Stream -->
-    <div class="gov-card flex-grow-1 d-flex flex-row overflow-hidden mb-0">
+    <!-- Chat Workstation: Left Contacts Drawer + Right Conversation Stream -->
+    <div class="gov-card flex-grow-1 d-flex flex-row overflow-hidden mb-0 shadow-sm border">
 
       <!-- Left Contacts Drawer (Width 280px) -->
       <div class="border-end d-flex flex-column bg-white flex-shrink-0" style="width: 280px;">
-        <div class="p-2 border-bottom bg-light fw-bold small text-muted text-uppercase">
-          Contacts Directory
+        <div class="p-3 border-bottom bg-light fw-bold small text-muted text-uppercase d-flex justify-content-between align-items-center" style="font-size: 11px; letter-spacing: 0.5px;">
+          <span>Contacts Directory</span>
+          <span class="badge bg-secondary-subtle text-secondary border"><%= contacts.length %></span>
         </div>
         <div class="list-group list-group-flush overflow-y-auto flex-grow-1">
           <% if (contacts && contacts.length > 0) { %>
@@ -29,13 +30,15 @@
               <%
                 const isActive = activeRecipient && activeRecipient._id.toString() === c.contact._id.toString();
               %>
-              <a href="/messages?recipientId=<%= c.contact._id %>" class="list-group-item list-group-item-action p-2 <%= isActive ? 'bg-primary-subtle border-start border-3 border-primary' : '' %>">
+              <a href="/messages?recipientId=<%= c.contact._id %>" class="list-group-item list-group-item-action p-3 <%= isActive ? 'bg-light border-start border-3 border-primary' : '' %>">
                 <div class="d-flex align-items-center gap-2">
-                  <img src="<%= c.contact.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm">
+                  <div class="position-relative">
+                    <img src="<%= c.contact.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm" style="width: 34px; height: 34px;">
+                    <span class="position-absolute bottom-0 end-0 p-1 bg-<%= c.isOnline ? 'success' : 'secondary' %> border border-white rounded-circle" style="width: 10px; height: 10px;"></span>
+                  </div>
                   <div class="overflow-hidden flex-grow-1">
                     <div class="d-flex justify-content-between align-items-baseline">
                       <strong class="text-truncate text-dark small"><%= c.displayName || c.contact.fullName %></strong>
-                      <span class="badge rounded-pill bg-<%= c.isOnline ? 'success' : 'secondary' %>" style="width: 8px; height: 8px; padding: 0;"></span>
                     </div>
                     <div class="text-muted text-truncate" style="font-size: 11px;"><%= c.contact.role %></div>
                   </div>
@@ -43,8 +46,8 @@
               </a>
             <% }) %>
           <% } else { %>
-            <div class="p-3 text-muted text-center small">
-              No contacts yet. <a href="/contacts/add">Add contacts</a>.
+            <div class="p-4 text-muted text-center small">
+              No contacts yet.<br><a href="/contacts/add" class="fw-semibold">Connect with colleagues &rarr;</a>
             </div>
           <% } %>
         </div>
@@ -55,118 +58,92 @@
 
         <% if (activeRecipient) { %>
           <!-- Conversation Header -->
-          <div class="p-2 px-3 border-bottom bg-white d-flex justify-content-between align-items-center flex-shrink-0">
-            <div class="d-flex align-items-center gap-2">
-              <img src="<%= activeRecipient.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm">
+          <div class="p-3 px-4 border-bottom bg-white d-flex justify-content-between align-items-center flex-shrink-0">
+            <div class="d-flex align-items-center gap-3">
+              <img src="<%= activeRecipient.profilePhoto || '/images/default-avatar.png' %>" alt="Photo" class="gov-avatar-sm" style="width: 38px; height: 38px;">
               <div>
-                <strong class="text-dark"><%= activeRecipient.fullName %></strong>
-                <small class="text-muted d-block" style="font-size: 11px;">
-                  <%= activeRecipient.role %> &bull; <%= activeRecipient.email %>
-                </small>
+                <h6 class="mb-0 fw-bold text-dark"><%= activeRecipient.fullName %></h6>
+                <div class="text-muted small" style="font-size: 11px;">
+                  <%= activeRecipient.role %> &bull; <span class="font-monospace"><%= activeRecipient.email %></span>
+                </div>
               </div>
             </div>
-            <span class="badge bg-light text-dark border">
-              <i class="bi bi-shield-check text-success me-1"></i> Socket.IO Live
-            </span>
           </div>
 
-          <!-- Message History Stream -->
-          <div class="p-3 flex-grow-1 overflow-y-auto" id="messageStream">
+          <!-- Messages Stream Scroll Container -->
+          <div class="flex-grow-1 p-4 overflow-y-auto d-flex flex-column gap-3" id="messageStream">
             <% if (messages && messages.length > 0) { %>
               <% messages.forEach(m => { %>
                 <%
                   const isMine = m.sender.toString() === currentInvestigator._id.toString();
                 %>
-                <div class="d-flex mb-3 <%= isMine ? 'justify-content-end' : 'justify-content-start' %>">
-                  <div class="card shadow-sm border" style="max-width: 75%; <%= isMine ? 'background-color: #0f2a4a; color: #ffffff;' : 'background-color: #ffffff;' %>">
-                    <div class="card-body p-2 px-3">
-                      <div class="d-flex justify-content-between align-items-baseline gap-3 mb-1">
-                        <strong style="font-size: 11px;" class="<%= isMine ? 'text-white-50' : 'text-primary' %>">
-                          <%= m.senderName %>
-                        </strong>
-                        <span style="font-size: 10px;" class="<%= isMine ? 'text-white-50' : 'text-muted' %>">
-                          <%= formatTimestamp(m.sentTimestamp, { includeSeconds: false }) %>
-                        </span>
+                <div class="d-flex flex-column <%= isMine ? 'align-items-end' : 'align-items-start' %>">
+                  <div class="p-3 rounded shadow-sm <%= isMine ? 'text-white' : 'bg-white text-dark border' %>" style="max-width: 70%; <%= isMine ? 'background-color: #0f2a4a;' : '' %>">
+                    <div class="mb-1" style="font-size: 0.92rem; line-height: 1.5;"><%= m.messageText %></div>
+
+                    <% if (m.attachments && m.attachments.length > 0) { %>
+                      <div class="mt-2 pt-2 border-top border-opacity-25 <%= isMine ? 'border-white' : 'border-secondary' %>">
+                        <% m.attachments.forEach(att => { %>
+                          <a href="/messages/attachment/<%= att.filename %>" class="btn btn-sm <%= isMine ? 'btn-outline-light' : 'btn-gov-secondary' %> py-1 px-2 mb-1" download>
+                            <i class="bi bi-paperclip me-1"></i> <%= att.originalFilename %>
+                          </a>
+                        <% }) %>
                       </div>
-
-                      <% if (m.messageText) { %>
-                        <div class="small" style="line-height: 1.4;"><%= m.messageText %></div>
-                      <% } %>
-
-                      <!-- Attachments -->
-                      <% if (m.attachments && m.attachments.length > 0) { %>
-                        <div class="mt-2 pt-2 border-top <%= isMine ? 'border-secondary' : 'border-light' %>">
-                          <% m.attachments.forEach((att, idx) => { %>
-                            <div class="p-2 rounded <%= isMine ? 'bg-black bg-opacity-25' : 'bg-light' %> mb-1 d-flex align-items-center justify-content-between gap-2">
-                              <div class="small text-truncate">
-                                <i class="bi <%= att.mimeType.startsWith('image') ? 'bi-file-earmark-image' : (att.mimeType.includes('pdf') ? 'bi-file-earmark-pdf text-danger' : 'bi-file-earmark-text') %> me-1"></i>
-                                <%= att.originalName %> (<%= (att.size / 1024).toFixed(1) %> KB)
-                              </div>
-                              <a href="/messages/attachment/<%= m._id %>/<%= idx %>" class="btn btn-sm btn-outline-light py-0 px-2" title="Download">
-                                <i class="bi bi-download"></i>
-                              </a>
-                            </div>
-                          <% }) %>
-                        </div>
-                      <% } %>
-
-                      <div class="text-end" style="font-size: 9px;">
-                        <span class="<%= isMine ? 'text-white-50' : 'text-muted' %>"><%= m.deliveryStatus %></span>
-                      </div>
-                    </div>
+                    <% } %>
                   </div>
+                  <small class="text-muted mt-1 font-monospace" style="font-size: 10px;">
+                    <%= formatTimestamp(m.sentTimestamp, { includeSeconds: false }) %>
+                    <% if (isMine) { %> &bull; <i class="bi bi-check2"></i> Sent<% } %>
+                  </small>
                 </div>
               <% }) %>
             <% } else { %>
-              <div class="text-center text-muted py-5">
-                <i class="bi bi-chat-dots fs-1 mb-2 d-block"></i>
-                No previous messages with <%= activeRecipient.fullName %>. Send a secure transmission below.
+              <div class="text-center text-muted my-auto p-4">
+                <i class="bi bi-chat-dots fs-1 mb-2 d-block text-secondary"></i>
+                Channel established. Send a secure encrypted message to start collaborating.
               </div>
             <% } %>
           </div>
 
-          <!-- Message Composition Input Bar -->
+          <!-- Message Input Toolbar -->
           <div class="p-3 bg-white border-top flex-shrink-0">
-            <form action="/messages/send" method="POST" enctype="multipart/form-data" id="chatForm" class="d-flex flex-column gap-2">
-              <input type="hidden" name="recipientId" value="<%= activeRecipient._id %>" id="chatRecipientId">
+            <form action="/messages/send" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+              <input type="hidden" name="recipientId" value="<%= activeRecipient._id %>">
 
-              <!-- Attachment Selector -->
-              <div class="d-flex align-items-center gap-2">
-                <input type="file" class="form-control form-control-sm" name="attachment" id="attachmentInput" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" style="max-width: 300px;">
-                <small class="text-muted" style="font-size: 11px;">Max 20MB (Images, PDF, TXT)</small>
-              </div>
+              <label class="btn btn-gov-secondary btn-sm mb-0 px-3 py-2" title="Attach Evidence File">
+                <i class="bi bi-paperclip"></i>
+                <input type="file" name="attachment" class="d-none">
+              </label>
 
-              <!-- Text Input + Send -->
-              <div class="input-group">
-                <input type="text" class="form-control" name="messageText" id="messageTextInput" placeholder="Type official message transmission..." autocomplete="off">
-                <button type="submit" class="btn btn-gov-primary px-4" id="sendBtn">
-                  <i class="bi bi-send-fill me-1"></i> Send
-                </button>
-              </div>
+              <input type="text" class="form-control" name="messageText" placeholder="Type an encrypted message..." required autofocus autocomplete="off">
+
+              <button type="submit" class="btn btn-gov-primary px-4 py-2">
+                <i class="bi bi-send-fill me-1"></i> Send
+              </button>
             </form>
           </div>
 
         <% } else { %>
-          <!-- No recipient selected -->
-          <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
-            <i class="bi bi-chat-left-text fs-1 mb-2"></i>
-            <h5>No Active Conversation</h5>
-            <p class="small">Select a colleague from the contacts directory to open a communication channel.</p>
+          <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-5 text-center">
+            <i class="bi bi-chat-square-text fs-1 mb-2 text-secondary"></i>
+            <h5>Select a Colleague from the Directory</h5>
+            <p class="small text-muted mb-0">Choose an active contact from the left drawer to inspect conversational logs and dispatch real-time directives.</p>
           </div>
         <% } %>
 
       </div>
+
     </div>
 
   </main>
 </div>
 
 <script>
-// Auto scroll message stream to bottom
-const stream = document.getElementById('messageStream');
-if (stream) {
-  stream.scrollTop = stream.scrollHeight;
-}
+  // Auto-scroll message stream to bottom on load
+  const stream = document.getElementById('messageStream');
+  if (stream) {
+    stream.scrollTop = stream.scrollHeight;
+  }
 </script>
 
 <%- include('../partials/footer') %>

@@ -4,10 +4,10 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Add Crime-Scene Digital Photographs</h1>
-        <small class="text-muted">Associated Case: <strong class="text-dark"><%= caseDoc.caseNumber %></strong> &bull; <%= caseDoc.caseName %></small>
+        <small class="text-muted">Associated Case: <strong class="text-dark font-monospace"><%= caseDoc.caseNumber %></strong> &bull; <%= caseDoc.caseName %></small>
       </div>
       <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Return to Case
@@ -22,9 +22,11 @@
     <% } %>
 
     <div class="gov-card shadow-sm border">
-      <div class="gov-card-header bg-white py-3">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-cloud-upload text-primary fs-4"></i>
+      <div class="gov-card-header bg-white py-3 border-bottom">
+        <div class="d-flex align-items-center gap-3">
+          <div class="gov-brand-icon" style="width: 36px; height: 36px; font-size: 1.1rem;">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+          </div>
           <div>
             <h5 class="mb-0 fw-bold">Evidence File Upload Interface</h5>
             <small class="text-muted">Upload original crime-scene photography for cryptographic hashing, EXIF parsing, and AI inspection</small>
@@ -38,10 +40,14 @@
 
           <div class="mb-4">
             <label class="form-label" for="evidenceFiles">Select Digital Crime-Scene Photographs <span class="text-danger">*</span></label>
-            <input type="file" class="form-control" id="evidenceFiles" name="evidenceFiles" multiple accept="image/jpeg,image/png,image/webp" required>
-            <small class="text-muted d-block mt-1">
-              Supported formats: <strong>JPG, JPEG, PNG, WebP</strong>. Maximum 10 images per batch, up to 30MB per image.
-            </small>
+            <div class="p-4 border border-2 border-dashed rounded bg-light text-center">
+              <i class="bi bi-images fs-1 text-primary d-block mb-2"></i>
+              <div class="mb-2 fw-semibold text-dark">Click to browse or drag and drop image files</div>
+              <input type="file" class="form-control w-75 mx-auto" id="evidenceFiles" name="evidenceFiles" multiple accept="image/jpeg,image/png,image/webp" required>
+              <small class="text-muted d-block mt-2">
+                Supported formats: <strong>JPG, JPEG, PNG, WebP</strong>. Maximum 10 images per batch, up to 30MB per image.
+              </small>
+            </div>
           </div>
 
           <div class="mb-4">
@@ -52,39 +58,38 @@
 
           <!-- Selected Files Preview Container -->
           <div id="fileListContainer" class="mb-4 d-none">
-            <h6 class="text-uppercase text-muted border-bottom pb-2 mb-2 fw-bold" style="font-size: 11px;">
+            <h6 class="text-uppercase text-dark border-bottom pb-2 mb-2 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
               Selected Files for Cryptographic Ingestion (<span id="fileCount">0</span>)
             </h6>
             <div class="table-responsive">
               <table class="table table-gov table-sm mb-0">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th style="width: 50px;">#</th>
                     <th>Filename</th>
-                    <th>Size</th>
-                    <th>MIME Type</th>
+                    <th>File Size</th>
+                    <th>Specific Item Description</th>
                   </tr>
                 </thead>
-                <tbody id="fileListBody"></tbody>
+                <tbody id="previewTableBody">
+                  <!-- Populated dynamically via main.js -->
+                </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Upload Progress Bar -->
-          <div id="uploadProgressContainer" class="mb-4 d-none">
-            <label class="form-label small text-muted mb-1">Upload & Integrity Verification Progress:</label>
-            <div class="progress" style="height: 12px;">
-              <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
-            </div>
-            <small id="uploadStatusText" class="text-muted mt-1 d-block" style="font-size: 11px;">Uploading bytes...</small>
+          <!-- Forensic Security Note -->
+          <div class="alert alert-light border py-2 px-3 mb-4" style="font-size: 11px; line-height: 1.4;">
+            <i class="bi bi-shield-check text-success me-1"></i>
+            <strong>Forensic Preservation Assurance:</strong> Uploaded files are stored in a private restricted vault. The server immediately calculates the cryptographic SHA-256 digest on the raw byte stream before creating any thumbnails or analytical overlays.
           </div>
 
           <div class="d-flex justify-content-between align-items-center pt-3 border-top">
             <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary">
               <i class="bi bi-x-circle me-1"></i> Cancel
             </a>
-            <button type="submit" class="btn btn-gov-primary px-4 py-2" id="submitUploadBtn">
-              <i class="bi bi-cloud-arrow-up-fill me-1"></i> Ingest Crime-Scene Photographs
+            <button type="submit" class="btn btn-gov-primary px-4 py-2" id="submitBtn">
+              <i class="bi bi-cloud-arrow-up-fill me-1"></i> Ingest & Calculate SHA-256 Digests
             </button>
           </div>
         </form>
@@ -92,49 +97,5 @@
     </div>
   </main>
 </div>
-
-<script>
-const fileInput = document.getElementById('evidenceFiles');
-const fileListContainer = document.getElementById('fileListContainer');
-const fileListBody = document.getElementById('fileListBody');
-const fileCount = document.getElementById('fileCount');
-
-fileInput.addEventListener('change', () => {
-  fileListBody.innerHTML = '';
-  if (fileInput.files.length > 0) {
-    fileCount.textContent = fileInput.files.length;
-    fileListContainer.classList.remove('d-none');
-    for (let i = 0; i < fileInput.files.length; i++) {
-      const f = fileInput.files[i];
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td><strong>${f.name}</strong></td>
-        <td>${(f.size / 1024).toFixed(1)} KB</td>
-        <td><span class="badge bg-light text-dark border">${f.type || 'image'}</span></td>
-      `;
-      fileListBody.appendChild(tr);
-    }
-  } else {
-    fileListContainer.classList.add('d-none');
-  }
-});
-
-document.getElementById('uploadForm').addEventListener('submit', () => {
-  const btn = document.getElementById('submitUploadBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ingesting & Calculating SHA-256...';
-
-  document.getElementById('uploadProgressContainer').classList.remove('d-none');
-  const bar = document.getElementById('uploadProgressBar');
-  let p = 15;
-  bar.style.width = p + '%';
-  const interval = setInterval(() => {
-    p = Math.min(95, p + 20);
-    bar.style.width = p + '%';
-    if (p >= 95) clearInterval(interval);
-  }, 400);
-});
-</script>
 
 <%- include('../partials/footer') %>

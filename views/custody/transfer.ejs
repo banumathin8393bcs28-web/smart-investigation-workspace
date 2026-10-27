@@ -4,7 +4,7 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Initiate Case Assignment Transfer</h1>
         <small class="text-muted">Formal transfer request protocol requiring recipient acknowledgment</small>
@@ -18,19 +18,24 @@
       <div class="col-lg-8">
 
         <% if (errors.general) { %>
-          <div class="alert alert-danger alert-gov mb-3">
+          <div class="alert alert-danger alert-gov alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= errors.general %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           </div>
         <% } %>
 
         <div class="gov-card shadow-sm border">
-          <div class="gov-card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-arrow-left-right text-primary me-2"></i> Case Transfer Directive</h5>
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-arrow-left-right text-primary fs-4"></i>
+              <h5 class="mb-0 fw-bold">Case Transfer Protocol Directive</h5>
+            </div>
           </div>
           <div class="gov-card-body p-4">
 
-            <div class="alert alert-light border py-2 mb-4 small text-muted">
-              <i class="bi bi-info-circle text-primary me-1"></i> Submitting this form does <strong>not</strong> immediately change case custody. A formal transfer request is transmitted to the receiving officer's dashboard, who must review and acknowledge or decline.
+            <div class="alert alert-light border py-2 mb-4 small text-muted" style="line-height: 1.5;">
+              <i class="bi bi-info-circle text-primary me-1"></i>
+              Submitting this directive initiates an official custody transfer request. The case assignment will transfer only after the designated receiving officer reviews and formally accepts custody.
             </div>
 
             <form action="/custody/transfer-case" method="POST">
@@ -51,41 +56,46 @@
 
               <!-- Recipient Investigator Selection -->
               <div class="mb-3">
-                <label class="form-label" for="recipientId">Receiving Investigator <span class="text-danger">*</span></label>
+                <label class="form-label" for="recipientId">Designated Receiving Investigator <span class="text-danger">*</span></label>
                 <select class="form-select <%= errors.recipientId ? 'is-invalid' : '' %>" id="recipientId" name="recipientId" required>
                   <option value="">Select receiving officer...</option>
                   <% colleagues.forEach(col => { %>
                     <option value="<%= col._id %>">
-                      <%= col.fullName %> (<%= col.role %> - <%= col.email %>)
+                      <%= col.fullName %> (<%= col.role %> &bull; <%= col.email %>)
                     </option>
                   <% }) %>
                 </select>
                 <% if (errors.recipientId) { %><div class="invalid-feedback"><%= errors.recipientId %></div><% } %>
               </div>
 
-              <!-- Transfer Reason -->
+              <!-- Transfer Type -->
               <div class="mb-3">
-                <label class="form-label" for="reason">Official Reason for Transfer <span class="text-danger">*</span></label>
-                <input type="text" class="form-control <%= errors.reason ? 'is-invalid' : '' %>" id="reason" name="reason" placeholder="e.g. Specialized ballistic forensics analysis required by Unit 4" required>
-                <% if (errors.reason) { %><div class="invalid-feedback"><%= errors.reason %></div><% } %>
+                <label class="form-label" for="transferType">Transfer Classification <span class="text-danger">*</span></label>
+                <select class="form-select" id="transferType" name="transferType">
+                  <option value="Assignment Transfer">Full Assignment Reallocation</option>
+                  <option value="Temporary Custody">Temporary Interrogation / Evidence Review</option>
+                  <option value="Forensic Examination">Specialized Cyber / Ballistic Analysis</option>
+                </select>
               </div>
 
-              <!-- Detailed Handover Notes -->
+              <!-- Justification -->
               <div class="mb-4">
-                <label class="form-label" for="notes">Handover Notes & Handling Directives</label>
-                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Specify any critical timeline constraints, sensitive witness protection rules, or evidentiary storage requirements..."></textarea>
+                <label class="form-label" for="reason">Operational Reason / Transfer Justification <span class="text-danger">*</span></label>
+                <textarea class="form-control <%= errors.reason ? 'is-invalid' : '' %>" id="reason" name="reason" rows="3" placeholder="Provide formal administrative justification (e.g. Specialized cyber forensics interrogation required; jurisdictional reallocation)..." required></textarea>
+                <% if (errors.reason) { %><div class="invalid-feedback"><%= errors.reason %></div><% } %>
               </div>
 
               <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                 <a href="/custody" class="btn btn-gov-secondary">
                   <i class="bi bi-x-circle me-1"></i> Cancel
                 </a>
-                <button type="submit" class="btn btn-gov-primary px-4">
-                  <i class="bi bi-send me-1"></i> Transmit Transfer Request
+                <button type="submit" class="btn btn-gov-primary px-4 py-2">
+                  <i class="bi bi-send-check me-1"></i> Transmit Transfer Request
                 </button>
               </div>
 
             </form>
+
           </div>
         </div>
 

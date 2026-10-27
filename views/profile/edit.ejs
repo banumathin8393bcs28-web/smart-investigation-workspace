@@ -4,7 +4,7 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Investigator Profile & Security Credentials</h1>
         <small class="text-muted">Review registration details and manage official credentials</small>
@@ -31,23 +31,23 @@
     <div class="row g-4">
       <!-- Left Column: Registration Details (Read-only / Identity) -->
       <div class="col-lg-4">
-        <div class="gov-card">
-          <div class="gov-card-header">
-            <span><i class="bi bi-person-vcard me-2"></i> Registered Identity</span>
+        <div class="gov-card shadow-sm border mb-4">
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <span><i class="bi bi-person-vcard text-primary me-2"></i> Registered Identity</span>
           </div>
           <div class="gov-card-body text-center p-4">
-            <img src="<%= investigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-lg mb-3 shadow-sm">
+            <img src="<%= investigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-lg mb-3 shadow-sm mx-auto">
             <h5 class="fw-bold mb-1 text-dark"><%= investigator.fullName %></h5>
-            <div class="badge bg-secondary mb-3"><%= investigator.role %></div>
+            <div class="badge bg-secondary-subtle text-secondary-emphasis border mb-3"><%= investigator.role %></div>
 
             <ul class="list-group list-group-flush text-start small border-top pt-2">
               <li class="list-group-item d-flex justify-content-between px-0">
                 <span class="text-muted">Username:</span>
-                <strong class="text-dark"><%= investigator.username %></strong>
+                <strong class="text-dark font-monospace"><%= investigator.username %></strong>
               </li>
               <li class="list-group-item d-flex justify-content-between px-0">
                 <span class="text-muted">Official Email:</span>
-                <strong class="text-dark"><%= investigator.email %></strong>
+                <strong class="text-dark font-monospace"><%= investigator.email %></strong>
               </li>
               <li class="list-group-item d-flex justify-content-between px-0">
                 <span class="text-muted">Date of Birth:</span>
@@ -58,34 +58,30 @@
                 <span class="text-dark"><%= investigator.age %> years</span>
               </li>
               <li class="list-group-item d-flex justify-content-between px-0">
-                <span class="text-muted">Gender:</span>
-                <span class="text-dark"><%= investigator.gender %></span>
+                <span class="text-muted">Phone:</span>
+                <span class="text-dark"><%= investigator.phone %></span>
               </li>
               <li class="list-group-item d-flex justify-content-between px-0">
-                <span class="text-muted">Email Verified:</span>
-                <span class="badge <%= investigator.isEmailVerified ? 'bg-success' : 'bg-warning text-dark' %>">
-                  <%= investigator.isEmailVerified ? 'Verified' : 'Pending' %>
+                <span class="text-muted">Security Question:</span>
+                <span class="text-dark text-truncate" style="max-width: 170px;" title="<%= investigator.securityQuestion %>">
+                  <%= investigator.securityQuestion %>
                 </span>
               </li>
               <li class="list-group-item d-flex justify-content-between px-0">
-                <span class="text-muted">Registration Date:</span>
-                <span class="text-muted"><%= formatTimestamp(investigator.createdAt, { includeSeconds: false }) %></span>
-              </li>
-              <li class="list-group-item d-flex justify-content-between px-0">
-                <span class="text-muted">Last Updated:</span>
-                <span class="text-muted"><%= formatTimestamp(investigator.updatedAt, { includeSeconds: false }) %></span>
+                <span class="text-muted">Account Ingested:</span>
+                <span class="text-muted font-monospace"><%= formatTimestamp(investigator.createdAt, { includeSeconds: false }) %></span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Editable Permitted Profile Details & Password Change -->
+      <!-- Right Column: Edit Forms -->
       <div class="col-lg-8">
-        <!-- Update Profile Details -->
-        <div class="gov-card mb-4">
-          <div class="gov-card-header">
-            <span><i class="bi bi-pencil-square me-2"></i> Update Permitted Profile Details</span>
+        <!-- Edit Profile Details -->
+        <div class="gov-card shadow-sm border mb-4">
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <span><i class="bi bi-pencil-square text-primary me-2"></i> Update Contact & Designation Details</span>
           </div>
           <div class="gov-card-body p-4">
             <form action="/profile/edit" method="POST" enctype="multipart/form-data">
@@ -98,13 +94,20 @@
 
                 <div class="col-md-6">
                   <label class="form-label" for="role">Designation / Role</label>
-                  <input type="text" class="form-control" id="role" name="role" value="<%= investigator.role %>">
+                  <select class="form-select" id="role" name="role">
+                    <option value="Lead Investigator" <%= investigator.role === 'Lead Investigator' ? 'selected' : '' %>>Lead Investigator</option>
+                    <option value="Senior Detective" <%= investigator.role === 'Senior Detective' ? 'selected' : '' %>>Senior Detective</option>
+                    <option value="Forensic Analyst" <%= investigator.role === 'Forensic Analyst' ? 'selected' : '' %>>Forensic Analyst</option>
+                    <option value="Cybercrime Investigator" <%= investigator.role === 'Cybercrime Investigator' ? 'selected' : '' %>>Cybercrime Investigator</option>
+                    <option value="Ballistics Expert" <%= investigator.role === 'Ballistics Expert' ? 'selected' : '' %>>Ballistics Expert</option>
+                    <option value="Crime Scene Officer" <%= investigator.role === 'Crime Scene Officer' ? 'selected' : '' %>>Crime Scene Officer</option>
+                  </select>
                 </div>
               </div>
 
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                  <label class="form-label" for="phone">Phone Number</label>
+                  <label class="form-label" for="phone">Official Phone Number</label>
                   <input type="text" class="form-control <%= errors.phone ? 'is-invalid' : '' %>" id="phone" name="phone" value="<%= investigator.phone %>" required>
                   <% if (errors.phone) { %><div class="invalid-feedback"><%= errors.phone %></div><% } %>
                 </div>
@@ -120,37 +123,29 @@
                 </div>
               </div>
 
-              <!-- Profile Photo Replacement -->
-              <div class="row g-3 mb-4 align-items-center">
-                <div class="col-md-8">
-                  <label class="form-label" for="profilePhoto">Replace Profile Photograph</label>
-                  <input type="file" class="form-control image-preview-input" id="profilePhoto" name="profilePhoto" accept="image/jpeg,image/png,image/webp" data-preview="replacementPreview">
-                  <small class="text-muted">Choose replacement image to preview.</small>
-                </div>
-                <div class="col-md-4 text-center">
-                  <span class="small text-muted d-block mb-1">New Preview:</span>
-                  <img id="replacementPreview" src="/images/default-avatar.png" alt="Replacement Preview" class="gov-avatar-md d-none">
-                </div>
+              <div class="mb-4">
+                <label class="form-label" for="profilePhoto">Replace Official Photograph</label>
+                <input type="file" class="form-control image-preview-input" id="profilePhoto" name="profilePhoto" accept="image/jpeg,image/png,image/webp" data-preview="newPhotoPreview">
+                <small class="text-muted">JPG, PNG, or WebP format (max 5MB).</small>
               </div>
 
-              <button type="submit" class="btn btn-gov-primary">
-                <i class="bi bi-save me-1"></i> Save Profile Details
+              <button type="submit" class="btn btn-gov-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i> Save Profile Details
               </button>
             </form>
           </div>
         </div>
 
-        <!-- Change Password Section (Requires Current Password Reauthentication) -->
-        <div class="gov-card">
-          <div class="gov-card-header">
-            <span><i class="bi bi-shield-lock me-2"></i> Change Account Password</span>
+        <!-- Change Password Card -->
+        <div class="gov-card shadow-sm border mb-0">
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <span><i class="bi bi-key-fill text-primary me-2"></i> Update Security Password</span>
           </div>
           <div class="gov-card-body p-4">
             <form action="/profile/change-password" method="POST">
               <div class="mb-3">
                 <label class="form-label" for="currentPassword">Current Password <span class="text-danger">*</span></label>
                 <input type="password" class="form-control <%= errors.currentPassword ? 'is-invalid' : '' %>" id="currentPassword" name="currentPassword" required>
-                <small class="text-muted">Reauthentication is required to update credentials.</small>
                 <% if (errors.currentPassword) { %><div class="invalid-feedback"><%= errors.currentPassword %></div><% } %>
               </div>
 
@@ -162,25 +157,21 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label" for="confirmPassword">Confirm New Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control <%= errors.confirmPassword ? 'is-invalid' : '' %>" id="confirmPassword" name="confirmPassword" required>
-                  <% if (errors.confirmPassword) { %><div class="invalid-feedback"><%= errors.confirmPassword %></div><% } %>
+                  <label class="form-label" for="retypePassword">Retype New Password <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control <%= errors.retypePassword ? 'is-invalid' : '' %>" id="retypePassword" name="retypePassword" required>
+                  <% if (errors.retypePassword) { %><div class="invalid-feedback"><%= errors.retypePassword %></div><% } %>
                 </div>
               </div>
 
-              <div class="alert alert-light border py-2 mb-3 small text-muted">
-                Must contain at least 8 characters, including uppercase, lowercase, digit, and special symbol.
-              </div>
-
               <button type="submit" class="btn btn-gov-secondary">
-                <i class="bi bi-key me-1"></i> Update Password
+                <i class="bi bi-shield-lock me-1"></i> Change Password
               </button>
             </form>
           </div>
         </div>
-
       </div>
     </div>
+
   </main>
 </div>
 

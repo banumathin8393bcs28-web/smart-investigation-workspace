@@ -14,19 +14,21 @@
     <% } %>
 
     <!-- Case Header & Action Buttons -->
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 pb-3 border-bottom gap-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 pb-3 border-bottom gap-3">
       <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <span class="badge bg-dark fs-6"><%= caseDoc.caseNumber %></span>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <span class="badge bg-dark font-monospace fs-6 px-2 py-1"><%= caseDoc.caseNumber %></span>
           <h1 class="h4 mb-0 fw-bold text-dark"><%= caseDoc.caseName %></h1>
-          <span class="badge <%= caseDoc.status === 'Closed' ? 'bg-secondary' : (caseDoc.status === 'Under Investigation' ? 'bg-primary' : 'bg-warning text-dark') %>">
+          <span class="badge <%= caseDoc.status === 'Closed' ? 'badge-soft-secondary' : (caseDoc.status === 'Under Investigation' ? 'badge-soft-primary' : (caseDoc.status === 'Transferred' ? 'badge-soft-warning' : 'badge-soft-success')) %>">
             <%= caseDoc.status %>
           </span>
         </div>
-        <div class="text-muted small">
-          Crime Classification: <strong class="text-dark"><%= caseDoc.crimeType %><%= caseDoc.crimeTypeOther ? ` (${caseDoc.crimeTypeOther})` : '' %></strong> &bull;
-          Location: <strong class="text-dark"><%= caseDoc.incidentLocation %></strong> &bull;
-          Assigned Officer: <strong class="text-dark"><%= caseDoc.assignedName %></strong>
+        <div class="text-muted small d-flex flex-wrap align-items-center gap-2">
+          <span>Classification: <strong class="text-dark"><%= caseDoc.crimeType %><%= caseDoc.crimeTypeOther ? ` (${caseDoc.crimeTypeOther})` : '' %></strong></span>
+          <span>&bull;</span>
+          <span>Location: <strong class="text-dark"><%= caseDoc.incidentLocation %></strong></span>
+          <span>&bull;</span>
+          <span>Assigned Officer: <strong class="text-dark"><%= caseDoc.assignedName %></strong></span>
         </div>
       </div>
 
@@ -50,59 +52,71 @@
       </div>
     </div>
 
-    <!-- Navigation jump anchors -->
-    <div class="mb-3 d-flex gap-3 small border-bottom pb-2">
-      <a href="#details-section" class="text-decoration-none text-muted fw-semibold">Incident Details</a>
-      <a href="#evidence-section" class="text-decoration-none text-primary fw-semibold">Evidence & Photographs (<%= evidenceList.length %>)</a>
-      <a href="#custody-section" class="text-decoration-none text-muted fw-semibold">Chain of Custody (<%= custodyHistory.length %>)</a>
-      <a href="#activity-section" class="text-decoration-none text-muted fw-semibold">Audit Activity (<%= auditLogs.length %>)</a>
+    <!-- Section Jump Anchor Tabs -->
+    <div class="mb-4 d-flex flex-wrap gap-2 small border-bottom pb-2">
+      <a href="#details-section" class="btn btn-sm btn-gov-secondary py-1 px-3">
+        <i class="bi bi-info-circle me-1"></i> Incident Narrative
+      </a>
+      <a href="#evidence-section" class="btn btn-sm btn-gov-secondary py-1 px-3">
+        <i class="bi bi-images me-1 text-primary"></i> Digital Evidence (<%= evidenceList.length %>)
+      </a>
+      <a href="#custody-section" class="btn btn-sm btn-gov-secondary py-1 px-3">
+        <i class="bi bi-shield-check me-1 text-success"></i> Chain of Custody (<%= custodyHistory.length %>)
+      </a>
+      <a href="#activity-section" class="btn btn-sm btn-gov-secondary py-1 px-3">
+        <i class="bi bi-clock-history me-1 text-muted"></i> Audit Log (<%= auditLogs.length %>)
+      </a>
     </div>
 
     <!-- 1. Case Details Section -->
-    <div class="gov-card mb-4" id="details-section">
-      <div class="gov-card-header">
-        <span><i class="bi bi-info-circle me-2"></i> Comprehensive Case & Incident Record</span>
-        <span class="text-muted small">
+    <div class="gov-card shadow-sm mb-4" id="details-section">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-file-earmark-text text-primary me-2"></i> Comprehensive Case & Incident Record</span>
+        <span class="text-muted small font-monospace">
           Ingested on <%= formatTimestamp(caseDoc.creationTimestamp) %>
         </span>
       </div>
-      <div class="gov-card-body">
-        <div class="row g-3 mb-3">
-          <div class="col-md-3">
-            <span class="text-muted small d-block">Incident Date & Time</span>
-            <strong><%= formatTimestamp(caseDoc.incidentDate, { includeSeconds: false }) %> at <%= caseDoc.incidentTime %></strong>
+      <div class="gov-card-body p-4">
+        <div class="row g-3 mb-4 p-3 bg-light rounded border">
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block mb-1">Incident Date & Time</span>
+            <strong class="text-dark"><%= formatTimestamp(caseDoc.incidentDate, { includeSeconds: false }) %> at <%= caseDoc.incidentTime %></strong>
           </div>
-          <div class="col-md-3">
-            <span class="text-muted small d-block">Incident Location</span>
-            <strong><%= caseDoc.incidentLocation %></strong>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block mb-1">Incident Location</span>
+            <strong class="text-dark"><%= caseDoc.incidentLocation %></strong>
           </div>
-          <div class="col-md-3">
-            <span class="text-muted small d-block">Street Address</span>
-            <strong><%= caseDoc.crimeSceneAddress || 'Not specified' %></strong>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block mb-1">Street Address</span>
+            <strong class="text-dark"><%= caseDoc.crimeSceneAddress || 'Not specified' %></strong>
           </div>
-          <div class="col-md-3">
-            <span class="text-muted small d-block">Department Unit</span>
-            <strong><%= caseDoc.department %></strong>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block mb-1">Department Unit</span>
+            <strong class="text-dark"><%= caseDoc.department %></strong>
           </div>
         </div>
 
-        <div class="mb-3">
-          <span class="text-muted small d-block mb-1">Detailed Case Narrative:</span>
-          <div class="p-3 border rounded bg-light" style="line-height: 1.6;">
+        <div class="mb-4">
+          <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Detailed Case Narrative:</span>
+          <div class="p-3 border rounded bg-white" style="line-height: 1.7; font-size: 0.92rem; color: #1e293b;">
             <%= caseDoc.caseDescription %>
           </div>
         </div>
 
-        <div class="row g-3 mb-3">
+        <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <span class="text-muted small d-block">Known Objects / AI Detection Context Targets:</span>
-            <div class="p-2 border rounded bg-light">
-              <%= caseDoc.knownObjects || 'None specified' %>
+            <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Known Context Objects / AI Detection Targets:</span>
+            <div class="p-2 px-3 border rounded bg-light small">
+              <% if (caseDoc.knownObjects) { %>
+                <i class="bi bi-tag-fill text-primary me-1"></i> <%= caseDoc.knownObjects %>
+              <% } else { %>
+                <span class="text-muted">None specified at ingestion</span>
+              <% } %>
             </div>
           </div>
           <div class="col-md-6">
-            <span class="text-muted small d-block">Preliminary Findings:</span>
-            <div class="p-2 border rounded bg-light">
+            <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Preliminary Findings:</span>
+            <div class="p-2 px-3 border rounded bg-light small">
               <%= caseDoc.preliminaryFindings || 'None recorded' %>
             </div>
           </div>
@@ -112,99 +126,101 @@
           <div class="row g-3 mb-3">
             <% if (caseDoc.victimDetails) { %>
               <div class="col-md-4">
-                <span class="text-muted small d-block">Victim Details:</span>
-                <div class="p-2 border rounded bg-light small"><%= caseDoc.victimDetails %></div>
+                <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Victim Information:</span>
+                <div class="p-2 px-3 border rounded bg-light small"><%= caseDoc.victimDetails %></div>
               </div>
             <% } %>
             <% if (caseDoc.suspectDetails) { %>
               <div class="col-md-4">
-                <span class="text-muted small d-block">Suspect Details:</span>
-                <div class="p-2 border rounded bg-light small"><%= caseDoc.suspectDetails %></div>
+                <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Suspect Leads:</span>
+                <div class="p-2 px-3 border rounded bg-light small"><%= caseDoc.suspectDetails %></div>
               </div>
             <% } %>
             <% if (caseDoc.witnessDetails) { %>
               <div class="col-md-4">
-                <span class="text-muted small d-block">Witness Details:</span>
-                <div class="p-2 border rounded bg-light small"><%= caseDoc.witnessDetails %></div>
+                <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Witness Records:</span>
+                <div class="p-2 px-3 border rounded bg-light small"><%= caseDoc.witnessDetails %></div>
               </div>
             <% } %>
           </div>
         <% } %>
 
         <% if (caseDoc.additionalNotes) { %>
-          <div class="mb-2">
-            <span class="text-muted small d-block">Additional Notes:</span>
-            <div class="p-2 border rounded bg-light small"><%= caseDoc.additionalNotes %></div>
+          <div class="mb-3">
+            <span class="text-muted small d-block mb-1 fw-bold text-uppercase" style="font-size: 11px;">Additional Notes:</span>
+            <div class="p-2 px-3 border rounded bg-light small"><%= caseDoc.additionalNotes %></div>
           </div>
         <% } %>
 
-        <div class="text-muted small pt-2 border-top mt-3 d-flex justify-content-between">
-          <span>Reporting Officer: <%= caseDoc.reportingInvestigator %> (Original Creator: <%= caseDoc.creatorName %>)</span>
-          <span>Last Authoritative Update: <%= formatTimestamp(caseDoc.lastUpdatedTimestamp) %> by <%= caseDoc.lastUpdatedByName || caseDoc.assignedName %></span>
+        <div class="text-muted small pt-3 border-top mt-4 d-flex flex-column flex-sm-row justify-content-between gap-1">
+          <span>Reporting Officer: <strong><%= caseDoc.reportingInvestigator %></strong> (Original Creator: <%= caseDoc.creatorName %>)</span>
+          <span class="font-monospace">Last Update: <%= formatTimestamp(caseDoc.lastUpdatedTimestamp) %></span>
         </div>
       </div>
     </div>
 
     <!-- 2. Crime-Scene Photographs & Digital Evidence -->
-    <div class="gov-card mb-4" id="evidence-section">
-      <div class="gov-card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-images me-2"></i> Crime-Scene Digital Evidence (<%= evidenceList.length %> Artifacts)</span>
-        <a href="/evidence/upload?caseId=<%= caseDoc._id %>" class="btn btn-gov-primary btn-sm py-0 px-2 small">
-          <i class="bi bi-plus"></i> Upload Photographs
+    <div class="gov-card shadow-sm mb-4" id="evidence-section">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-images me-2 text-primary"></i> Crime-Scene Digital Evidence (<%= evidenceList.length %> Artifacts)</span>
+        <a href="/evidence/upload?caseId=<%= caseDoc._id %>" class="btn btn-gov-primary btn-sm">
+          <i class="bi bi-plus-lg me-1"></i> Upload Photographs
         </a>
       </div>
-      <div class="gov-card-body p-3">
+      <div class="gov-card-body p-4">
         <% if (evidenceList.length > 0) { %>
           <div class="row g-3">
             <% evidenceList.forEach(ev => { %>
-              <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border">
+              <div class="col-md-6 col-xl-4">
+                <div class="card h-100 border shadow-sm">
                   <!-- Thumbnail / Image View -->
-                  <div class="text-center p-2 bg-light border-bottom position-relative" style="height: 190px; overflow: hidden;">
+                  <div class="text-center p-2 bg-light border-bottom position-relative" style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                     <a href="/evidence/<%= ev._id %>">
-                      <img src="/evidence/<%= ev._id %>/thumbnail" alt="<%= ev.evidenceIdentifier %>" class="img-fluid rounded" style="max-height: 175px; object-fit: contain;">
+                      <img src="/evidence/<%= ev._id %>/thumbnail" alt="<%= ev.evidenceIdentifier %>" class="img-fluid rounded" style="max-height: 185px; width: auto; object-fit: contain;">
                     </a>
-                    <span class="position-absolute top-0 end-0 m-2 badge <%= ev.inspectionStatus === 'Inspected' ? 'bg-success' : 'bg-secondary' %>">
+                    <span class="position-absolute top-0 end-0 m-2 badge <%= ev.inspectionStatus === 'Inspected' ? 'badge-soft-success' : 'badge-soft-secondary' %>">
                       <%= ev.inspectionStatus %>
                     </span>
                   </div>
 
-                  <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                      <a href="/evidence/<%= ev._id %>" class="fw-bold text-decoration-none text-primary">
-                        <%= ev.evidenceIdentifier %>
-                      </a>
-                      <span class="text-muted small"><%= (ev.fileSize / 1024).toFixed(1) %> KB</span>
-                    </div>
+                  <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                      <div class="d-flex justify-content-between align-items-start mb-1">
+                        <a href="/evidence/<%= ev._id %>" class="fw-bold text-decoration-none text-primary font-monospace">
+                          <%= ev.evidenceIdentifier %>
+                        </a>
+                        <span class="text-muted small"><%= (ev.fileSize / 1024).toFixed(1) %> KB</span>
+                      </div>
 
-                    <div class="small text-truncate mb-2" title="<%= ev.originalFilename %>">
-                      <i class="bi bi-file-earmark-image me-1"></i> <%= ev.originalFilename %>
-                    </div>
+                      <div class="small text-truncate mb-2 text-dark" title="<%= ev.originalFilename %>">
+                        <i class="bi bi-file-earmark-image me-1 text-muted"></i> <%= ev.originalFilename %>
+                      </div>
 
-                    <% if (ev.description) { %>
-                      <p class="small text-muted mb-2 text-truncate" title="<%= ev.description %>">
-                        <%= ev.description %>
-                      </p>
-                    <% } %>
+                      <% if (ev.description) { %>
+                        <p class="small text-muted mb-2 text-truncate" title="<%= ev.description %>">
+                          <%= ev.description %>
+                        </p>
+                      <% } %>
 
-                    <div class="mb-2">
-                      <span class="text-muted small d-block" style="font-size: 11px;">SHA-256 Digest:</span>
-                      <div class="d-flex gap-1 align-items-center">
-                        <span class="gov-hash flex-grow-1 text-truncate" style="font-size: 10px;" title="<%= ev.sha256Hash %>">
-                          <%= ev.sha256Hash.substring(0, 18) %>...
-                        </span>
-                        <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-copy-hash" data-hash="<%= ev.sha256Hash %>" title="Copy Hash">
-                          <i class="bi bi-clipboard"></i>
-                        </button>
+                      <div class="mb-3">
+                        <span class="text-muted small d-block mb-1" style="font-size: 11px;">SHA-256 Digest:</span>
+                        <div class="d-flex gap-1 align-items-center">
+                          <span class="gov-hash flex-grow-1 text-truncate" style="font-size: 10px;" title="<%= ev.sha256Hash %>">
+                            <%= ev.sha256Hash.substring(0, 20) %>...
+                          </span>
+                          <button class="btn btn-gov-secondary btn-sm py-0 px-2 btn-copy-hash" data-hash="<%= ev.sha256Hash %>" title="Copy Hash">
+                            <i class="bi bi-clipboard"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
-                      <a href="/evidence/<%= ev._id %>" class="btn btn-gov-secondary btn-sm py-1">
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                      <a href="/evidence/<%= ev._id %>" class="btn btn-gov-primary btn-sm py-1 px-3">
                         <i class="bi bi-search me-1"></i> Inspect
                       </a>
-                      <a href="/evidence/<%= ev._id %>/file" class="btn btn-outline-secondary btn-sm py-1" download title="Download Original">
-                        <i class="bi bi-download"></i>
+                      <a href="/evidence/<%= ev._id %>/file" class="btn btn-gov-secondary btn-sm py-1 px-3" download title="Download Original Pristine File">
+                        <i class="bi bi-download me-1"></i> Original
                       </a>
                     </div>
                   </div>
@@ -213,8 +229,8 @@
             <% }) %>
           </div>
         <% } else { %>
-          <div class="p-4 text-center text-muted">
-            <i class="bi bi-camera fs-2 mb-2 d-block"></i>
+          <div class="p-5 text-center text-muted">
+            <i class="bi bi-camera fs-2 mb-2 d-block text-secondary"></i>
             No crime-scene images uploaded yet.
             <div class="mt-2">
               <a href="/evidence/upload?caseId=<%= caseDoc._id %>" class="btn btn-gov-primary btn-sm">
@@ -227,9 +243,9 @@
     </div>
 
     <!-- 3. Chain of Custody History -->
-    <div class="gov-card mb-4" id="custody-section">
-      <div class="gov-card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-shield-check me-2"></i> Chronological Chain of Custody Ledger</span>
+    <div class="gov-card shadow-sm mb-4" id="custody-section">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-shield-check me-2 text-success"></i> Chronological Chain of Custody Ledger</span>
         <a href="/custody?caseId=<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm py-0 px-2 small">Full Ledger</a>
       </div>
       <div class="gov-card-body p-0">
@@ -243,23 +259,23 @@
                   <th>Actor / Officer</th>
                   <th>Transfer Details</th>
                   <th>Reason</th>
-                  <th>Timestamp</th>
+                  <th>Timestamp (IST)</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 <% custodyHistory.forEach(cust => { %>
                   <tr>
-                    <td class="fw-bold"><%= cust.eventId %></td>
+                    <td class="fw-bold font-monospace"><%= cust.eventId %></td>
                     <td><span class="badge bg-light text-dark border"><%= cust.action %></span></td>
-                    <td><%= cust.actorName %></td>
+                    <td class="fw-semibold"><%= cust.actorName %></td>
                     <td class="small">
                       <%= cust.transferorName ? `${cust.transferorName} &rarr; ${cust.recipientName}` : 'Internal Custody Action' %>
                     </td>
                     <td class="small"><%= cust.reason %></td>
-                    <td class="small text-muted"><%= formatTimestamp(cust.eventTimestamp) %></td>
+                    <td class="small text-muted font-monospace"><%= formatTimestamp(cust.eventTimestamp) %></td>
                     <td>
-                      <span class="badge <%= cust.status === 'Completed' ? 'bg-success' : (cust.status === 'Pending' ? 'bg-warning text-dark' : 'bg-secondary') %>">
+                      <span class="badge <%= cust.status === 'Completed' ? 'badge-soft-success' : (cust.status === 'Pending' ? 'badge-soft-warning' : 'badge-soft-danger') %>">
                         <%= cust.status %>
                       </span>
                     </td>
@@ -269,34 +285,44 @@
             </table>
           </div>
         <% } else { %>
-          <div class="p-3 text-muted text-center small">No custody events recorded for this case.</div>
+          <div class="p-4 text-center text-muted small">No custody transfer events recorded for this case yet.</div>
         <% } %>
       </div>
     </div>
 
-    <!-- 4. Case Audit History -->
-    <div class="gov-card" id="activity-section">
-      <div class="gov-card-header">
-        <span><i class="bi bi-journal-text me-2"></i> Case Security & Modification Audit Trail</span>
+    <!-- 4. Audit Log Activity -->
+    <div class="gov-card shadow-sm mb-0" id="activity-section">
+      <div class="gov-card-header bg-white py-3 border-bottom">
+        <span><i class="bi bi-clock-history me-2 text-primary"></i> Case Operation Audit Journal (<%= auditLogs.length %> Logs)</span>
       </div>
       <div class="gov-card-body p-0">
         <% if (auditLogs.length > 0) { %>
-          <ul class="list-group list-group-flush small">
-            <% auditLogs.forEach(log => { %>
-              <li class="list-group-item d-flex justify-content-between align-items-start py-2 px-3">
-                <div>
-                  <span class="badge bg-light text-dark border me-1"><%= log.action %></span>
-                  <strong><%= log.changeSummary %></strong>
-                  <div class="text-muted" style="font-size: 11px;">
-                    Officer: <%= log.actorName %> &bull; IP: <%= log.ipAddress %>
-                  </div>
-                </div>
-                <span class="text-muted small text-nowrap"><%= formatTimestamp(log.timestamp) %></span>
-              </li>
-            <% }) %>
-          </ul>
+          <div class="table-responsive">
+            <table class="table table-gov table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Officer</th>
+                  <th>Change Summary</th>
+                  <th>IP Address</th>
+                  <th>Timestamp (IST)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% auditLogs.forEach(log => { %>
+                  <tr>
+                    <td><span class="badge bg-light text-dark border"><%= log.action %></span></td>
+                    <td class="fw-semibold"><%= log.actorName %></td>
+                    <td class="small"><%= log.changeSummary %></td>
+                    <td class="small font-monospace text-muted"><%= log.ipAddress %></td>
+                    <td class="small text-muted font-monospace"><%= formatTimestamp(log.timestamp) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         <% } else { %>
-          <div class="p-3 text-muted text-center small">No audit log records for this case.</div>
+          <div class="p-4 text-center text-muted small">No audit log records associated with this case file.</div>
         <% } %>
       </div>
     </div>

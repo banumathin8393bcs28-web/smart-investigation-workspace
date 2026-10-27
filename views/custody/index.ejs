@@ -4,7 +4,7 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Chain of Custody & Evidence Ledger</h1>
         <small class="text-muted">Tamper-evident chronological audit trail of case assignments and physical evidence custody</small>
@@ -34,7 +34,7 @@
     <!-- Pending Custody & Assignment Transfers Awaiting Action -->
     <% if (pendingTransfers && pendingTransfers.length > 0) { %>
       <div class="gov-card border-warning mb-4 shadow-sm">
-        <div class="gov-card-header bg-warning-subtle text-dark d-flex justify-content-between align-items-center">
+        <div class="gov-card-header bg-warning-subtle text-dark d-flex justify-content-between align-items-center py-3">
           <span class="fw-bold"><i class="bi bi-exclamation-circle-fill text-warning me-2"></i> Incoming Transfers Awaiting Your Decision (<%= pendingTransfers.length %>)</span>
           <span class="badge bg-warning text-dark">Action Required</span>
         </div>
@@ -47,58 +47,34 @@
                   <th>Case #</th>
                   <th>Transferor Officer</th>
                   <th>Transfer Reason</th>
-                  <th>Requested Timestamp</th>
-                  <th>Decision Actions</th>
+                  <th>Requested (IST)</th>
+                  <th style="min-width: 250px;">Your Decision</th>
                 </tr>
               </thead>
               <tbody>
-                <% pendingTransfers.forEach(p => { %>
+                <% pendingTransfers.forEach(t => { %>
                   <tr>
-                    <td class="fw-bold"><%= p.eventId %></td>
-                    <td><strong class="text-primary"><%= p.caseNumber %></strong></td>
-                    <td><%= p.transferorName %></td>
-                    <td><%= p.reason %></td>
-                    <td class="small text-muted"><%= formatTimestamp(p.eventTimestamp) %></td>
+                    <td class="fw-bold font-monospace"><%= t.eventId %></td>
                     <td>
-                      <div class="d-flex gap-2">
-                        <!-- Accept Form -->
-                        <form action="/custody/respond/<%= p._id %>" method="POST" class="d-inline">
-                          <input type="hidden" name="response" value="Accept">
-                          <button type="submit" class="btn btn-success btn-sm py-1 px-2">
-                            <i class="bi bi-check-lg"></i> Accept
+                      <a href="/cases/<%= t.caseId._id %>" class="fw-bold font-monospace text-primary text-decoration-none">
+                        <%= t.caseNumber %>
+                      </a>
+                    </td>
+                    <td class="fw-semibold"><%= t.transferorName %></td>
+                    <td class="small"><%= t.reason %></td>
+                    <td class="small text-muted font-monospace"><%= formatTimestamp(t.eventTimestamp) %></td>
+                    <td>
+                      <form action="/custody/respond/<%= t._id %>" method="POST" class="d-flex flex-column gap-2 py-1">
+                        <input type="text" name="responseNotes" class="form-control form-control-sm" placeholder="Review remarks / acceptance notes..." required>
+                        <div class="d-flex gap-2">
+                          <button type="submit" name="response" value="Accept" class="btn btn-success btn-sm flex-grow-1">
+                            <i class="bi bi-check2"></i> Accept Case
                           </button>
-                        </form>
-
-                        <!-- Reject Modal Trigger -->
-                        <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2" data-bs-toggle="modal" data-bs-target="#rejectModal<%= p._id %>">
-                          <i class="bi bi-x-lg"></i> Decline
-                        </button>
-                      </div>
-
-                      <!-- Decline Modal with Reason -->
-                      <div class="modal fade" id="rejectModal<%= p._id %>" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                          <div class="modal-content">
-                            <form action="/custody/respond/<%= p._id %>" method="POST">
-                              <input type="hidden" name="response" value="Reject">
-                              <div class="modal-header">
-                                <h6 class="modal-title fw-bold">Decline Transfer Request</h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                              </div>
-                              <div class="modal-body">
-                                <p class="small text-muted mb-2">Please state the official reason for declining the custody or assignment transfer of <%= p.caseNumber %>.</p>
-                                <label class="form-label small">Rejection Justification <span class="text-danger">*</span></label>
-                                <textarea class="form-control" name="notes" rows="3" placeholder="e.g. Case jurisdiction belongs to Unit 3; conflict of interest..." required></textarea>
-                              </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-gov-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
-                              </div>
-                            </form>
-                          </div>
+                          <button type="submit" name="response" value="Reject" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-x"></i> Reject
+                          </button>
                         </div>
-                      </div>
-
+                      </form>
                     </td>
                   </tr>
                 <% }) %>
@@ -109,64 +85,52 @@
       </div>
     <% } %>
 
-    <!-- Master Custody History Ledger -->
-    <div class="gov-card">
-      <div class="gov-card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-journal-check me-2"></i> Append-Only Custody Ledger (<%= custodyHistory.length %> Records)</span>
-        <span class="text-muted small">Tamper-Evident Chronological History</span>
+    <!-- Chronological Custody History -->
+    <div class="gov-card shadow-sm">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2 text-primary"></i> Master Chronological Custody Ledger (<%= custodyHistory.length %> Events)</span>
+        <% if (filterCaseId) { %>
+          <a href="/custody" class="btn btn-gov-secondary btn-sm py-0 px-2 small">Clear Case Filter</a>
+        <% } %>
       </div>
       <div class="gov-card-body p-0">
-        <% if (custodyHistory.length > 0) { %>
+        <% if (custodyHistory && custodyHistory.length > 0) { %>
           <div class="table-responsive">
             <table class="table table-gov mb-0">
               <thead>
                 <tr>
                   <th>Event ID</th>
-                  <th>Action</th>
                   <th>Case #</th>
-                  <th>Evidence Item</th>
-                  <th>Transferor &rarr; Recipient</th>
-                  <th>Reason / Notes</th>
-                  <th>Authoritative Timestamp</th>
+                  <th>Custody Action</th>
+                  <th>Actor Officer</th>
+                  <th>Transfer Directive</th>
+                  <th>Justification / Reason</th>
+                  <th>Timestamp (IST)</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 <% custodyHistory.forEach(c => { %>
                   <tr>
-                    <td class="fw-bold"><%= c.eventId %></td>
+                    <td class="fw-bold font-monospace"><%= c.eventId %></td>
                     <td>
-                      <span class="badge bg-light text-dark border"><%= c.action %></span>
-                    </td>
-                    <td>
-                      <a href="/cases/<%= c.caseId %>" class="fw-bold text-decoration-none text-primary">
+                      <a href="/cases/<%= c.caseId %>" class="fw-bold font-monospace text-primary text-decoration-none">
                         <%= c.caseNumber %>
                       </a>
                     </td>
-                    <td>
-                      <% if (c.evidenceIdentifier) { %>
-                        <span class="badge bg-secondary"><%= c.evidenceIdentifier %></span>
+                    <td><span class="badge bg-light text-dark border"><%= c.action %></span></td>
+                    <td class="fw-semibold"><%= c.actorName %></td>
+                    <td class="small">
+                      <% if (c.transferorName && c.recipientName) { %>
+                        <%= c.transferorName %> &rarr; <%= c.recipientName %>
                       <% } else { %>
-                        <span class="text-muted small">Case Assignment</span>
+                        <span class="text-muted">Internal Case Action</span>
                       <% } %>
                     </td>
-                    <td class="small">
-                      <%= c.transferorName || c.actorName %>
-                      <% if (c.recipientName) { %>
-                        &rarr; <%= c.recipientName %>
-                      <% } %>
-                    </td>
-                    <td class="small">
-                      <div><%= c.reason %></div>
-                      <% if (c.notes) { %>
-                        <small class="text-muted d-block"><%= c.notes %></small>
-                      <% } %>
-                    </td>
-                    <td class="small text-muted text-nowrap">
-                      <%= formatTimestamp(c.eventTimestamp) %>
-                    </td>
+                    <td class="small"><%= c.reason %></td>
+                    <td class="small text-muted font-monospace"><%= formatTimestamp(c.eventTimestamp) %></td>
                     <td>
-                      <span class="badge <%= c.status === 'Completed' ? 'bg-success' : (c.status === 'Pending' ? 'bg-warning text-dark' : (c.status === 'Rejected' ? 'bg-danger' : 'bg-secondary')) %>">
+                      <span class="badge <%= c.status === 'Completed' ? 'badge-soft-success' : (c.status === 'Pending' ? 'badge-soft-warning' : 'badge-soft-danger') %>">
                         <%= c.status %>
                       </span>
                     </td>
@@ -177,8 +141,8 @@
           </div>
         <% } else { %>
           <div class="p-5 text-center text-muted">
-            <i class="bi bi-shield-x fs-2 mb-2 d-block"></i>
-            No custody events or transfers recorded yet.
+            <i class="bi bi-shield-x fs-2 mb-2 d-block text-secondary"></i>
+            No custody events recorded matching current view.
           </div>
         <% } %>
       </div>

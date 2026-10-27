@@ -4,23 +4,27 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Crime Scene Sector: <%= scene.sceneIdentifier %></h1>
-        <small class="text-muted">Associated Case: <a href="/cases/<%= caseDoc._id %>"><%= caseDoc.caseNumber %></a></small>
+        <small class="text-muted">Associated Case: <a href="/cases/<%= caseDoc._id %>" class="text-primary fw-semibold font-monospace"><%= caseDoc.caseNumber %>: <%= caseDoc.caseName %></a></small>
       </div>
       <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Return to Case
       </a>
     </div>
 
-    <div class="gov-card">
-      <div class="gov-card-header">
-        <span><i class="bi bi-geo-alt me-2"></i> Scene Sector Details</span>
+    <div class="gov-card shadow-sm border">
+      <div class="gov-card-header bg-white py-3 border-bottom">
+        <span><i class="bi bi-geo-alt-fill text-primary me-2"></i> Scene Sector Forensic Details</span>
       </div>
-      <div class="gov-card-body">
-        <p><%= scene.sceneDetails %></p>
-        <div class="text-muted small">Recorded on <%= formatTimestamp(scene.createdAt) %></div>
+      <div class="gov-card-body p-4">
+        <div class="p-3 bg-light rounded border mb-3" style="line-height: 1.6;">
+          <%= scene.sceneDetails %>
+        </div>
+        <div class="text-muted small font-monospace">
+          <i class="bi bi-clock me-1"></i> Ingested on <%= formatTimestamp(scene.createdAt) %>
+        </div>
       </div>
     </div>
   </main>

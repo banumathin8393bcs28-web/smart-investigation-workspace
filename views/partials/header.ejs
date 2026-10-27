@@ -15,47 +15,54 @@
 
 <% if (typeof currentInvestigator !== 'undefined' && currentInvestigator) { %>
 <!-- Top Administrative Header -->
-<header class="gov-topbar d-flex justify-content-between align-items-center">
-  <div class="d-flex align-items-center gap-3">
+<header class="gov-topbar">
+  <div class="d-flex align-items-center gap-2 gap-sm-3">
+    <!-- Mobile Hamburger Toggle -->
+    <button class="gov-menu-toggle" id="sidebarToggleBtn" type="button" aria-label="Toggle navigation drawer">
+      <i class="bi bi-list"></i>
+    </button>
+
     <a href="/dashboard" class="gov-topbar-brand">
-      <i class="bi bi-shield-lock-fill"></i>
+      <div class="gov-brand-icon">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
       <div>
-        <div>SMART INVESTIGATION WORKSPACE</div>
-        <div class="gov-topbar-subtitle">Digital Evidence Management & Forensic Investigation</div>
+        <div class="gov-brand-title">SMART INVESTIGATION WORKSPACE</div>
+        <div class="gov-brand-subtitle d-none d-sm-block">Digital Evidence Management & Forensics</div>
       </div>
     </a>
   </div>
 
-  <div class="d-flex align-items-center gap-3">
+  <div class="d-flex align-items-center gap-2 gap-sm-3">
     <!-- Running Live Clock -->
-    <div class="gov-clock-pill text-white d-none d-md-flex align-items-center gap-2">
+    <div class="gov-clock-pill d-none d-lg-flex align-items-center gap-2">
       <i class="bi bi-clock"></i>
       <span id="liveClock">Loading time...</span>
     </div>
 
     <!-- Notification Indicator -->
-    <a href="/notifications" class="text-white text-decoration-none position-relative px-2" title="Notification Center">
+    <a href="/notifications" class="text-white text-decoration-none position-relative p-2" title="Notification Center">
       <i class="bi bi-bell-fill fs-5"></i>
       <% if (typeof unreadNotificationsCount !== 'undefined' && unreadNotificationsCount > 0) { %>
-        <span id="topbarNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        <span id="topbarNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px; padding: 3px 6px;">
           <%= unreadNotificationsCount %>
         </span>
       <% } else { %>
-        <span id="topbarNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+        <span id="topbarNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 10px; padding: 3px 6px;">0</span>
       <% } %>
     </a>
 
     <!-- Investigator Profile Pill -->
-    <div class="gov-user-pill text-white border-start ps-3 border-secondary">
+    <a href="/profile/edit" class="gov-user-pill border-start ps-2 ps-sm-3 border-secondary border-opacity-50 text-decoration-none" title="Officer Profile Settings">
       <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-sm">
-      <div class="d-none d-sm-block text-start">
-        <div class="fw-bold lh-1"><%= currentInvestigator.fullName %></div>
+      <div class="d-none d-md-block text-start">
+        <div class="fw-semibold text-white lh-1 small"><%= currentInvestigator.fullName %></div>
         <small class="text-white-50" style="font-size: 11px;"><%= currentInvestigator.role %></small>
       </div>
-    </div>
+    </a>
 
     <!-- Visible Sign Out Button -->
-    <a href="/auth/logout" class="btn btn-outline-light btn-sm ms-2" title="Sign Out">
+    <a href="/auth/logout" class="btn btn-outline-light btn-sm ms-1" title="Sign Out">
       <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Sign Out</span>
     </a>
   </div>
@@ -63,4 +70,4 @@
 <% } %>
 
 <!-- Live Notification Toast Container -->
-<div id="liveNotificationToastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; max-width: 350px;"></div>
+<div id="liveNotificationToastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; max-width: 360px;"></div>

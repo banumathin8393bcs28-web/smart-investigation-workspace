@@ -2,7 +2,7 @@
 
 <div class="container py-5 my-auto">
   <div class="row justify-content-center">
-    <div class="col-md-9 col-lg-7">
+    <div class="col-md-10 col-lg-8">
 
       <% if (typeof success !== 'undefined' && success) { %>
         <div class="alert alert-success alert-gov alert-dismissible fade show mb-4" role="alert">
@@ -19,36 +19,88 @@
       <% } %>
 
       <div class="gov-card shadow-sm border">
-        <div class="gov-card-header text-center justify-content-center py-3 bg-white border-bottom">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-shield-shaded text-primary fs-3"></i>
-            <h1 class="h3 mb-0 fw-bold text-dark">SMART INVESTIGATION WORKSPACE</h1>
+        <!-- Official Emblem & Header -->
+        <div class="text-center pt-5 pb-3 px-4">
+          <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background: #0f2a4a; border-radius: 12px; color: #ffffff; font-size: 1.8rem; box-shadow: 0 4px 10px rgba(15, 42, 74, 0.2);">
+            <i class="bi bi-shield-lock-fill"></i>
           </div>
-        </div>
-
-        <div class="gov-card-body p-4 p-md-5 text-center">
-          <p class="lead text-secondary mb-4" style="font-size: 1.15rem; font-weight: 500;">
+          <h1 class="h3 fw-bold text-dark mb-2 tracking-tight">SMART INVESTIGATION WORKSPACE</h1>
+          <p class="lead text-secondary mb-0 fw-medium" style="font-size: 1.05rem;">
             "A secure workspace for investigation case management and digital evidence organization."
           </p>
+        </div>
 
-          <p class="text-muted small mb-4" style="line-height: 1.6;">
-            This system is an authorized administrative workspace designed for certified law enforcement investigators to organize crime-scene digital photographs, maintain tamper-evident chain-of-custody ledgers, execute AI-assisted object inspection, communicate securely, and generate comprehensive PDF investigation reports.
+        <div class="gov-card-body px-4 px-md-5 pt-3 pb-5">
+          <p class="text-muted small text-center mb-4" style="line-height: 1.6; max-width: 620px; margin: 0 auto;">
+            Official digital evidence management and forensic case tracking application. Certified investigators can catalog crime-scene photographs, verify cryptographic SHA-256 digests, run AI-assisted YOLOv8 object detection, maintain chain of custody, collaborate in real time, and compile comprehensive PDF investigation dossiers.
           </p>
+
+          <!-- Core Pillar Feature Cards Grid -->
+          <div class="row g-3 my-2 mb-4">
+            <div class="col-sm-6">
+              <div class="p-3 border rounded bg-light h-100">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="bi bi-fingerprint text-primary fs-5"></i>
+                  <span class="fw-bold small text-dark">Cryptographic Evidence Vault</span>
+                </div>
+                <div class="text-muted" style="font-size: 12px; line-height: 1.4;">
+                  SHA-256 byte hashing, Sharp image property parsing, and Exif metadata extraction.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="p-3 border rounded bg-light h-100">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="bi bi-cpu text-primary fs-5"></i>
+                  <span class="fw-bold small text-dark">Ultralytics YOLOv8 AI</span>
+                </div>
+                <div class="text-muted" style="font-size: 12px; line-height: 1.4;">
+                  Computer-vision object detection with case-context correlation and bounding overlays.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="p-3 border rounded bg-light h-100">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="bi bi-shield-check text-primary fs-5"></i>
+                  <span class="fw-bold small text-dark">Chain of Custody Protocol</span>
+                </div>
+                <div class="text-muted" style="font-size: 12px; line-height: 1.4;">
+                  Immutable custody ledgers, transfer request protocols, and verified audit history.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="p-3 border rounded bg-light h-100">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                  <span class="fw-bold small text-dark">Official PDF Dossiers</span>
+                </div>
+                <div class="text-muted" style="font-size: 12px; line-height: 1.4;">
+                  Multi-page PDFKit case dossiers with embedded images, EXIF, AI, and SHA-256 verification.
+                </div>
+              </div>
+            </div>
+          </div>
 
           <hr class="my-4 border-secondary-subtle">
 
+          <!-- Primary Action Buttons -->
           <div class="d-grid d-sm-flex justify-content-sm-center gap-3">
-            <a href="/auth/register" class="btn btn-gov-primary btn-lg px-4">
+            <a href="/auth/register" class="btn btn-gov-primary btn-lg px-4 py-2">
               <i class="bi bi-person-plus-fill me-2"></i> Register
             </a>
-            <a href="/auth/login" class="btn btn-gov-secondary btn-lg px-4 border">
+            <a href="/auth/login" class="btn btn-gov-secondary btn-lg px-4 py-2 border">
               <i class="bi bi-box-arrow-in-right me-2"></i> Login
             </a>
           </div>
 
-          <div class="mt-4 pt-3 border-top border-light">
+          <div class="mt-4 pt-3 text-center border-top">
             <small class="text-muted">
-              <i class="bi bi-lock-fill me-1"></i> Restricted Access: Authorized government investigators only.
+              <i class="bi bi-lock-fill text-warning me-1"></i> Authorized Government Personnel Only &bull; All Access Attempts Logged
             </small>
           </div>
         </div>

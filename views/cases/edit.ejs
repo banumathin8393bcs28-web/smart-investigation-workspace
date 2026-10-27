@@ -4,7 +4,7 @@
   <%- include('../partials/sidebar') %>
 
   <main class="gov-main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
       <div>
         <h1 class="h4 mb-1 fw-bold text-dark">Edit Case: <%= caseDoc.caseNumber %></h1>
         <small class="text-muted">Modify authorized case details. Core creation identifiers remain immutable.</small>
@@ -22,16 +22,16 @@
     <% } %>
 
     <div class="gov-card shadow-sm border">
-      <div class="gov-card-header bg-white py-3">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <i class="bi bi-pencil-square text-primary fs-4"></i>
           <div>
             <h5 class="mb-0 fw-bold">Case Modification Record</h5>
-            <small class="text-muted">Case Number: <strong class="text-dark"><%= caseDoc.caseNumber %></strong> &bull; Original Creator: <%= caseDoc.creatorName %></small>
+            <small class="text-muted">Case Number: <strong class="text-dark font-monospace"><%= caseDoc.caseNumber %></strong> &bull; Original Creator: <%= caseDoc.creatorName %></small>
           </div>
         </div>
         <span class="badge bg-light text-muted border">
-          Creation: <%= formatTimestamp(caseDoc.creationTimestamp) %>
+          Immutable Ingestion: <%= formatTimestamp(caseDoc.creationTimestamp) %>
         </span>
       </div>
 
@@ -39,7 +39,14 @@
         <form action="/cases/<%= caseDoc._id %>/edit" method="POST">
 
           <!-- Core details -->
-          <div class="row g-3 mb-3">
+          <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+            <span class="badge bg-primary text-white" style="font-size: 11px;">1</span>
+            <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Core Specifications
+            </h6>
+          </div>
+
+          <div class="row g-3 mb-4">
             <div class="col-md-6">
               <label class="form-label" for="caseName">Case Title <span class="text-danger">*</span></label>
               <input type="text" class="form-control <%= errors.caseName ? 'is-invalid' : '' %>" id="caseName" name="caseName" value="<%= caseDoc.caseName %>" required>
@@ -63,7 +70,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
+              <label class="form-label" for="status">Current Status <span class="text-danger">*</span></label>
               <select class="form-select <%= errors.status ? 'is-invalid' : '' %>" id="status" name="status" required>
                 <option value="New" <%= caseDoc.status === 'New' ? 'selected' : '' %>>New</option>
                 <option value="Under Investigation" <%= caseDoc.status === 'Under Investigation' ? 'selected' : '' %>>Under Investigation</option>
@@ -72,28 +79,28 @@
                 <option value="Closed" <%= caseDoc.status === 'Closed' ? 'selected' : '' %>>Closed</option>
               </select>
             </div>
-          </div>
 
-          <!-- Other Crime Type Additional Description -->
-          <div class="row g-3 mb-3 <%= caseDoc.crimeType === 'Other' ? '' : 'd-none' %>" id="crimeOtherRow">
-            <div class="col-md-12">
-              <label class="form-label" for="crimeTypeOther">Specify Crime Type (Other)</label>
+            <div class="col-md-6 <%= caseDoc.crimeType === 'Other' ? '' : 'd-none' %>" id="crimeTypeOtherContainer">
+              <label class="form-label" for="crimeTypeOther">Specify Other Classification</label>
               <input type="text" class="form-control" id="crimeTypeOther" name="crimeTypeOther" value="<%= caseDoc.crimeTypeOther || '' %>">
             </div>
           </div>
 
-          <!-- Date & Location -->
-          <div class="row g-3 mb-3">
+          <!-- Time & Location -->
+          <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+            <span class="badge bg-primary text-white" style="font-size: 11px;">2</span>
+            <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Incident Date, Time & Location
+            </h6>
+          </div>
+
+          <div class="row g-3 mb-4">
             <div class="col-md-3">
               <label class="form-label" for="incidentDate">Incident Date <span class="text-danger">*</span></label>
               <%
-                let dateStr = '';
-                if (caseDoc.incidentDate) {
-                  const d = new Date(caseDoc.incidentDate);
-                  dateStr = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : '';
-                }
+                const dateVal = caseDoc.incidentDate ? new Date(caseDoc.incidentDate).toISOString().split('T')[0] : '';
               %>
-              <input type="date" class="form-control" id="incidentDate" name="incidentDate" value="<%= dateStr %>" required>
+              <input type="date" class="form-control" id="incidentDate" name="incidentDate" value="<%= dateVal %>" required>
             </div>
 
             <div class="col-md-3">
@@ -102,7 +109,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label" for="incidentLocation">Location / City <span class="text-danger">*</span></label>
+              <label class="form-label" for="incidentLocation">Location Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="incidentLocation" name="incidentLocation" value="<%= caseDoc.incidentLocation %>" required>
             </div>
 
@@ -112,29 +119,22 @@
             </div>
           </div>
 
-          <!-- Reporting investigator & Unit -->
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label class="form-label" for="reportingInvestigator">Reporting Investigator</label>
-              <input type="text" class="form-control" id="reportingInvestigator" name="reportingInvestigator" value="<%= caseDoc.reportingInvestigator %>" readonly>
-              <small class="text-muted">Official reporting officer identifier cannot be modified.</small>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label" for="department">Department Unit</label>
-              <input type="text" class="form-control" id="department" name="department" value="<%= caseDoc.department %>">
-            </div>
+          <!-- Narrative & Findings -->
+          <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+            <span class="badge bg-primary text-white" style="font-size: 11px;">3</span>
+            <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Narrative & Evidence Markers
+            </h6>
           </div>
 
-          <!-- Narrative -->
           <div class="mb-3">
             <label class="form-label" for="caseDescription">Detailed Narrative <span class="text-danger">*</span></label>
             <textarea class="form-control" id="caseDescription" name="caseDescription" rows="4" required><%= caseDoc.caseDescription %></textarea>
           </div>
 
-          <div class="row g-3 mb-3">
+          <div class="row g-3 mb-4">
             <div class="col-md-6">
-              <label class="form-label" for="knownObjects">Known Objects / AI Detection Context Targets</label>
+              <label class="form-label" for="knownObjects">Known Context Objects / AI Keywords</label>
               <input type="text" class="form-control" id="knownObjects" name="knownObjects" value="<%= caseDoc.knownObjects || '' %>">
             </div>
 
@@ -144,34 +144,40 @@
             </div>
           </div>
 
+          <!-- Parties & Notes -->
+          <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+            <span class="badge bg-primary text-white" style="font-size: 11px;">4</span>
+            <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+              Associated Parties & Additional Notes
+            </h6>
+          </div>
+
           <div class="row g-3 mb-3">
             <div class="col-md-4">
               <label class="form-label" for="victimDetails">Victim Details</label>
-              <textarea class="form-control" id="victimDetails" name="victimDetails" rows="2"><%= caseDoc.victimDetails || '' %></textarea>
+              <input type="text" class="form-control" id="victimDetails" name="victimDetails" value="<%= caseDoc.victimDetails || '' %>">
             </div>
-
             <div class="col-md-4">
               <label class="form-label" for="suspectDetails">Suspect Details</label>
-              <textarea class="form-control" id="suspectDetails" name="suspectDetails" rows="2"><%= caseDoc.suspectDetails || '' %></textarea>
+              <input type="text" class="form-control" id="suspectDetails" name="suspectDetails" value="<%= caseDoc.suspectDetails || '' %>">
             </div>
-
             <div class="col-md-4">
-              <label class="form-label" for="witnessDetails">Witness Information</label>
-              <textarea class="form-control" id="witnessDetails" name="witnessDetails" rows="2"><%= caseDoc.witnessDetails || '' %></textarea>
+              <label class="form-label" for="witnessDetails">Witness Details</label>
+              <input type="text" class="form-control" id="witnessDetails" name="witnessDetails" value="<%= caseDoc.witnessDetails || '' %>">
             </div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label" for="additionalNotes">Additional Notes</label>
+            <label class="form-label" for="additionalNotes">Additional Notes / Follow-up Tasks</label>
             <textarea class="form-control" id="additionalNotes" name="additionalNotes" rows="2"><%= caseDoc.additionalNotes || '' %></textarea>
           </div>
 
           <div class="d-flex justify-content-between align-items-center pt-3 border-top">
             <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary">
-              <i class="bi bi-x-circle me-1"></i> Cancel Changes
+              <i class="bi bi-x-circle me-1"></i> Cancel
             </a>
-            <button type="submit" class="btn btn-gov-primary px-4">
-              <i class="bi bi-check-lg me-1"></i> Save Changes
+            <button type="submit" class="btn btn-gov-primary px-4 py-2">
+              <i class="bi bi-check2-circle me-1"></i> Save Changes & Log Audit Entry
             </button>
           </div>
 
@@ -182,14 +188,13 @@
 </div>
 
 <script>
-function toggleCrimeOther(val) {
-  const row = document.getElementById('crimeOtherRow');
-  if (val === 'Other') {
-    row.classList.remove('d-none');
-  } else {
-    row.classList.add('d-none');
+  function toggleCrimeOther(val) {
+    const el = document.getElementById('crimeTypeOtherContainer');
+    if (el) {
+      if (val === 'Other') el.classList.remove('d-none');
+      else el.classList.add('d-none');
+    }
   }
-}
 </script>
 
 <%- include('../partials/footer') %>

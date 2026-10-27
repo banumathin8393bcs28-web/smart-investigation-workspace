@@ -5,15 +5,17 @@
     <div class="col-md-10 col-lg-8">
 
       <div class="gov-card shadow-sm border">
-        <div class="gov-card-header bg-white py-3">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-person-plus text-primary fs-4"></i>
+        <div class="gov-card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="gov-brand-icon" style="width: 36px; height: 36px; font-size: 1.1rem;">
+              <i class="bi bi-person-plus-fill"></i>
+            </div>
             <div>
-              <h2 class="h5 mb-0 fw-bold">Investigator Registration</h2>
+              <h2 class="h5 mb-0 fw-bold text-dark">Investigator Registration</h2>
               <small class="text-muted">Register an authorized government investigation account</small>
             </div>
           </div>
-          <a href="/auth/login" class="btn btn-outline-secondary btn-sm">Existing Account? Login</a>
+          <a href="/auth/login" class="btn btn-gov-secondary btn-sm">Existing Account? Login</a>
         </div>
 
         <div class="gov-card-body p-4">
@@ -26,14 +28,18 @@
 
           <form action="/auth/register" method="POST" enctype="multipart/form-data" novalidate>
 
-            <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
-              Personal & Professional Profile
-            </h6>
+            <!-- Section 1: Personal & Professional Profile -->
+            <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+              <span class="badge bg-primary text-white" style="font-size: 11px;">1</span>
+              <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+                Personal & Professional Identification
+              </h6>
+            </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label" for="fullName">Full Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control <%= errors.fullName ? 'is-invalid' : '' %>" id="fullName" name="fullName" value="<%= formData.fullName || '' %>" placeholder="e.g. Detective John Miller" required>
+                <input type="text" class="form-control <%= errors.fullName ? 'is-invalid' : '' %>" id="fullName" name="fullName" value="<%= formData.fullName || '' %>" placeholder="e.g. Detective Sarah Miller" required>
                 <% if (errors.fullName) { %><div class="invalid-feedback"><%= errors.fullName %></div><% } %>
               </div>
 
@@ -54,19 +60,19 @@
 
             <!-- Profile Photo Upload & Preview -->
             <div class="row g-3 mb-3 align-items-center">
-              <div class="col-md-8">
+              <div class="col-md-9">
                 <label class="form-label" for="profilePhoto">Official Profile Photograph</label>
                 <input type="file" class="form-control image-preview-input <%= errors.profilePhoto ? 'is-invalid' : '' %>" id="profilePhoto" name="profilePhoto" accept="image/jpeg,image/png,image/webp" data-preview="photoPreview">
-                <small class="text-muted">JPG, PNG, or WebP (max 5MB).</small>
+                <small class="text-muted">JPG, PNG, or WebP format (max 5MB).</small>
                 <% if (errors.profilePhoto) { %><div class="invalid-feedback"><%= errors.profilePhoto %></div><% } %>
               </div>
-              <div class="col-md-4 text-center">
-                <img id="photoPreview" src="/images/default-avatar.png" alt="Preview" class="gov-avatar-md d-none">
+              <div class="col-md-3 text-center">
+                <img id="photoPreview" src="/images/default-avatar.png" alt="Preview" class="gov-avatar-md d-none mx-auto border shadow-sm">
               </div>
             </div>
 
             <!-- DOB, Age, Gender -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
               <div class="col-md-4">
                 <label class="form-label" for="dobInput">Date of Birth <span class="text-danger">*</span></label>
                 <input type="date" class="form-control <%= errors.dob ? 'is-invalid' : '' %>" id="dobInput" name="dob" value="<%= formData.dob || '' %>" required>
@@ -92,15 +98,19 @@
               </div>
             </div>
 
-            <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
-              Contact & Official Identity
-            </h6>
+            <!-- Section 2: Contact & Official Identity -->
+            <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+              <span class="badge bg-primary text-white" style="font-size: 11px;">2</span>
+              <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+                Contact Details & Government Email
+              </h6>
+            </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label" for="email">Official Government Email <span class="text-danger">*</span></label>
                 <input type="email" class="form-control <%= errors.email ? 'is-invalid' : '' %>" id="email" name="email" value="<%= formData.email || '' %>" placeholder="name.unit@gov.in" required>
-                <small class="text-muted">Must strictly follow xxx.yyy@gov.in pattern.</small>
+                <small class="text-muted d-block mt-1">Pattern requirement: <code>xxx.yyy@gov.in</code></small>
                 <% if (errors.email) { %><div class="invalid-feedback"><%= errors.email %></div><% } %>
               </div>
 
@@ -111,19 +121,23 @@
               </div>
             </div>
 
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label" for="username">Official Username <span class="text-danger">*</span></label>
                 <input type="text" class="form-control <%= errors.username ? 'is-invalid' : '' %>" id="username" name="username" value="<%= formData.username || '' %>" placeholder="e.g. det_miller" required>
+                <small class="text-muted">Unique alphanumeric username for official signing.</small>
                 <% if (errors.username) { %><div class="invalid-feedback"><%= errors.username %></div><% } %>
               </div>
             </div>
 
-            <h6 class="text-uppercase text-muted border-bottom pb-2 my-3 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
-              Security & Credentials
-            </h6>
+            <!-- Section 3: Security & Credentials -->
+            <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
+              <span class="badge bg-primary text-white" style="font-size: 11px;">3</span>
+              <h6 class="text-uppercase text-dark mb-0 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">
+                Security Credentials & Verification Challenge
+              </h6>
+            </div>
 
-            <!-- Password Rules & Inputs -->
             <div class="row g-3 mb-2">
               <div class="col-md-6">
                 <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
@@ -148,10 +162,8 @@
               </div>
             </div>
 
-            <div class="alert alert-light border py-2 mb-3">
-              <small class="text-muted d-block">
-                <strong>Password Policy:</strong> At least 8 characters, with at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol (!@#$%^&*...).
-              </small>
+            <div class="alert alert-light border py-2 mb-3" style="font-size: 11px; line-height: 1.4;">
+              <strong>Password Complexity:</strong> At least 8 characters, containing at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol.
             </div>
 
             <!-- Security Question & Answer -->
@@ -172,7 +184,7 @@
               <div class="col-md-5">
                 <label class="form-label" for="securityAnswer">One-Word Security Answer <span class="text-danger">*</span></label>
                 <input type="text" class="form-control <%= errors.securityAnswer ? 'is-invalid' : '' %>" id="securityAnswer" name="securityAnswer" value="<%= formData.securityAnswer || '' %>" placeholder="Single word only" required>
-                <small class="text-muted">Must be exactly one word. Answer is hashed with bcrypt before saving.</small>
+                <small class="text-muted" style="font-size: 11px;">Stored as a one-way bcrypt hash for account recovery.</small>
                 <% if (errors.securityAnswer) { %><div class="invalid-feedback"><%= errors.securityAnswer %></div><% } %>
               </div>
             </div>
@@ -181,22 +193,22 @@
             <div class="row g-3 mb-4 align-items-center">
               <div class="col-sm-5">
                 <label class="form-label" for="captcha">Security CAPTCHA <span class="text-danger">*</span></label>
-                <input type="text" class="form-control <%= errors.captcha ? 'is-invalid' : '' %>" id="captcha" name="captcha" placeholder="Enter characters" required>
+                <input type="text" class="form-control <%= errors.captcha ? 'is-invalid' : '' %>" id="captcha" name="captcha" placeholder="Enter characters" required autocomplete="off">
                 <% if (errors.captcha) { %><div class="invalid-feedback"><%= errors.captcha %></div><% } %>
               </div>
-              <div class="col-sm-7 d-flex align-items-center gap-2 pt-3 pt-sm-4">
-                <div class="border rounded p-1 bg-light">
+              <div class="col-sm-7 d-flex align-items-center gap-2 pt-1 pt-sm-4">
+                <div class="border rounded p-1 bg-light text-center" style="overflow: hidden;">
                   <span id="captchaContainer"><%- captchaSvg %></span>
                 </div>
-                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="location.reload()" title="Refresh CAPTCHA">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-2" onclick="refreshCaptcha()" title="Refresh CAPTCHA">
                   <i class="bi bi-arrow-clockwise"></i> Refresh
                 </button>
               </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-              <a href="/auth/login" class="text-decoration-none small">
-                <i class="bi bi-box-arrow-in-right"></i> Already registered? Log in here
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 pt-3 border-top">
+              <a href="/auth/login" class="text-decoration-none small text-muted">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Already registered? Log in here
               </a>
               <button type="submit" class="btn btn-gov-primary px-4 py-2">
                 <i class="bi bi-check2-circle me-1"></i> Complete Registration
