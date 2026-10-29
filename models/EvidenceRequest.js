@@ -1,38 +1,88 @@
-const { getCollection } = require('../config/db');
+const mongoose = require('mongoose');
 
-class EvidenceRequestModel {
-  static collection() {
-    return getCollection('EvidenceRequest');
+const evidenceRequestSchema = new mongoose.Schema({
+  requestIdentifier: {
+    type: String,
+    required: true,
+    unique: true,
+    uppercase: true,
+    trim: true
+  },
+  caseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Case',
+    required: true
+  },
+  caseNumber: {
+    type: String,
+    required: true
+  },
+  evidenceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Evidence',
+    default: null
+  },
+  evidenceIdentifier: {
+    type: String,
+    default: 'ALL-CASE-EVIDENCE'
+  },
+  requestedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Investigator',
+    required: true
+  },
+  requestedByName: {
+    type: String,
+    required: true
+  },
+  requestedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Investigator',
+    required: true
+  },
+  requestedToName: {
+    type: String,
+    required: true
+  },
+  purpose: {
+    type: String,
+    required: [true, 'Forensic necessity/purpose is required'],
+    trim: true
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Cancelled'],
+    default: 'Pending'
+  },
+  responseNotes: {
+    type: String,
+    default: ''
+  },
+  respondedBy: {
+    type: String,
+    default: ''
+  },
+  respondedAt: {
+    type: Date,
+    default: null
+  },
+  fileHashAtShare: {
+    type: String,
+    default: ''
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    immutable: true
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
+});
 
-  static async find(query = {}) {
-    return await this.collection().find(query);
-  }
+evidenceRequestSchema.index({ requestedTo: 1, status: 1 });
+evidenceRequestSchema.index({ requestedBy: 1 });
+evidenceRequestSchema.index({ caseId: 1 });
 
-  static async findOne(query = {}) {
-    return await this.collection().findOne(query);
-  }
-
-  static async findById(id) {
-    return await this.collection().findById(id);
-  }
-
-  static async create(reqData) {
-    reqData.status = reqData.status || 'Pending';
-    return await this.collection().create(reqData);
-  }
-
-  static async findByIdAndUpdate(id, update, options) {
-    return await this.collection().findByIdAndUpdate(id, update, options);
-  }
-
-  static async findByIdAndDelete(id) {
-    return await this.collection().findByIdAndDelete(id);
-  }
-
-  static async countDocuments(query) {
-    return await this.collection().countDocuments(query);
-  }
-}
-
-module.exports = EvidenceRequestModel;
+module.exports = mongoose.model('EvidenceRequest', evidenceRequestSchema);

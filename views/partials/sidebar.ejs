@@ -4,7 +4,7 @@
 <nav class="gov-sidebar">
   <!-- Officer Mini Identification Card -->
   <div class="gov-sidebar-user-card">
-    <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Officer Avatar" class="gov-avatar-sm" style="width: 36px; height: 36px;">
+    <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Officer Avatar" class="gov-avatar-sm" style="width: 36px; height: 36px; object-fit: cover;">
     <div class="overflow-hidden">
       <div class="fw-bold small text-dark text-truncate" title="<%= currentInvestigator.fullName %>"><%= currentInvestigator.fullName %></div>
       <div class="text-muted text-truncate" style="font-size: 11px;"><%= currentInvestigator.email %></div>
@@ -25,22 +25,34 @@
         </a>
       </li>
       <li class="gov-sidebar-item">
+        <a href="/cases" class="gov-sidebar-link <%= (typeof title !== 'undefined' && (title.includes('Existing Investigation Cases') || title.includes('Case #'))) ? 'active' : '' %>">
+          <i class="bi bi-folder2-open"></i>
+          <span>Investigation Cases</span>
+        </a>
+      </li>
+      <li class="gov-sidebar-item">
         <a href="/cases/new" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Create New Case')) ? 'active' : '' %>">
           <i class="bi bi-folder-plus"></i>
           <span>Create New Case</span>
         </a>
       </li>
-      <li class="gov-sidebar-item">
-        <a href="/cases" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Existing Investigation Cases') || title.includes('Case #')) ? 'active' : '' %>">
-          <i class="bi bi-folder2-open"></i>
-          <span>View Existing Cases</span>
-        </a>
-      </li>
     </ul>
 
-    <!-- Section: Forensics -->
-    <div class="gov-sidebar-section-title">Forensic Modules</div>
+    <!-- Section: Forensics & Evidence Management -->
+    <div class="gov-sidebar-section-title">Digital Forensics</div>
     <ul class="gov-sidebar-menu mb-2">
+      <li class="gov-sidebar-item">
+        <a href="/autopsy/jobs" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Autopsy')) ? 'active' : '' %>">
+          <i class="bi bi-hdd-network"></i>
+          <span>Autopsy Analysis</span>
+        </a>
+      </li>
+      <li class="gov-sidebar-item">
+        <a href="/evidence/requests" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Evidence Access')) ? 'active' : '' %>">
+          <i class="bi bi-arrow-left-right"></i>
+          <span>Evidence Requests</span>
+        </a>
+      </li>
       <li class="gov-sidebar-item">
         <a href="/custody" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Custody')) ? 'active' : '' %>">
           <i class="bi bi-shield-check"></i>
@@ -48,9 +60,15 @@
         </a>
       </li>
       <li class="gov-sidebar-item">
+        <a href="/criminals" class="gov-sidebar-link <%= (typeof title !== 'undefined' && (title.includes('Criminal') || title.includes('Suspect'))) ? 'active' : '' %>">
+          <i class="bi bi-person-lines-fill"></i>
+          <span>Criminal Records</span>
+        </a>
+      </li>
+      <li class="gov-sidebar-item">
         <a href="/reports" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Report')) ? 'active' : '' %>">
           <i class="bi bi-file-earmark-pdf"></i>
-          <span>Generate Report</span>
+          <span>Investigation Reports</span>
         </a>
       </li>
     </ul>
@@ -61,7 +79,13 @@
       <li class="gov-sidebar-item">
         <a href="/contacts" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Contacts')) ? 'active' : '' %>">
           <i class="bi bi-people"></i>
-          <span>Investigator Communication</span>
+          <span>Investigator Directory</span>
+        </a>
+      </li>
+      <li class="gov-sidebar-item">
+        <a href="/messages" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Communication')) ? 'active' : '' %>">
+          <i class="bi bi-chat-dots"></i>
+          <span>Direct Messaging</span>
         </a>
       </li>
       <li class="gov-sidebar-item">
@@ -75,13 +99,13 @@
       </li>
     </ul>
 
-    <!-- Section: Settings -->
+    <!-- Section: Account -->
     <div class="gov-sidebar-section-title">Account</div>
     <ul class="gov-sidebar-menu">
       <li class="gov-sidebar-item">
         <a href="/profile/edit" class="gov-sidebar-link <%= (typeof title !== 'undefined' && title.includes('Profile')) ? 'active' : '' %>">
           <i class="bi bi-person-gear"></i>
-          <span>Edit Profile</span>
+          <span>My Profile</span>
         </a>
       </li>
       <li class="gov-sidebar-item mt-2 pt-2 border-top border-secondary-subtle">

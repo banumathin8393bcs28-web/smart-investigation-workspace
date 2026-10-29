@@ -13,7 +13,9 @@ const Case = require('../models/Case');
 const Evidence = require('../models/Evidence');
 const Custody = require('../models/Custody');
 const Report = require('../models/Report');
-const AIInspection = require('../models/AIInspection');
+const AnalysisJob = require('../models/AnalysisJob');
+const EvidenceRequest = require('../models/EvidenceRequest');
+const CriminalRecord = require('../models/CriminalRecord');
 
 const TEST_PORT = 3199;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -290,16 +292,17 @@ async function runEndToEndTests() {
       assert.strictEqual(res.status, 200);
       const text = await res.text();
       assert(text.includes('Evidence Photography Artifact'));
-      assert(text.includes('AI Computer Vision Object Detection'));
-      assert(text.includes('Run AI Inspection'));
+      assert(text.includes('Autopsy Digital Forensics Ingest'));
+      assert(text.includes('Initiate Autopsy Forensic Ingest'));
     });
 
-    await check('4.7 POST /evidence/:id/inspect (Trigger AI YOLOv8 Object Inspection)', async () => {
+    await check('4.7 POST /evidence/:id/autopsy (Trigger Autopsy Digital Forensics Ingest)', async () => {
       assert(uploadedEvidenceId);
       const params = new URLSearchParams();
-      params.append('confidenceThreshold', '0.25');
+      params.append('modules', 'File Type Identification');
+      params.append('modules', 'Cryptographic Hash Verification');
 
-      const res = await request(`/evidence/${uploadedEvidenceId}/inspect`, {
+      const res = await request(`/evidence/${uploadedEvidenceId}/autopsy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()
@@ -307,14 +310,34 @@ async function runEndToEndTests() {
 
       assert.strictEqual(res.status, 302, 'Inspection must redirect back to evidence page');
 
-      // Verify AIInspection record in MongoDB
-      const insp = await AIInspection.findOne({ evidenceId: uploadedEvidenceId });
-      assert(insp, 'AIInspection record must be persisted');
-      assert(['Success', 'No Objects Detected'].includes(insp.inspectionStatus));
-      assert(insp.modelName.includes('YOLO'));
+      // Verify AnalysisJob record in MongoDB
+      const job = await AnalysisJob.findOne({ evidenceId: uploadedEvidenceId });
+      assert(job, 'AnalysisJob record must be persisted');
+      assert(job.jobIdentifier.startsWith('AJOB-'));
     });
 
-    await check('4.8 GET /custody (Chain of Custody Dashboard)', async () => {
+    await check('4.8 GET /autopsy/jobs (Autopsy Jobs Dashboard)', async () => {
+      const res = await request('/autopsy/jobs');
+      assert.strictEqual(res.status, 200);
+      const text = await res.text();
+      assert(text.includes('Autopsy Forensic Analysis Jobs'));
+    });
+
+    await check('4.9 GET /evidence/requests (Evidence Sharing Requests Dashboard)', async () => {
+      const res = await request('/evidence/requests');
+      assert.strictEqual(res.status, 200);
+      const text = await res.text();
+      assert(text.includes('Evidence Access & Secure Sharing Requests'));
+    });
+
+    await check('4.10 GET /criminals (Criminal Registry & Suspect Dossiers)', async () => {
+      const res = await request('/criminals');
+      assert.strictEqual(res.status, 200);
+      const text = await res.text();
+      assert(text.includes('Criminal Records & Suspect Dossiers'));
+    });
+
+    await check('4.11 GET /custody (Chain of Custody Dashboard)', async () => {
       const res = await request('/custody');
       assert.strictEqual(res.status, 200);
       const text = await res.text();
@@ -322,14 +345,14 @@ async function runEndToEndTests() {
       assert(text.includes('Chain of Custody & Evidence Ledger'));
     });
 
-    await check('4.9 GET /contacts (Investigator Directory & Communication)', async () => {
+    await check('4.12 GET /contacts (Investigator Directory & Communication)', async () => {
       const res = await request('/contacts');
       assert.strictEqual(res.status, 200);
       const text = await res.text();
       assert(text.includes('Investigator Contacts'));
     });
 
-    await check('4.10 GET /messages (Real-Time Communication Interface)', async () => {
+    await check('4.13 GET /messages (Real-Time Communication Interface)', async () => {
       const res = await request('/messages');
       // If user has contacts, /messages auto-redirects (302) to first contact's chat
       if (res.status === 302) {
@@ -346,16 +369,16 @@ async function runEndToEndTests() {
       }
     });
 
-    await check('4.11 GET /reports (Reports Center)', async () => {
+    let generatedReportId = null;
+
+    await check('4.14 GET /reports (Reports Center)', async () => {
       const res = await request('/reports');
       assert.strictEqual(res.status, 200);
       const text = await res.text();
       assert(text.includes('Investigation Reports'));
     });
 
-    let generatedReportId = null;
-
-    await check('4.12 POST /reports/generate (Generate PDF Investigation Report)', async () => {
+    await check('4.15 POST /reports/generate (Generate PDF Investigation Report)', async () => {
       assert(createdCaseId);
       const params = new URLSearchParams();
       params.append('caseId', createdCaseId);
@@ -378,7 +401,7 @@ async function runEndToEndTests() {
       assert(fs.existsSync(report.protectedFileReference), 'PDF file must exist on disk');
     });
 
-    await check('4.13 GET /reports/download/:id (Download Authenticated PDF Report)', async () => {
+    await check('4.16 GET /reports/download/:id (Download Authenticated PDF Report)', async () => {
       assert(generatedReportId);
       const res = await request(`/reports/download/${generatedReportId}`);
       assert.strictEqual(res.status, 200);
@@ -388,7 +411,15 @@ async function runEndToEndTests() {
       assert(buffer.subarray(0, 4).toString() === '%PDF', 'Must start with PDF header bytes');
     });
 
-    await check('4.14 GET /auth/logout (Secure Sign Out)', async () => {
+    await check('4.17 Cache-Control Headers on Protected Routes', async () => {
+      const res = await request('/dashboard');
+      assert.strictEqual(res.status, 200);
+      const cacheControl = res.headers.get('cache-control') || '';
+      assert(cacheControl.includes('no-store'), 'Protected route must enforce no-store');
+      assert(cacheControl.includes('no-cache'), 'Protected route must enforce no-cache');
+    });
+
+    await check('4.18 GET /auth/logout (Secure Sign Out)', async () => {
       const res = await request('/auth/logout');
       assert.strictEqual(res.status, 302);
       assert.strictEqual(res.headers.get('location'), '/?success=You+have+been+securely+signed+out.');
@@ -403,7 +434,7 @@ async function runEndToEndTests() {
     if (createdCaseId) {
       await Case.findByIdAndDelete(createdCaseId);
       await Evidence.deleteMany({ caseId: createdCaseId });
-      await AIInspection.deleteMany({ caseId: createdCaseId });
+      await AnalysisJob.deleteMany({ caseId: createdCaseId });
       await Custody.deleteMany({ caseId: createdCaseId });
       if (generatedReportId) {
         const report = await Report.findById(generatedReportId);

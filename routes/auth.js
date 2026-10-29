@@ -9,6 +9,7 @@ const { uploadProfile } = require('../middleware/upload');
 const { validateRegistration, validateLogin, handleValidationErrors } = require('../middleware/validation');
 const { redirectIfAuthenticated, ensureAuthenticated } = require('../middleware/auth');
 const { formatTimestamp } = require('../services/timestampService');
+const { saveToStorage } = require('../services/storageService');
 
 // Reusable CAPTCHA generator
 function generateCaptcha(req) {
@@ -101,10 +102,26 @@ router.post('/register', redirectIfAuthenticated, uploadProfile.single('profileP
     const normalizedAnswer = securityAnswer.trim().toLowerCase();
     const securityAnswerHash = await bcrypt.hash(normalizedAnswer, salt);
 
-    // Profile photo path
+    // Profile photo path and persistent storage
     let profilePhotoPath = '/images/default-avatar.png';
+    let profilePhotoKey = '';
+    let profilePhotoGridFsId = null;
+
     if (req.file) {
       profilePhotoPath = `/uploads/profiles/${req.file.filename}`;
+      try {
+        const storageResult = await saveToStorage({
+          filePath: req.file.path,
+          filename: req.file.filename,
+          mimeType: req.file.mimetype,
+          bucketName: 'profile_bucket',
+          metadata: { username: username.toLowerCase(), email: email.toLowerCase() }
+        });
+        profilePhotoKey = storageResult.storageKey;
+        profilePhotoGridFsId = storageResult.gridFsId;
+      } catch (storageErr) {
+        console.warn('[Registration] Profile photo persistent storage error:', storageErr.message);
+      }
     }
 
     // SMTP verification token handling
@@ -146,6 +163,8 @@ router.post('/register', redirectIfAuthenticated, uploadProfile.single('profileP
       fullName: fullName.trim(),
       role: role.trim(),
       profilePhoto: profilePhotoPath,
+      profilePhotoKey,
+      profilePhotoGridFsId,
       dob: new Date(dob),
       age: req.calculatedAge || parseInt(req.body.age, 10),
       gender,

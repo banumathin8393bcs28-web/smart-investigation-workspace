@@ -1,0 +1,118 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h3 mb-0 fw-bold text-dark">Autopsy Forensic Analysis Jobs</h1>
+        <small class="text-muted">Digital forensic ingestion, artifact extraction, and file integrity verification ledgers</small>
+      </div>
+      <div>
+        <a href="/cases" class="btn btn-gov-primary btn-sm">
+          <i class="bi bi-hdd-network me-1"></i> Ingest Case Evidence
+        </a>
+      </div>
+    </div>
+
+    <% if (success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <div class="gov-card shadow-sm border mb-4">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-task me-2 text-primary"></i> Analysis Jobs Ledger</span>
+        <span class="badge badge-soft-secondary"><%= jobs ? jobs.length : 0 %> Jobs Recorded</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-gov table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Job Identifier</th>
+              <th style="width: 130px;">Case Number</th>
+              <th>Target Data Source</th>
+              <th>Status</th>
+              <th>Findings</th>
+              <th>Submitted By</th>
+              <th>Timestamp</th>
+              <th class="text-end" style="width: 120px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (jobs && jobs.length > 0) { %>
+              <% jobs.forEach(j => { %>
+                <tr>
+                  <td class="fw-bold font-monospace text-primary">
+                    <a href="/autopsy/jobs/<%= j._id %>" class="text-decoration-none">
+                      <%= j.jobIdentifier %>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="badge badge-soft-primary"><%= j.caseNumber %></span>
+                  </td>
+                  <td>
+                    <div class="fw-semibold text-dark small text-truncate" style="max-width: 220px;" title="<%= j.dataSourceFilename %>">
+                      <%= j.dataSourceFilename || j.evidenceIdentifier %>
+                    </div>
+                    <small class="text-muted"><%= j.dataSourceType.replace(/_/g, ' ') %></small>
+                  </td>
+                  <td>
+                    <% if (j.status === 'Completed') { %>
+                      <span class="badge badge-soft-success"><i class="bi bi-check-circle me-1"></i> Completed</span>
+                    <% } else if (j.status === 'Running') { %>
+                      <span class="badge badge-soft-primary"><i class="bi bi-gear me-1"></i> Running</span>
+                    <% } else if (j.status === 'Queued') { %>
+                      <span class="badge badge-soft-warning"><i class="bi bi-clock me-1"></i> Queued</span>
+                    <% } else { %>
+                      <span class="badge badge-soft-danger"><i class="bi bi-x-circle me-1"></i> <%= j.status %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">
+                      <%= j.findingsCount || 0 %> artifacts
+                    </span>
+                  </td>
+                  <td class="small text-muted">
+                    <%= j.submitterName %>
+                  </td>
+                  <td class="small text-muted font-monospace">
+                    <%= formatTimestamp(j.submissionTimestamp, { includeSeconds: false }) %>
+                  </td>
+                  <td class="text-end">
+                    <a href="/autopsy/jobs/<%= j._id %>" class="btn btn-gov-secondary btn-sm py-1 px-2" title="View Dossier">
+                      <i class="bi bi-folder2-open me-1"></i> View
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8" class="text-center py-5 text-muted">
+                  <i class="bi bi-hdd-network fs-2 d-block mb-2 text-secondary"></i>
+                  No Autopsy forensic analysis jobs recorded yet.<br>
+                  <a href="/cases" class="fw-semibold">Select an investigation case to initiate forensic ingest &rarr;</a>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

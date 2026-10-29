@@ -47,112 +47,126 @@
     <div class="row g-4">
 
       <!-- Left Column: Image Previews & AI Inspection -->
+      <!-- Left Column: Evidence Photo & Autopsy Forensic Ingest -->
       <div class="col-lg-6">
 
         <!-- Image Card -->
         <div class="gov-card shadow-sm mb-4">
           <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
             <span><i class="bi bi-image text-primary me-2"></i> Evidence Photography Artifact</span>
-            <span class="text-muted small font-monospace">MIME: <%= evidence.fileMimeType %></span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-muted small font-monospace">MIME: <%= evidence.fileMimeType %></span>
+              <a href="/evidence/<%= evidence._id %>/file?download=1" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Download Original Raw File">
+                <i class="bi bi-download"></i>
+              </a>
+            </div>
           </div>
           <div class="gov-card-body text-center p-3 bg-light rounded-bottom">
-            <%
-              const latestSuccessInspection = inspections.find(i => i.inspectionStatus === 'Success');
-            %>
             <div class="ai-preview-box w-100 text-center" style="min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-              <% if (latestSuccessInspection && latestSuccessInspection.annotatedImageReference) { %>
-                <img src="/evidence/<%= evidence._id %>/annotated" alt="Annotated Evidence" class="img-fluid rounded border shadow-sm mx-auto" style="max-height: 440px; object-fit: contain;">
-                <div class="small text-danger fw-semibold mt-2">
-                  <i class="bi bi-bounding-box me-1"></i> Displaying YOLOv8 AI Detection Overlay (Original raw bytes preserved intact)
-                </div>
-              <% } else { %>
-                <img src="/evidence/<%= evidence._id %>/file" alt="Evidence" class="img-fluid rounded border shadow-sm mx-auto" style="max-height: 440px; object-fit: contain;">
-                <div class="small text-success fw-semibold mt-2">
-                  <i class="bi bi-check-circle text-success me-1"></i> Original Raw Evidence Photograph
-                </div>
-              <% } %>
+              <img src="/evidence/<%= evidence._id %>/file" alt="Evidence" class="img-fluid rounded border shadow-sm mx-auto" style="max-height: 440px; object-fit: contain;">
+              <div class="small text-success fw-semibold mt-2">
+                <i class="bi bi-check-circle text-success me-1"></i> Original Authenticated Evidence Media
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- AI Object Detection Control -->
+        <!-- Autopsy Forensic Platform Ingest Control -->
         <div class="gov-card shadow-sm mb-4 border-primary">
           <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <span class="text-primary fw-bold"><i class="bi bi-cpu-fill me-2"></i> AI Computer Vision Object Detection</span>
-            <span class="badge bg-primary-subtle text-primary border">Ultralytics YOLOv8</span>
+            <span class="text-primary fw-bold"><i class="bi bi-hdd-network-fill me-2"></i> Autopsy Digital Forensics Ingest</span>
+            <span class="badge bg-primary-subtle text-primary border">Forensic Platform</span>
           </div>
           <div class="gov-card-body p-4">
             <p class="small text-muted mb-3" style="line-height: 1.5;">
-              The AI inspection engine correlates case context (e.g. <em><%= caseDoc.knownObjects || caseDoc.caseDescription.substring(0, 80) %>...</em>) with official YOLOv8 neural network inference to detect weapons, vehicles, bags, tools, bottles, and persons.
+              Submit this evidence item to the Autopsy forensic analysis engine to verify cryptographic byte integrity, inspect binary magic headers, calculate Shannon data entropy, and extract embedded forensic artifacts.
             </p>
 
-            <form action="/evidence/<%= evidence._id %>/inspect" method="POST" class="row g-2 align-items-end mb-3">
-              <div class="col-sm-6">
-                <label class="form-label small" for="confidenceThreshold">Confidence Threshold</label>
-                <select class="form-select form-select-sm" id="confidenceThreshold" name="confidenceThreshold">
-                  <option value="0.15">15% (Permissive Forensic Scan)</option>
-                  <option value="0.25" selected>25% (Standard Baseline)</option>
-                  <option value="0.40">40% (High Confidence)</option>
-                  <option value="0.60">60% (Strict Positive)</option>
-                </select>
+            <form action="/autopsy/create" method="POST" class="mb-3">
+              <input type="hidden" name="caseId" value="<%= caseDoc._id %>">
+              <input type="hidden" name="evidenceId" value="<%= evidence._id %>">
+              <input type="hidden" name="dataSourceType" value="file_evidence">
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Select Forensic Ingest Modules:</label>
+                <div class="row g-2">
+                  <div class="col-sm-6">
+                    <div class="form-check small">
+                      <input class="form-check-input" type="checkbox" name="modules" value="File Type Identification" id="mod1" checked>
+                      <label class="form-check-label" for="mod1">File Type Identification</label>
+                    </div>
+                    <div class="form-check small">
+                      <input class="form-check-input" type="checkbox" name="modules" value="Cryptographic Hash Verification" id="mod2" checked>
+                      <label class="form-check-label" for="mod2">Hash Verification (SHA-256)</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-check small">
+                      <input class="form-check-input" type="checkbox" name="modules" value="Forensic Artifact & Keyword Search" id="mod3" checked>
+                      <label class="form-check-label" for="mod3">Forensic Artifact Search</label>
+                    </div>
+                    <div class="form-check small">
+                      <input class="form-check-input" type="checkbox" name="modules" value="Data Entropy & Steganography Check" id="mod4" checked>
+                      <label class="form-check-label" for="mod4">Entropy & Steganography</label>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="col-sm-6">
-                <button type="submit" class="btn btn-gov-primary btn-sm w-100 py-2" id="inspectBtn">
-                  <i class="bi bi-search me-1"></i> Run AI Inspection
-                </button>
-              </div>
+
+              <button type="submit" class="btn btn-gov-primary btn-sm w-100 py-2">
+                <i class="bi bi-play-circle-fill me-1"></i> Initiate Autopsy Forensic Ingest
+              </button>
             </form>
 
             <div class="alert alert-light border py-2 px-3 mb-0" style="font-size: 11px; line-height: 1.4;">
-              <strong>Model Limitation Note:</strong> YOLOv8 detections assist investigator triage and do not constitute conclusive judicial proof. Non-detection does not prove absence.
+              <strong>Forensic Principle:</strong> Original evidence bytes are preserved strictly read-only. Ingest processing runs on authenticated copies.
             </div>
           </div>
         </div>
 
-        <!-- AI Inspection History -->
+        <!-- Autopsy Analysis Execution Ledgers -->
         <div class="gov-card shadow-sm mb-0">
-          <div class="gov-card-header bg-white py-3 border-bottom">
-            <span><i class="bi bi-clock-history text-primary me-2"></i> AI Inspection Execution History</span>
+          <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clock-history text-primary me-2"></i> Autopsy Forensic Dossiers</span>
+            <% const jobsList = typeof autopsyJobs !== 'undefined' ? autopsyJobs : []; %>
+            <span class="badge badge-soft-secondary"><%= jobsList.length %> Recorded</span>
           </div>
           <div class="gov-card-body p-0">
-            <% if (inspections.length > 0) { %>
+            <% if (jobsList.length > 0) { %>
               <ul class="list-group list-group-flush small">
-                <% inspections.forEach(insp => { %>
+                <% jobsList.forEach(job => { %>
                   <li class="list-group-item p-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                      <span class="badge <%= insp.inspectionStatus === 'Success' ? 'badge-soft-success' : (insp.inspectionStatus === 'No Objects Detected' ? 'badge-soft-secondary' : 'badge-soft-danger') %>">
-                        <%= insp.inspectionStatus %>
+                      <span class="badge <%= job.status === 'Completed' ? 'badge-soft-success' : (job.status === 'Running' ? 'badge-soft-primary' : 'badge-soft-warning') %>">
+                        <%= job.status %>
                       </span>
                       <span class="text-muted font-monospace" style="font-size: 11px;">
-                        <%= formatTimestamp(insp.inspectionTimestamp) %>
+                        <%= formatTimestamp(job.submissionTimestamp) %>
                       </span>
                     </div>
 
-                    <div class="fw-medium text-dark mb-1"><%= insp.summaryMessage %></div>
+                    <div class="fw-bold text-dark mb-1">
+                      <a href="/autopsy/jobs/<%= job._id %>" class="text-decoration-none">
+                        <%= job.jobIdentifier %>
+                      </a>
+                    </div>
 
-                    <% if (insp.detections && insp.detections.length > 0) { %>
-                      <div class="mt-2 pt-2 border-top">
-                        <strong class="d-block mb-1 text-uppercase text-muted" style="font-size: 10px;">Detected Entities:</strong>
-                        <div class="d-flex flex-wrap gap-1">
-                          <% insp.detections.forEach(det => { %>
-                            <span class="badge <%= det.isContextMatch ? 'bg-danger text-white' : 'bg-light text-dark border' %>">
-                              <%= det.label %>: <%= Math.round(det.confidence * 100) %>%
-                              <% if (det.isContextMatch) { %><i class="bi bi-asterisk ms-1" title="Context Match"></i><% } %>
-                            </span>
-                          <% }) %>
-                        </div>
-                      </div>
-                    <% } %>
+                    <div class="text-secondary small mb-2"><%= job.reportSummary || 'Ingest job running in forensic engine.' %></div>
 
-                    <div class="text-muted mt-2" style="font-size: 11px;">
-                      Inspected by: <%= insp.inspectedByName %> &bull; Model: <%= insp.modelName %> (<%= insp.modelVersion %>)
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="badge bg-light text-dark border"><%= job.findingsCount || 0 %> findings</span>
+                      <a href="/autopsy/jobs/<%= job._id %>" class="btn btn-gov-secondary btn-sm py-0 px-2" style="font-size: 11px;">
+                        <i class="bi bi-folder2-open me-1"></i> View Dossier
+                      </a>
                     </div>
                   </li>
                 <% }) %>
               </ul>
             <% } else { %>
-              <div class="p-4 text-center text-muted small">No AI inspections recorded for this evidence item yet.</div>
+              <div class="p-4 text-center text-muted small">No Autopsy forensic analysis jobs recorded for this evidence item yet.</div>
             <% } %>
+          </div>
+        </div>
           </div>
         </div>
 

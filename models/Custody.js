@@ -44,6 +44,8 @@ const custodySchema = new mongoose.Schema({
       'Case Transferred',
       'Transfer Accepted',
       'Transfer Rejected',
+      'Evidence Submitted for Analysis',
+      'Analysis Completed',
       'Other'
     ],
     required: true

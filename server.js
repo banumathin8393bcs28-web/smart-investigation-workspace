@@ -15,6 +15,7 @@ const { setSocketIO, createNotification } = require('./services/notificationServ
 const Message = require('./models/Message');
 const Investigator = require('./models/Investigator');
 const { ensureAuthenticated } = require('./middleware/auth');
+const { serveFileResponse } = require('./services/storageService');
 
 // Route imports
 const authRoutes = require('./routes/auth');
@@ -22,12 +23,15 @@ const dashboardRoutes = require('./routes/dashboard');
 const profileRoutes = require('./routes/profile');
 const caseRoutes = require('./routes/cases');
 const sceneRoutes = require('./routes/scenes');
+const evidenceRequestRoutes = require('./routes/evidenceRequests');
 const evidenceRoutes = require('./routes/evidence');
 const contactRoutes = require('./routes/contacts');
 const messageRoutes = require('./routes/messages');
 const notificationRoutes = require('./routes/notifications');
 const custodyRoutes = require('./routes/custody');
 const reportRoutes = require('./routes/reports');
+const autopsyRoutes = require('./routes/autopsy');
+const criminalRoutes = require('./routes/criminalRecords');
 
 const app = express();
 const server = http.createServer(app);
@@ -99,15 +103,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Authenticated route for serving private profile uploads
-app.get('/uploads/profiles/:filename', ensureAuthenticated, (req, res) => {
+// Authenticated route for serving private profile uploads across local and cloud environments
+app.get('/uploads/profiles/:filename', (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(__dirname, 'private_uploads', 'profiles', filename);
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.redirect('/images/default-avatar.png');
-  }
+  const ext = path.extname(filename).toLowerCase();
+  const mimeType = ext === '.png' ? 'image/png' : (ext === '.webp' ? 'image/webp' : 'image/jpeg');
+
+  serveFileResponse(req, res, {
+    filename,
+    localPath: filePath,
+    mimeType,
+    bucketName: 'profile_bucket',
+    fallbackPath: '/images/default-avatar.png'
+  });
 });
 
 // Socket.IO Real-time Messaging and Room Management
@@ -185,12 +194,16 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/profile', profileRoutes);
 app.use('/cases', caseRoutes);
 app.use('/scenes', sceneRoutes);
+app.use('/evidence/requests', evidenceRequestRoutes);
 app.use('/evidence', evidenceRoutes);
 app.use('/contacts', contactRoutes);
 app.use('/messages', messageRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/custody', custodyRoutes);
 app.use('/reports', reportRoutes);
+app.use('/autopsy', autopsyRoutes);
+app.use('/criminals', criminalRoutes);
+app.use('/suspects', criminalRoutes);
 
 // 404 Handler
 app.use((req, res) => {

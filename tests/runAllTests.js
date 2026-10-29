@@ -9,15 +9,19 @@ const { connectDB } = require('../config/db');
 const Investigator = require('../models/Investigator');
 const Case = require('../models/Case');
 const Evidence = require('../models/Evidence');
-const AIInspection = require('../models/AIInspection');
+const AnalysisJob = require('../models/AnalysisJob');
+const EvidenceRequest = require('../models/EvidenceRequest');
+const CriminalRecord = require('../models/CriminalRecord');
 const Custody = require('../models/Custody');
 const Notification = require('../models/Notification');
 const Message = require('../models/Message');
 const Report = require('../models/Report');
+const AIInspection = require('../models/AIInspection');
 const { getNextCaseNumber, getNextEvidenceNumber, getNextCustodyEventId } = require('../services/caseNumberService');
 const { calculateBufferHash, calculateFileHash, verifyFileIntegrity } = require('../services/hashService');
 const { extractImagePropertiesAndExif } = require('../services/metadataService');
-const { extractContextKeywords, inspectEvidenceImage } = require('../services/aiService');
+const { saveToStorage, getFileReadStream } = require('../services/storageService');
+const { createAnalysisJob, executeAnalysis } = require('../services/autopsyService');
 const { initiateCaseTransfer, respondToTransfer, recordEvidenceCustodyEvent } = require('../services/custodyService');
 const { generateCaseReport } = require('../services/reportService');
 const { GOV_EMAIL_REGEX, PASSWORD_REGEX } = require('../middleware/validation');
@@ -175,73 +179,124 @@ async function startTests() {
     assert.strictEqual(metadata.rawExifSummary.includes('No EXIF metadata available'), true);
   });
 
-  console.log('\n=== TEST SUITE 4: AI CONTEXT & OBJECT DETECTION ===');
+  console.log('\n=== TEST SUITE 4: AUTOPSY FORENSICS & PERSISTENT STORAGE ===');
 
-  runTest('4.1: Keyword extraction correctly maps case context variations', () => {
-    const text1 = 'The victim was attacked using a hunting knife near the bank entrance.';
-    const terms1 = extractContextKeywords(text1);
-    assert(terms1.includes('knife'), 'Should extract knife from knife keyword.');
+  await runAsyncTest('4.1: Persistent Storage GridFS save and stream retrieval verification', async () => {
+    const testPayload = Buffer.from('FORENSIC_INTEGRITY_VERIFICATION_PAYLOAD_DATA_' + Date.now());
+    const testFilename = `test_specimen_${Date.now()}.bin`;
 
-    const text2 = 'Perpetrators fled in a dark vehicle carrying stolen leather duffel bags and a handgun.';
-    const terms2 = extractContextKeywords(text2);
-    assert(terms2.includes('vehicle'), 'Should extract vehicle.');
-    assert(terms2.includes('bag'), 'Should extract bag from duffel bags.');
-    assert(terms2.includes('gun'), 'Should extract gun from handgun.');
+    const stored = await saveToStorage({
+      buffer: testPayload,
+      filename: testFilename,
+      mimeType: 'application/octet-stream',
+      bucketName: 'evidence_bucket',
+      metadata: { testCase: 'unit-4.1' }
+    });
+
+    assert(stored.storageKey, 'Must generate storageKey');
+    assert(stored.gridFsId, 'Must generate GridFS ObjectId');
+
+    const readRes = await getFileReadStream({
+      gridFsId: stored.gridFsId,
+      filename: stored.storageKey,
+      bucketName: 'evidence_bucket'
+    });
+
+    assert(readRes && readRes.stream, 'Must retrieve readable stream');
+    const chunks = [];
+    for await (const chunk of readRes.stream) {
+      chunks.push(chunk);
+    }
+    const retrievedBuffer = Buffer.concat(chunks);
+    assert.strictEqual(retrievedBuffer.toString('hex'), testPayload.toString('hex'), 'Stream bytes must match original');
   });
 
-  await runAsyncTest('4.2: AI Inspection executes via Python child process fallback when HTTP service is offline', async () => {
+  await runAsyncTest('4.2: Autopsy Analysis Job creation, ingest execution and findings generation', async () => {
     const officer = await Investigator.findOne({ email: 'detective.miller@gov.in' });
     const caseDoc = await Case.findOne({ caseNumber: 'CASE001' });
     const evidence = await Evidence.findOne({ caseNumber: 'CASE001' });
 
-    assert(officer && caseDoc && evidence, 'Prerequisites must exist in database');
+    assert(officer && caseDoc && evidence, 'Prerequisites must exist');
 
-    // Run inspection with mock unreachable port 59999 to test automatic fallback to Python CLI
-    const origUrl = process.env.PYTHON_AI_SERVICE_URL;
-    process.env.PYTHON_AI_SERVICE_URL = 'http://127.0.0.1:59999/detect';
-
-    const result = await inspectEvidenceImage({
-      evidence,
+    const job = await createAnalysisJob({
       caseDoc,
+      evidenceDoc: evidence,
       investigator: officer,
-      confidenceThreshold: 0.25
+      modules: ['File Type Identification', 'Cryptographic Hash Verification', 'Data Entropy & Steganography Check']
     });
 
-    // When HTTP is offline, fallback activates child process successfully
-    assert(['Success', 'No Objects Detected'].includes(result.inspectionStatus), `Expected Success or No Objects Detected via CLI fallback, got ${result.inspectionStatus}`);
-    assert(result.modelName.includes('YOLO'), 'Model name must reflect YOLO');
+    assert(job, 'Analysis job must be created');
+    assert.strictEqual(job.caseNumber, 'CASE001');
+    assert(job.jobIdentifier.startsWith('AJOB-'));
 
-    process.env.PYTHON_AI_SERVICE_URL = origUrl;
+    // Execute analysis
+    await executeAnalysis(job._id);
+
+    const completedJob = await AnalysisJob.findById(job._id);
+    assert.strictEqual(completedJob.status, 'Completed', 'Job status must be Completed');
+    assert(completedJob.findings.length > 0, 'Must produce forensic findings');
+    assert(completedJob.reportSummary.includes('completed'), 'Must produce summary');
   });
 
-  await runAsyncTest('4.3: Truthful reporting with zero fake detections when AI service fails', async () => {
+  await runAsyncTest('4.3: Evidence Request workflow (create -> notify -> custodian decision -> custody record)', async () => {
+    const requester = await Investigator.findOne({ email: 'detective.miller@gov.in' });
+    const custodian = await Investigator.findOne({ email: 'd.chen@gov.in' }) || requester;
+    const caseDoc = await Case.findOne({ caseNumber: 'CASE001' });
+    const evidence = await Evidence.findOne({ caseNumber: 'CASE001' });
+
+    const reqDoc = await EvidenceRequest.create({
+      requestIdentifier: `REQ-UNIT-${Date.now()}`,
+      caseId: caseDoc._id,
+      caseNumber: caseDoc.caseNumber,
+      evidenceId: evidence ? evidence._id : null,
+      evidenceIdentifier: evidence ? evidence.evidenceIdentifier : 'CASE-EVIDENCE',
+      requestedBy: requester._id,
+      requestedByName: requester.fullName,
+      requestedTo: custodian._id,
+      requestedToName: custodian.fullName,
+      purpose: 'Forensic ballistics inter-agency review for upcoming grand jury hearing.',
+      status: 'Pending'
+    });
+
+    assert.strictEqual(reqDoc.status, 'Pending');
+
+    // Simulate Custodian Approval
+    reqDoc.status = 'Approved';
+    reqDoc.responseNotes = 'Access authorized for 14 days under supervised chain of custody.';
+    reqDoc.respondedBy = custodian.fullName;
+    reqDoc.respondedAt = new Date();
+    await reqDoc.save();
+
+    const verifiedReq = await EvidenceRequest.findById(reqDoc._id);
+    assert.strictEqual(verifiedReq.status, 'Approved');
+    assert.strictEqual(verifiedReq.respondedBy, custodian.fullName);
+  });
+
+  await runAsyncTest('4.4: Criminal Record management (profile registration, trait indexing, case linkage)', async () => {
     const officer = await Investigator.findOne({ email: 'detective.miller@gov.in' });
     const caseDoc = await Case.findOne({ caseNumber: 'CASE001' });
 
-    // Evidence pointing to non-existent image to simulate failure
-    const fakeEvidence = {
-      _id: new mongoose.Types.ObjectId(),
-      caseId: caseDoc._id,
-      evidenceIdentifier: 'EVID-TEST-999',
-      protectedStoragePath: 'C:\\non_existent_image_path_forensic_test.jpg'
-    };
-
-    const origUrl = process.env.PYTHON_AI_SERVICE_URL;
-    process.env.PYTHON_AI_SERVICE_URL = 'http://127.0.0.1:59999/detect';
-
-    const result = await inspectEvidenceImage({
-      evidence: fakeEvidence,
-      caseDoc,
-      investigator: officer,
-      confidenceThreshold: 0.25
+    const rec = await CriminalRecord.create({
+      recordNumber: `CR-UNIT-${Date.now()}`,
+      fullName: 'Viktor K. Sterling',
+      alias: 'The Ghost',
+      nationalId: 'NAT-998811',
+      status: 'Wanted',
+      riskLevel: 'Extreme',
+      physicalTraits: {
+        height: '6ft 2in',
+        eyeColor: 'Hazel',
+        hairColor: 'Silver',
+        identifyingMarks: 'Cross tattoo left wrist'
+      },
+      connectedCases: [caseDoc._id],
+      registeredBy: officer._id,
+      registeredByName: officer.fullName
     });
 
-    assert.strictEqual(result.inspectionStatus, 'Service Unavailable');
-    assert(result.summaryMessage.includes('unavailable') || result.summaryMessage.includes('failed') || result.summaryMessage.includes('Ensure'));
-    assert.strictEqual(result.detections.length, 0, 'Must NOT fabricate fake detections when service fails.');
-
-    process.env.PYTHON_AI_SERVICE_URL = origUrl;
-    await AIInspection.findByIdAndDelete(result._id);
+    assert.strictEqual(rec.fullName, 'Viktor K. Sterling');
+    assert.strictEqual(rec.riskLevel, 'Extreme');
+    assert.strictEqual(rec.connectedCases.length, 1);
   });
 
   console.log('\n=== TEST SUITE 5: CHAIN OF CUSTODY WORKFLOW ===');

@@ -1,188 +1,256 @@
 <%- include('../partials/header') %>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-  <div>
-    <div class="d-flex align-items-center gap-3 mb-1">
-      <h1 class="mb-0 text-white"><%= suspect.fullName %></h1>
-      <span class="badge <%= suspect.riskLevel === 'Extreme' || suspect.riskLevel === 'High' ? 'badge-critical' : 'badge-open' %> fs-6">
-        <%= suspect.riskLevel %> RISK
-      </span>
-      <span class="badge <%= suspect.status === 'Wanted' ? 'badge-tampered' : 'badge-open' %> fs-6">
-        <%= suspect.status %>
-      </span>
+<% const s = typeof record !== 'undefined' ? record : suspect; %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <a href="/criminals" class="btn btn-outline-secondary btn-sm py-0 px-2">&larr; Back to Registry</a>
+          <span class="badge badge-soft-primary"><%= s.recordNumber || 'CRIMINAL DOSSIER' %></span>
+          <% if (s.riskLevel === 'Extreme' || s.riskLevel === 'High') { %>
+            <span class="badge badge-soft-danger"><%= s.riskLevel %> RISK</span>
+          <% } else { %>
+            <span class="badge badge-soft-secondary"><%= s.riskLevel %> RISK</span>
+          <% } %>
+          <span class="badge badge-soft-primary"><%= s.status %></span>
+        </div>
+        <h1 class="h3 mb-0 fw-bold text-dark"><%= s.fullName %></h1>
+      </div>
+      <div>
+        <button type="button" class="btn btn-gov-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#interrogationModal">
+          <i class="bi bi-journal-plus me-1"></i> Record Interrogation Note
+        </button>
+      </div>
     </div>
-    <p class="text-muted fs-5 mb-0">Alias: "<%= suspect.alias || 'None' %>" • National ID: <%= suspect.nationalId || 'Unrecorded' %></p>
-  </div>
-  <a href="/suspects" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Suspect Registry</a>
+
+    <% if (success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <div class="row g-4 mb-4">
+
+      <!-- Left Column: Mugshot Photograph & Core Identity -->
+      <div class="col-lg-4">
+        <div class="gov-card shadow-sm border mb-4">
+          <div class="gov-card-header bg-white py-3 border-bottom text-center">
+            <span class="fw-bold text-dark"><i class="bi bi-camera me-1 text-primary"></i> Identification Photograph</span>
+          </div>
+          <div class="gov-card-body text-center p-4 bg-light">
+            <img src="<%= s.photo || '/images/default-suspect.png' %>" alt="<%= s.fullName %>" class="img-fluid rounded border shadow-sm mx-auto mb-3" style="max-height: 240px; width: 100%; object-fit: cover;">
+            <h5 class="fw-bold text-dark mb-1"><%= s.fullName %></h5>
+            <div class="text-muted small mb-2">Alias: "<%= s.alias || 'None' %>"</div>
+            <span class="badge badge-soft-primary font-monospace"><%= s.recordNumber || 'REGISTERED' %></span>
+          </div>
+        </div>
+
+        <div class="gov-card shadow-sm border">
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <span><i class="bi bi-person-lines-fill me-2 text-primary"></i> Physical Traits</span>
+          </div>
+          <div class="gov-card-body p-3">
+            <table class="table table-gov table-sm mb-0">
+              <tbody>
+                <tr><th>Height:</th><td><%= s.physicalTraits?.height || 'Not recorded' %></td></tr>
+                <tr><th>Eye Color:</th><td><%= s.physicalTraits?.eyeColor || 'Not recorded' %></td></tr>
+                <tr><th>Hair Color:</th><td><%= s.physicalTraits?.hairColor || 'Not recorded' %></td></tr>
+                <tr><th>Distinctive Marks:</th><td class="small"><%= s.physicalTraits?.identifyingMarks || 'None noted' %></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Case Linkages & Interrogation Notes -->
+      <div class="col-lg-8">
+
+        <!-- Demographics & Identifying Parameters -->
+        <div class="gov-card shadow-sm border mb-4">
+          <div class="gov-card-header bg-white py-3 border-bottom">
+            <span><i class="bi bi-card-text me-2 text-primary"></i> Registered Demographics</span>
+          </div>
+          <div class="gov-card-body p-4">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <span class="text-muted small d-block">National Identification:</span>
+                <strong><%= s.nationalId || 'Not provided' %></strong>
+              </div>
+              <div class="col-sm-6">
+                <span class="text-muted small d-block">Gender & Age:</span>
+                <strong><%= s.gender %> &bull; <%= s.age || 'Unknown' %> years</strong>
+              </div>
+              <div class="col-sm-6">
+                <span class="text-muted small d-block">Contact Phone:</span>
+                <span class="font-monospace"><%= s.phone || 'None recorded' %></span>
+              </div>
+              <div class="col-sm-6">
+                <span class="text-muted small d-block">Last Known Address:</span>
+                <span><%= s.address || 'Unknown' %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Investigation Cases -->
+        <div class="gov-card shadow-sm border mb-4">
+          <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-link-45deg me-2 text-primary"></i> Linked Investigation Cases</span>
+            <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2" data-bs-toggle="modal" data-bs-target="#linkCaseModal">
+              <i class="bi bi-plus-lg me-1"></i> Link Active Case
+            </button>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (s.connectedCases && s.connectedCases.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-gov table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Case Number</th>
+                      <th>Case Title</th>
+                      <th>Crime Type</th>
+                      <th>Status</th>
+                      <th class="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% s.connectedCases.forEach(c => { %>
+                      <tr>
+                        <td class="font-monospace fw-bold text-primary">
+                          <%= typeof c === 'object' ? c.caseNumber : c %>
+                        </td>
+                        <td>
+                          <%= typeof c === 'object' ? c.caseName : 'Linked Incident' %>
+                        </td>
+                        <td>
+                          <span class="badge bg-light text-dark border">
+                            <%= typeof c === 'object' ? c.crimeType : 'General' %>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge badge-soft-primary">
+                            <%= typeof c === 'object' ? c.status : 'Active' %>
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <a href="/cases/<%= typeof c === 'object' ? c._id : c %>" class="btn btn-gov-secondary btn-sm py-0 px-2">
+                            View Case
+                          </a>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="p-4 text-center text-muted small">
+                No active investigation cases linked to this criminal profile yet.
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Interrogation Statements & Evidentiary Observations -->
+        <div class="gov-card shadow-sm border">
+          <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-journal-text me-2 text-primary"></i> Interrogation Ledger (<%= s.interrogationNotes ? s.interrogationNotes.length : 0 %>)</span>
+          </div>
+          <div class="gov-card-body p-0">
+            <% if (s.interrogationNotes && s.interrogationNotes.length > 0) { %>
+              <ul class="list-group list-group-flush">
+                <% s.interrogationNotes.forEach(note => { %>
+                  <li class="list-group-item p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <strong class="text-dark small"><%= note.investigatorName %></strong>
+                      <span class="text-muted font-monospace" style="font-size: 11px;">
+                        <%= formatTimestamp(note.date) %>
+                      </span>
+                    </div>
+                    <div class="text-secondary small" style="white-space: pre-wrap; line-height: 1.5;">
+                      <%= note.notes %>
+                    </div>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <div class="p-4 text-center text-muted small">
+                No formal interrogation statements recorded for this subject.
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
 </div>
 
-<% if (success) { %>
-  <div class="alert alert-success" role="alert">
-    <i class="bi bi-check-circle-fill fs-5"></i>
-    <div><%= success %></div>
-  </div>
-<% } %>
-
-<% if (error) { %>
-  <div class="alert alert-danger" role="alert">
-    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-    <div><%= error %></div>
-  </div>
-<% } %>
-
-<div class="row g-4">
-  <!-- Left Column: Mugshot, Bio, Physical Traits -->
-  <div class="col-lg-4">
-    <div class="forensic-card text-center mb-4">
-      <img 
-        src="<%= suspect.photo || '/images/default-suspect.png' %>" 
-        alt="<%= suspect.fullName %>" 
-        class="rounded border border-secondary shadow mb-3"
-        style="width: 180px; height: 210px; object-fit: cover;"
-      >
-      <h3 class="text-white mb-1"><%= suspect.fullName %></h3>
-      <div class="badge badge-critical mb-3"><%= suspect.status %></div>
-
-      <div class="p-3 rounded bg-dark border border-secondary text-start small">
-        <div class="mb-2"><strong>Phone:</strong> <%= suspect.phone || 'N/A' %></div>
-        <div class="mb-2"><strong>Last Known Address:</strong> <%= suspect.address || 'Unknown' %></div>
-        <div><strong>Record Created:</strong> <%= new Date(suspect.createdAt).toLocaleDateString() %></div>
-      </div>
-    </div>
-
-    <!-- Physical Traits Card -->
-    <div class="forensic-card">
-      <div class="forensic-card-header">
-        <div class="forensic-card-title">
-          <i class="bi bi-person-bounding-box text-info"></i> Physical Traits
+<!-- Modal: Record Interrogation Note -->
+<div class="modal fade" id="interrogationModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/criminals/<%= s._id %>/interrogation" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title h6">Record Interrogation Note - <%= s.fullName %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-      </div>
-      <ul class="list-unstyled mb-0">
-        <li class="mb-2"><strong>Height:</strong> <span class="text-light"><%= suspect.physicalTraits?.height || 'N/A' %></span></li>
-        <li class="mb-2"><strong>Eye Color:</strong> <span class="text-light"><%= suspect.physicalTraits?.eyeColor || 'N/A' %></span></li>
-        <li class="mb-2"><strong>Hair Color:</strong> <span class="text-light"><%= suspect.physicalTraits?.hairColor || 'N/A' %></span></li>
-        <li class="mb-0"><strong>Marks / Tattoos:</strong> <span class="text-info"><%= suspect.physicalTraits?.identifyingMarks || 'None' %></span></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Right Column: Cases, Prior Offenses, Interrogation Voice Notes -->
-  <div class="col-lg-8">
-    <!-- Linked Cases -->
-    <div class="forensic-card mb-4">
-      <div class="forensic-card-header">
-        <div class="forensic-card-title">
-          <i class="bi bi-folder-check text-primary"></i> Linked Criminal Cases (<%= linkedCases.length %>)
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="intNotes">Interrogation Statement / Formal Notes</label>
+            <textarea class="form-control form-control-sm" id="intNotes" name="notes" rows="4" required placeholder="Record questioning notes, alibis given, behavioral observations, or inconsistencies..."></textarea>
+          </div>
         </div>
-      </div>
-
-      <% if (linkedCases.length === 0) { %>
-        <p class="text-muted mb-3">No cases directly linked to this suspect.</p>
-      <% } else { %>
-        <div class="table-responsive mb-3">
-          <table class="table-dark-custom">
-            <thead>
-              <tr>
-                <th>Case #</th>
-                <th>Title</th>
-                <th>Classification</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% linkedCases.forEach(c => { %>
-                <tr>
-                  <td class="fw-bold text-info"><%= c.caseNumber %></td>
-                  <td><%= c.title %></td>
-                  <td><%= c.classification %></td>
-                  <td><span class="badge badge-open"><%= c.status %></span></td>
-                  <td><a href="/cases/<%= c._id %>" class="btn btn-sm btn-outline">View Case</a></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-
-      <!-- Form to link another case -->
-      <form action="/suspects/<%= suspect._id %>/link-case" method="POST" class="row g-2 align-items-center">
-        <div class="col-md-9">
-          <select class="form-select" name="caseId" required>
-            <option value="">-- Connect with Existing Case File --</option>
-            <% allCases.forEach(ac => { %>
-              <% if (!suspect.connectedCases || !suspect.connectedCases.includes(ac._id.toString())) { %>
-                <option value="<%= ac._id %>"><%= ac.caseNumber %> - <%= ac.title %></option>
-              <% } %>
-            <% }); %>
-          </select>
-        </div>
-        <div class="col-md-3 d-grid">
-          <button type="submit" class="btn btn-primary"><i class="bi bi-link-45deg"></i> Link Case</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gov-primary btn-sm">Save Note</button>
         </div>
       </form>
     </div>
+  </div>
+</div>
 
-    <!-- Prior Offenses -->
-    <div class="forensic-card mb-4">
-      <div class="forensic-card-header">
-        <div class="forensic-card-title">
-          <i class="bi bi-journal-text text-warning"></i> Prior Criminal Record / Rap Sheet
+<!-- Modal: Link Active Case -->
+<div class="modal fade" id="linkCaseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/criminals/<%= s._id %>/link-case" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title h6">Link Profile to Investigation Case</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-      </div>
-      <% if (!suspect.priorOffenses || suspect.priorOffenses.length === 0) { %>
-        <p class="text-muted mb-0">No prior convictions recorded.</p>
-      <% } else { %>
-        <ul class="list-group list-group-flush bg-transparent">
-          <% suspect.priorOffenses.forEach(off => { %>
-            <li class="list-group-item bg-transparent text-light border-secondary px-0 py-2">
-              <i class="bi bi-dot text-danger fs-4 align-middle"></i> <%= off %>
-            </li>
-          <% }); %>
-        </ul>
-      <% } %>
-    </div>
-
-    <!-- Interrogation Voice Notes & Statements -->
-    <div class="forensic-card">
-      <div class="forensic-card-header">
-        <div class="forensic-card-title">
-          <i class="bi bi-mic text-danger"></i> Interrogation Statements & Voice Notes
-        </div>
-      </div>
-
-      <!-- Add Interrogation Note with Web Speech API -->
-      <form action="/suspects/<%= suspect._id %>/interrogation" method="POST" class="mb-4">
-        <input type="hidden" name="voiceRecorded" id="interrogation-voice-flag" value="false">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <label for="interrogationNotes" class="form-label mb-0">Record Interrogation Statement / Deposition</label>
-          <button type="button" class="voice-dictate-btn" data-target="#interrogationNotes" onclick="document.getElementById('interrogation-voice-flag').value = 'true';">
-            <i class="bi bi-mic"></i> Start Voice Dictation
-          </button>
-        </div>
-        <textarea class="form-control mb-3" id="interrogationNotes" name="notes" rows="4" required placeholder="Dictate or type suspect statements, alibis, interrogation responses..."></textarea>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Save Interrogation Record</button>
-      </form>
-
-      <!-- Existing Notes List -->
-      <% if (!suspect.interrogationNotes || suspect.interrogationNotes.length === 0) { %>
-        <p class="text-muted mb-0">No interrogation sessions logged yet.</p>
-      <% } else { %>
-        <div class="timeline-container">
-          <% (suspect.interrogationNotes || []).reverse().forEach(n => { %>
-            <div class="p-3 mb-2 rounded bg-dark border border-secondary-subtle">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="text-info fw-bold"><i class="bi bi-person-badge"></i> <%= n.investigator %></span>
-                <span class="text-muted small"><%= new Date(n.date).toLocaleString() %></span>
-              </div>
-              <p class="text-light mb-1" style="white-space: pre-line;"><%= n.notes %></p>
-              <% if (n.voiceRecorded) { %>
-                <span class="badge badge-open text-primary"><i class="bi bi-mic-fill"></i> Voice Dictated</span>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="linkCaseSelect">Select Investigation Case</label>
+            <select class="form-select form-select-sm" id="linkCaseSelect" name="caseId" required>
+              <option value="">-- Choose Case --</option>
+              <% if (typeof allCases !== 'undefined' && allCases.length > 0) { %>
+                <% allCases.forEach(c => { %>
+                  <option value="<%= c._id %>"><%= c.caseNumber %> - <%= c.caseName %></option>
+                <% }) %>
               <% } %>
-            </div>
-          <% }); %>
+            </select>
+          </div>
         </div>
-      <% } %>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gov-primary btn-sm">Link Case</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

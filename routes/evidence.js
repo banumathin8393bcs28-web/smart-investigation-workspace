@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const Case = require('../models/Case');
 const Evidence = require('../models/Evidence');
-const AIInspection = require('../models/AIInspection');
+const AnalysisJob = require('../models/AnalysisJob');
 const AuditLog = require('../models/AuditLog');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { canAccessCase, canAccessEvidence } = require('../middleware/authorization');
@@ -13,7 +13,8 @@ const { extractImagePropertiesAndExif, generateThumbnail } = require('../service
 const { calculateBufferHash, calculateFileHash } = require('../services/hashService');
 const { getNextEvidenceNumber } = require('../services/caseNumberService');
 const { recordEvidenceCustodyEvent } = require('../services/custodyService');
-const { inspectEvidenceImage } = require('../services/aiService');
+const { createAnalysisJob } = require('../services/autopsyService');
+const { saveToStorage, serveFileResponse } = require('../services/storageService');
 
 // 1. Upload Form
 router.get('/upload', ensureAuthenticated, async (req, res) => {
@@ -94,6 +95,30 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
       const thumbPath = path.join(thumbnailsDir, thumbFilename);
       await generateThumbnail(buffer, thumbPath, 320, 240);
 
+      // Save original file to persistent GridFS storage
+      const origStorage = await saveToStorage({
+        buffer,
+        filePath: file.path,
+        filename: file.filename,
+        mimeType: file.mimetype,
+        bucketName: 'evidence_bucket',
+        metadata: { caseNumber: caseDoc.caseNumber, originalFilename: file.originalname }
+      });
+
+      // Save thumbnail to persistent storage
+      let thumbGridFsId = null;
+      if (fs.existsSync(thumbPath)) {
+        const thumbBuf = fs.readFileSync(thumbPath);
+        const thumbStorage = await saveToStorage({
+          buffer: thumbBuf,
+          filePath: thumbPath,
+          filename: thumbFilename,
+          mimeType: 'image/jpeg',
+          bucketName: 'evidence_bucket'
+        });
+        thumbGridFsId = thumbStorage.gridFsId;
+      }
+
       // 4. Generate unique atomic evidence identifier (EVID-CASE001-001)
       const evidenceIdentifier = await getNextEvidenceNumber(caseDoc.caseNumber);
       const fileDescription = (descriptions[i] || req.body.generalDescription || '').trim();
@@ -104,8 +129,11 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
         caseNumber: caseDoc.caseNumber,
         originalFilename: file.originalname,
         storedFilename: file.filename,
+        storageKey: origStorage.storageKey,
+        gridFsId: origStorage.gridFsId,
         protectedStoragePath: file.path,
         thumbnailPath: fs.existsSync(thumbPath) ? thumbPath : '',
+        thumbnailGridFsId: thumbGridFsId,
         fileMimeType: file.mimetype,
         fileSize: file.size,
         imageProperties: properties,
@@ -165,13 +193,14 @@ router.get('/:id', ensureAuthenticated, canAccessEvidence, async (req, res) => {
     const evidence = req.evidence;
     const caseDoc = req.caseDoc;
 
-    const inspections = await AIInspection.find({ evidenceId: evidence._id }).sort({ inspectionTimestamp: -1 });
+    const autopsyJobs = await AnalysisJob.find({ evidenceId: evidence._id }).sort({ submissionTimestamp: -1 });
 
     res.render('evidence/show', {
       title: `${evidence.evidenceIdentifier} - Evidence Details`,
       evidence,
       caseDoc,
-      inspections
+      autopsyJobs,
+      inspections: []
     });
   } catch (error) {
     console.error('[Evidence Show Error]:', error);
@@ -214,77 +243,56 @@ router.post('/:id/edit-description', ensureAuthenticated, canAccessEvidence, asy
   }
 });
 
-// 5. Trigger AI Object Inspection
-router.post('/:id/inspect', ensureAuthenticated, canAccessEvidence, async (req, res) => {
+// 5. Submit Evidence to Autopsy Forensic Ingest
+router.post('/:id/autopsy', ensureAuthenticated, canAccessEvidence, async (req, res) => {
   try {
     const evidence = req.evidence;
     const caseDoc = req.caseDoc;
-    const confidenceThreshold = parseFloat(req.body.confidenceThreshold || '0.25');
+    const modules = Array.isArray(req.body.modules) ? req.body.modules : (req.body.modules ? [req.body.modules] : []);
 
-    // Run inspection via AI Service
-    const inspection = await inspectEvidenceImage({
-      evidence,
+    const job = await createAnalysisJob({
       caseDoc,
+      evidenceDoc: evidence,
       investigator: req.investigator,
-      confidenceThreshold
+      modules
     });
 
-    // Audit Log
-    await AuditLog.create({
-      actor: req.investigator._id,
-      actorName: req.investigator.fullName,
-      action: 'AI_IMAGE_INSPECTED',
-      relatedCase: caseDoc._id,
-      caseNumber: caseDoc.caseNumber,
-      relatedEvidence: evidence._id,
-      relatedObjectIdentifier: evidence.evidenceIdentifier,
-      changeSummary: `AI object detection completed. Status: ${inspection.inspectionStatus}. Detections: ${inspection.detections.length}.`,
-      ipAddress: req.ip || '127.0.0.1',
-      userAgent: req.headers['user-agent'] || '',
-      timestamp: new Date()
-    });
-
-    res.redirect(`/evidence/${evidence._id}?success=${encodeURIComponent(`AI inspection finished: ${inspection.summaryMessage}`)}`);
+    res.redirect(`/evidence/${evidence._id}?success=${encodeURIComponent(`Autopsy forensic analysis job ${job.jobIdentifier} initiated.`)}`);
   } catch (error) {
-    console.error('[AI Inspection Error]:', error);
-    res.redirect(`/evidence/${req.params.id}?error=${encodeURIComponent(`Inspection failed: ${error.message}`)}`);
+    console.error('[Autopsy Evidence Ingest Error]:', error);
+    res.redirect(`/evidence/${req.params.id}?error=${encodeURIComponent(`Analysis failed: ${error.message}`)}`);
   }
 });
 
-// 6. Authenticated File Serving for Original Evidence Image
-router.get('/:id/file', ensureAuthenticated, canAccessEvidence, (req, res) => {
-  const filePath = req.evidence.protectedStoragePath;
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Evidence file not found on disk.');
-  }
-  res.setHeader('Content-Type', req.evidence.fileMimeType);
-  res.sendFile(filePath);
+// Backwards-compatible /:id/inspect redirecting to Autopsy ingest
+router.post('/:id/inspect', ensureAuthenticated, canAccessEvidence, async (req, res) => {
+  return res.redirect(307, `/evidence/${req.params.id}/autopsy`);
 });
 
-// 7. Authenticated Thumbnail Serving
-router.get('/:id/thumbnail', ensureAuthenticated, canAccessEvidence, (req, res) => {
-  const thumbPath = req.evidence.thumbnailPath;
-  if (thumbPath && fs.existsSync(thumbPath)) {
-    res.setHeader('Content-Type', 'image/jpeg');
-    return res.sendFile(thumbPath);
-  }
-  // Fallback to original
-  res.sendFile(req.evidence.protectedStoragePath);
+// 6. Authenticated File Serving for Original Evidence Image across all environments
+router.get('/:id/file', ensureAuthenticated, canAccessEvidence, async (req, res) => {
+  const evidence = req.evidence;
+  await serveFileResponse(req, res, {
+    gridFsId: evidence.gridFsId,
+    filename: evidence.storedFilename || evidence.storageKey,
+    localPath: evidence.protectedStoragePath,
+    mimeType: evidence.fileMimeType || 'image/jpeg',
+    bucketName: 'evidence_bucket',
+    downloadAs: req.query.download ? evidence.originalFilename : null
+  });
 });
 
-// 8. Authenticated Annotated Image Serving
-router.get('/:id/annotated', ensureAuthenticated, canAccessEvidence, async (req, res) => {
-  const latestInspection = await AIInspection.findOne({
-    evidenceId: req.evidence._id,
-    inspectionStatus: 'Success'
-  }).sort({ inspectionTimestamp: -1 });
-
-  if (!latestInspection || !latestInspection.annotatedImageReference || !fs.existsSync(latestInspection.annotatedImageReference)) {
-    return res.status(404).send('No annotated inspection image found.');
-  }
-
-  res.setHeader('Content-Type', req.evidence.fileMimeType);
-  res.sendFile(latestInspection.annotatedImageReference);
+// 7. Authenticated Thumbnail Serving with persistent GridFS fallback
+router.get('/:id/thumbnail', ensureAuthenticated, canAccessEvidence, async (req, res) => {
+  const evidence = req.evidence;
+  await serveFileResponse(req, res, {
+    gridFsId: evidence.thumbnailGridFsId || evidence.gridFsId,
+    filename: evidence.thumbnailPath ? path.basename(evidence.thumbnailPath) : evidence.storedFilename,
+    localPath: evidence.thumbnailPath || evidence.protectedStoragePath,
+    mimeType: 'image/jpeg',
+    bucketName: 'evidence_bucket',
+    fallbackPath: '/images/default-avatar.png'
+  });
 });
 
 module.exports = router;

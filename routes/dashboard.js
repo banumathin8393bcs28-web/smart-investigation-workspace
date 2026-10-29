@@ -6,6 +6,8 @@ const Custody = require('../models/Custody');
 const Message = require('../models/Message');
 const Notification = require('../models/Notification');
 const AuditLog = require('../models/AuditLog');
+const AnalysisJob = require('../models/AnalysisJob');
+const EvidenceRequest = require('../models/EvidenceRequest');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { formatTimestamp } = require('../services/timestampService');
 
@@ -72,6 +74,20 @@ router.get('/', ensureAuthenticated, async (req, res) => {
       deliveryStatus: { $ne: 'Read' }
     });
 
+    // 7. Autopsy forensic jobs
+    const autopsyJobsCount = await AnalysisJob.countDocuments({
+      $or: [
+        { caseId: { $in: caseIds } },
+        { submittedBy: investigatorId }
+      ]
+    });
+
+    // 8. Pending evidence sharing requests
+    const pendingRequestsCount = await EvidenceRequest.countDocuments({
+      requestedTo: investigatorId,
+      status: 'Pending'
+    });
+
     // Recent activity (AuditLogs for this investigator or their cases)
     const recentActivities = await AuditLog.find({
       $or: [
@@ -108,7 +124,9 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         closedCases,
         evidenceItemsCount,
         pendingTransfers,
-        unreadMessages
+        unreadMessages,
+        autopsyJobsCount,
+        pendingRequestsCount
       },
       recentActivities,
       recentNotifications,

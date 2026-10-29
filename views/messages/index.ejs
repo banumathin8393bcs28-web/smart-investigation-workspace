@@ -76,25 +76,38 @@
               <% messages.forEach(m => { %>
                 <%
                   const isMine = m.sender.toString() === currentInvestigator._id.toString();
+                  const senderPhoto = isMine ? (currentInvestigator.profilePhoto || '/images/default-avatar.png') : (activeRecipient.profilePhoto || '/images/default-avatar.png');
+                  const senderName = isMine ? currentInvestigator.fullName : activeRecipient.fullName;
                 %>
-                <div class="d-flex flex-column <%= isMine ? 'align-items-end' : 'align-items-start' %>">
-                  <div class="p-3 rounded shadow-sm <%= isMine ? 'text-white' : 'bg-white text-dark border' %>" style="max-width: 70%; <%= isMine ? 'background-color: #0f2a4a;' : '' %>">
-                    <div class="mb-1" style="font-size: 0.92rem; line-height: 1.5;"><%= m.messageText %></div>
+                <div class="d-flex <%= isMine ? 'justify-content-end' : 'justify-content-start' %> gap-2 align-items-end">
+                  <% if (!isMine) { %>
+                    <img src="<%= senderPhoto %>" alt="<%= senderName %>" class="gov-avatar-sm rounded-circle border flex-shrink-0" style="width: 28px; height: 28px; object-fit: cover;" title="<%= senderName %>">
+                  <% } %>
 
-                    <% if (m.attachments && m.attachments.length > 0) { %>
-                      <div class="mt-2 pt-2 border-top border-opacity-25 <%= isMine ? 'border-white' : 'border-secondary' %>">
-                        <% m.attachments.forEach(att => { %>
-                          <a href="/messages/attachment/<%= att.filename %>" class="btn btn-sm <%= isMine ? 'btn-outline-light' : 'btn-gov-secondary' %> py-1 px-2 mb-1" download>
-                            <i class="bi bi-paperclip me-1"></i> <%= att.originalFilename %>
-                          </a>
-                        <% }) %>
-                      </div>
-                    <% } %>
+                  <div class="d-flex flex-column <%= isMine ? 'align-items-end' : 'align-items-start' %>" style="max-width: 70%;">
+                    <div class="p-3 rounded shadow-sm <%= isMine ? 'text-white' : 'bg-white text-dark border' %>" style="<%= isMine ? 'background-color: #0f2a4a;' : '' %>">
+                      <div class="mb-1" style="font-size: 0.92rem; line-height: 1.5;"><%= m.messageText %></div>
+
+                      <% if (m.attachments && m.attachments.length > 0) { %>
+                        <div class="mt-2 pt-2 border-top border-opacity-25 <%= isMine ? 'border-white' : 'border-secondary' %>">
+                          <% m.attachments.forEach((att, attIdx) => { %>
+                            <a href="/messages/attachment/<%= m._id %>/<%= attIdx %>" class="btn btn-sm <%= isMine ? 'btn-outline-light' : 'btn-gov-secondary' %> py-1 px-2 mb-1" download>
+                              <i class="bi bi-paperclip me-1"></i> <%= att.originalName || att.originalFilename || 'Attachment' %>
+                              <span class="opacity-75 small">(<%= (att.size / 1024).toFixed(0) %> KB)</span>
+                            </a>
+                          <% }) %>
+                        </div>
+                      <% } %>
+                    </div>
+                    <small class="text-muted mt-1 font-monospace" style="font-size: 10px;">
+                      <%= formatTimestamp(m.sentTimestamp, { includeSeconds: false }) %>
+                      <% if (isMine) { %> &bull; <i class="bi bi-check2"></i> Sent<% } %>
+                    </small>
                   </div>
-                  <small class="text-muted mt-1 font-monospace" style="font-size: 10px;">
-                    <%= formatTimestamp(m.sentTimestamp, { includeSeconds: false }) %>
-                    <% if (isMine) { %> &bull; <i class="bi bi-check2"></i> Sent<% } %>
-                  </small>
+
+                  <% if (isMine) { %>
+                    <img src="<%= senderPhoto %>" alt="<%= senderName %>" class="gov-avatar-sm rounded-circle border flex-shrink-0" style="width: 28px; height: 28px; object-fit: cover;" title="<%= senderName %>">
+                  <% } %>
                 </div>
               <% }) %>
             <% } else { %>

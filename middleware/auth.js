@@ -58,6 +58,11 @@ async function ensureAuthenticated(req, res, next) {
     // Attach server timestamp helper
     res.locals.formatTimestamp = formatTimestamp;
 
+    // Prevent browser bfcache from exposing sensitive authenticated pages after logout
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     next();
   } catch (error) {
     console.error('[AuthMiddleware] Error fetching investigator:', error);

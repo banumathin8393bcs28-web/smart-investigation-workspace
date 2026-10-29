@@ -6,6 +6,7 @@ const AuditLog = require('../models/AuditLog');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadProfile } = require('../middleware/upload');
 const { GOV_EMAIL_REGEX, PASSWORD_REGEX } = require('../middleware/validation');
+const { saveToStorage } = require('../services/storageService');
 
 // View & Edit Profile
 router.get('/edit', ensureAuthenticated, (req, res) => {
@@ -60,6 +61,19 @@ router.post('/edit', ensureAuthenticated, uploadProfile.single('profilePhoto'), 
 
     if (req.file) {
       investigator.profilePhoto = `/uploads/profiles/${req.file.filename}`;
+      try {
+        const storageResult = await saveToStorage({
+          filePath: req.file.path,
+          filename: req.file.filename,
+          mimeType: req.file.mimetype,
+          bucketName: 'profile_bucket',
+          metadata: { investigatorId: investigator._id }
+        });
+        investigator.profilePhotoKey = storageResult.storageKey;
+        investigator.profilePhotoGridFsId = storageResult.gridFsId;
+      } catch (storageErr) {
+        console.warn('[Profile Edit] Persistent photo storage warning:', storageErr.message);
+      }
       changes.push('Profile photograph replaced');
     }
 

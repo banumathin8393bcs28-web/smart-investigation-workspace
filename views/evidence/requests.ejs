@@ -1,88 +1,274 @@
 <%- include('../partials/header') %>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-  <div>
-    <h1 class="mb-1"><i class="bi bi-arrow-left-right text-success"></i> Evidence Access & Transfer Requests</h1>
-    <p class="text-muted fs-5 mb-0">Review inter-agency evidence transfer requests, chain-of-custody handovers, and supervisory approvals.</p>
-  </div>
-  <a href="/evidence/gallery" class="btn btn-outline"><i class="bi bi-images"></i> Media Gallery</a>
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="h3 mb-0 fw-bold text-dark">Evidence Access & Secure Sharing Requests</h1>
+        <small class="text-muted">Inter-agency evidence transfer requests, chain-of-custody handovers, and supervisory approvals</small>
+      </div>
+      <div>
+        <button type="button" class="btn btn-gov-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newRequestModal">
+          <i class="bi bi-file-earmark-plus me-1"></i> File Evidence Request
+        </button>
+      </div>
+    </div>
+
+    <% if (success) { %>
+      <div class="alert alert-success alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-danger alert-gov alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+    <!-- Incoming Requests (Action Required) -->
+    <div class="gov-card shadow-sm border mb-4">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-inbox-fill me-2 text-primary"></i> Incoming Requests (Awaiting Your Decision)</span>
+        <span class="badge badge-soft-warning"><%= incomingRequests ? incomingRequests.length : 0 %> Received</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-gov table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 130px;">Request ID</th>
+              <th>Requested By</th>
+              <th>Case Reference</th>
+              <th>Target Evidence</th>
+              <th>Stated Forensic Purpose</th>
+              <th>Status</th>
+              <th class="text-end" style="width: 170px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (incomingRequests && incomingRequests.length > 0) { %>
+              <% incomingRequests.forEach(r => { %>
+                <tr>
+                  <td class="font-monospace fw-bold text-primary"><%= r.requestIdentifier %></td>
+                  <td>
+                    <strong class="text-dark small"><%= r.requestedByName %></strong>
+                  </td>
+                  <td>
+                    <span class="badge badge-soft-primary"><%= r.caseNumber %></span>
+                  </td>
+                  <td>
+                    <span class="small font-monospace"><%= r.evidenceIdentifier %></span>
+                  </td>
+                  <td class="small text-secondary" style="max-width: 250px;">
+                    <%= r.purpose %>
+                  </td>
+                  <td>
+                    <% if (r.status === 'Approved') { %>
+                      <span class="badge badge-soft-success"><i class="bi bi-check-circle me-1"></i> Approved</span>
+                    <% } else if (r.status === 'Pending') { %>
+                      <span class="badge badge-soft-warning"><i class="bi bi-clock me-1"></i> Pending</span>
+                    <% } else { %>
+                      <span class="badge badge-soft-danger"><i class="bi bi-x-circle me-1"></i> <%= r.status %></span>
+                    <% } %>
+                  </td>
+                  <td class="text-end">
+                    <% if (r.status === 'Pending') { %>
+                      <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-success py-1 px-2" data-bs-toggle="modal" data-bs-target="#respondModal_<%= r._id %>" title="Approve Request">
+                          <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                        <button type="button" class="btn btn-outline-danger py-1 px-2" data-bs-toggle="modal" data-bs-target="#rejectModal_<%= r._id %>" title="Reject Request">
+                          <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                      </div>
+
+                      <!-- Approve Modal -->
+                      <div class="modal fade" id="respondModal_<%= r._id %>" tabindex="-1">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <form action="/evidence/requests/<%= r._id %>/respond" method="POST">
+                              <input type="hidden" name="decision" value="Approved">
+                              <div class="modal-header">
+                                <h5 class="modal-title h6">Authorize Evidence Sharing - <%= r.requestIdentifier %></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                              </div>
+                              <div class="modal-body">
+                                <p class="small text-muted mb-3">
+                                  You are approving evidence access for investigator <strong><%= r.requestedByName %></strong>. This action will log a chain-of-custody transfer event.
+                                </p>
+                                <div class="mb-3">
+                                  <label class="form-label small" for="respNotes_<%= r._id %>">Authorization Notes / Directives</label>
+                                  <textarea class="form-control form-control-sm" id="respNotes_<%= r._id %>" name="responseNotes" rows="2" placeholder="e.g. Access granted for forensic ballistics review until case hearing."></textarea>
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success btn-sm">Confirm Approval</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Reject Modal -->
+                      <div class="modal fade" id="rejectModal_<%= r._id %>" tabindex="-1">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <form action="/evidence/requests/<%= r._id %>/respond" method="POST">
+                              <input type="hidden" name="decision" value="Rejected">
+                              <div class="modal-header">
+                                <h5 class="modal-title h6">Reject Evidence Access - <%= r.requestIdentifier %></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                              </div>
+                              <div class="modal-body">
+                                <p class="small text-muted mb-3">
+                                  Provide justification for denying evidence access to <strong><%= r.requestedByName %></strong>.
+                                </p>
+                                <div class="mb-3">
+                                  <label class="form-label small" for="rejNotes_<%= r._id %>">Rejection Justification</label>
+                                  <textarea class="form-control form-control-sm" id="rejNotes_<%= r._id %>" name="responseNotes" rows="2" required placeholder="e.g. Evidence is under active grand jury seal; access not permitted."></textarea>
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    <% } else { %>
+                      <small class="text-muted"><%= r.respondedAt ? formatTimestamp(r.respondedAt, { includeSeconds: false }) : 'Closed' %></small>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted small">
+                  No pending incoming evidence access requests directed to you.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Outgoing Requests (Filed by You) -->
+    <div class="gov-card shadow-sm border mb-4">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-send-fill me-2 text-primary"></i> Outgoing Requests (Filed by You)</span>
+        <span class="badge badge-soft-secondary"><%= outgoingRequests ? outgoingRequests.length : 0 %> Submitted</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-gov table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 130px;">Request ID</th>
+              <th>Case Number</th>
+              <th>Target Evidence</th>
+              <th>Requested To</th>
+              <th>Status</th>
+              <th>Custodian Response</th>
+              <th>Filed Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (outgoingRequests && outgoingRequests.length > 0) { %>
+              <% outgoingRequests.forEach(r => { %>
+                <tr>
+                  <td class="font-monospace fw-bold"><%= r.requestIdentifier %></td>
+                  <td><span class="badge badge-soft-primary"><%= r.caseNumber %></span></td>
+                  <td class="font-monospace small"><%= r.evidenceIdentifier %></td>
+                  <td><strong><%= r.requestedToName %></strong></td>
+                  <td>
+                    <% if (r.status === 'Approved') { %>
+                      <span class="badge badge-soft-success"><i class="bi bi-check-circle me-1"></i> Approved</span>
+                    <% } else if (r.status === 'Pending') { %>
+                      <span class="badge badge-soft-warning"><i class="bi bi-clock me-1"></i> Pending Review</span>
+                    <% } else { %>
+                      <span class="badge badge-soft-danger"><i class="bi bi-x-circle me-1"></i> <%= r.status %></span>
+                    <% } %>
+                  </td>
+                  <td class="small text-muted">
+                    <%= r.responseNotes || (r.status === 'Pending' ? 'Awaiting custodian review' : 'No response notes') %>
+                  </td>
+                  <td class="small text-muted font-monospace">
+                    <%= formatTimestamp(r.createdAt, { includeSeconds: false }) %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted small">
+                  You have not submitted any outgoing evidence access requests.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
 </div>
 
-<% if (success) { %>
-  <div class="alert alert-success" role="alert">
-    <i class="bi bi-check-circle-fill fs-5"></i>
-    <div><%= success %></div>
-  </div>
-<% } %>
+<!-- Modal: File New Evidence Access Request -->
+<div class="modal fade" id="newRequestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/evidence/requests/new" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title h6"><i class="bi bi-file-earmark-lock me-2 text-primary"></i> File Inter-Agency Evidence Request</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="reqCaseId">Investigation Case <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" id="reqCaseId" name="caseId" required>
+              <option value="">-- Select Investigation Case --</option>
+              <% if (availableCases && availableCases.length > 0) { %>
+                <% availableCases.forEach(c => { %>
+                  <option value="<%= c._id %>"><%= c.caseNumber %> - <%= c.caseName %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
 
-<% if (error) { %>
-  <div class="alert alert-danger" role="alert">
-    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-    <div><%= error %></div>
-  </div>
-<% } %>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="reqCustodian">Target Custodian Investigator <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" id="reqCustodian" name="requestedTo" required>
+              <option value="">-- Select Investigator Custodian --</option>
+              <% if (investigators && investigators.length > 0) { %>
+                <% investigators.forEach(inv => { %>
+                  <option value="<%= inv._id %>"><%= inv.fullName %> (<%= inv.role %>)</option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
 
-<div class="forensic-card">
-  <% if (requests.length === 0) { %>
-    <div class="text-center py-5 text-muted">
-      <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
-      <p class="fs-5">No evidence access or transfer requests logged.</p>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="reqPurpose">Forensic Purpose / Legal Justification <span class="text-danger">*</span></label>
+            <textarea class="form-control form-control-sm" id="reqPurpose" name="purpose" rows="3" required placeholder="Specify why this evidence item is required, judicial or departmental authorization, and intended analysis..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gov-primary btn-sm">
+            <i class="bi bi-send-fill me-1"></i> Submit Request
+          </button>
+        </div>
+      </form>
     </div>
-  <% } else { %>
-    <div class="table-responsive">
-      <table class="table-dark-custom">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Requested By</th>
-            <th>Evidence Item</th>
-            <th>Associated Case</th>
-            <th>Purpose</th>
-            <th>Status</th>
-            <th>Decision / Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% requests.forEach(r => { %>
-            <tr>
-              <td class="text-muted small"><%= new Date(r.createdAt).toLocaleDateString() %></td>
-              <td>
-                <span class="text-white fw-bold"><%= r.requestedByName %></span>
-                <div class="text-muted small"><%= r.requestedByBadge %></div>
-              </td>
-              <td>
-                <a href="/evidence/<%= r.evidenceId %>" class="text-info fw-bold">
-                  <%= r.evidence?.evidenceNumber || 'EVD' %> - <%= r.evidence?.title || 'Evidence File' %>
-                </a>
-              </td>
-              <td>
-                <span class="text-secondary"><%= r.caseItem?.caseNumber || 'N/A' %></span>
-              </td>
-              <td style="max-width: 250px;"><%= r.purpose %></td>
-              <td>
-                <span class="badge <%= r.status === 'Approved' ? 'badge-intact' : (r.status === 'Pending' ? 'badge-progress' : 'badge-tampered') %>">
-                  <%= r.status %>
-                </span>
-              </td>
-              <td>
-                <% if (r.status === 'Pending') { %>
-                  <form action="/evidence/requests/<%= r._id %>/respond" method="POST" class="d-flex gap-2">
-                    <input type="hidden" name="responseNotes" value="Authorized by case lead">
-                    <button type="submit" name="status" value="Approved" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Approve</button>
-                    <button type="submit" name="status" value="Rejected" class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i> Reject</button>
-                  </form>
-                <% } else { %>
-                  <div class="text-muted small">
-                    Decided by <%= r.respondedBy || 'Supervisor' %> on <%= r.respondedAt ? new Date(r.respondedAt).toLocaleDateString() : '' %>
-                  </div>
-                <% } %>
-              </td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
-    </div>
-  <% } %>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

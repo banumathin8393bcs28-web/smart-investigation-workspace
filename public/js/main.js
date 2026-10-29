@@ -19,16 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. File Preview Before Upload
   initFilePreviews();
 
-  // 6. Browser BeforeUnload Warning for Authenticated Sessions
-  initBeforeUnloadWarning();
-
-  // 7. Copy to Clipboard Utility for SHA-256 Hashes
+  // 6. Copy to Clipboard Utility for SHA-256 Hashes
   initCopyHashButtons();
 
-  // 8. Socket.IO Real-time Notifications & Chat
+  // 7. Socket.IO Real-time Notifications & Chat
   initSocketIO();
 
-  // 9. Auto-Dismiss Flash Alerts after 8 seconds
+  // 8. Auto-Dismiss Flash Alerts after 8 seconds
   initAutoDismissAlerts();
 });
 
@@ -208,30 +205,6 @@ function initFilePreviews() {
   }
 }
 
-/**
- * Browser BeforeUnload Warning for Authenticated Sessions
- */
-function initBeforeUnloadWarning() {
-  const isAuth = document.body.getAttribute('data-auth-session') === 'true';
-  if (!isAuth) return;
-
-  // Track if user is submitting a form so we don't warn during legitimate submits
-  let isSubmitting = false;
-  document.querySelectorAll('form').forEach(f => {
-    f.addEventListener('submit', () => {
-      isSubmitting = true;
-    });
-  });
-
-  window.addEventListener('beforeunload', (e) => {
-    if (isSubmitting) return;
-    // Standard browser beforeunload prompt
-    const message = 'You have an active authorized investigation session. Please ensure you sign out properly before leaving.';
-    e.preventDefault();
-    e.returnValue = message;
-    return message;
-  });
-}
 
 /**
  * Copy to Clipboard Utility for SHA-256 Hashes

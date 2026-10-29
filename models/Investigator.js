@@ -17,6 +17,14 @@ const investigatorSchema = new mongoose.Schema({
     type: String,
     default: '/images/default-avatar.png'
   },
+  profilePhotoKey: {
+    type: String,
+    default: ''
+  },
+  profilePhotoGridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
   dob: {
     type: Date,
     required: [true, 'Date of birth is required']

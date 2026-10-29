@@ -10,7 +10,7 @@
     "test": "node tests/runAllTests.js && node tests/testServerEndpoints.js",
     "test:unit": "node tests/runAllTests.js",
     "test:e2e": "node tests/testServerEndpoints.js",
-    "ai:start": "python ai_service/app.py"
+    "autopsy:worker": "node scripts/autopsyWorker.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

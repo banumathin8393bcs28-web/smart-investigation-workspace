@@ -30,6 +30,14 @@ const evidenceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  storageKey: {
+    type: String,
+    default: ''
+  },
+  gridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
   protectedStoragePath: {
     type: String,
     required: true
@@ -37,6 +45,10 @@ const evidenceSchema = new mongoose.Schema({
   thumbnailPath: {
     type: String,
     default: ''
+  },
+  thumbnailGridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
   },
   fileMimeType: {
     type: String,

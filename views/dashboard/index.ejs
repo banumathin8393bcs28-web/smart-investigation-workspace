@@ -39,46 +39,38 @@
 
     <!-- Summary Metrics (MongoDB Aggregates) -->
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-4 col-xl-2">
-        <div class="gov-stat-tile h-100">
-          <div class="gov-stat-header">
-            <span class="gov-stat-label">Assigned Cases</span>
-            <div class="gov-stat-icon bg-primary-subtle text-primary">
-              <i class="bi bi-folder2-open"></i>
+      <div class="col-6 col-md-3">
+        <a href="/cases" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Assigned Cases</span>
+              <div class="gov-stat-icon bg-primary-subtle text-primary">
+                <i class="bi bi-folder2-open"></i>
+              </div>
             </div>
+            <div class="gov-stat-value"><%= stats.totalAssignedCases %></div>
           </div>
-          <div class="gov-stat-value"><%= stats.totalAssignedCases %></div>
-        </div>
+        </a>
       </div>
 
-      <div class="col-6 col-md-4 col-xl-2">
-        <div class="gov-stat-tile h-100">
-          <div class="gov-stat-header">
-            <span class="gov-stat-label">Active Cases</span>
-            <div class="gov-stat-icon bg-info-subtle text-info">
-              <i class="bi bi-activity"></i>
+      <div class="col-6 col-md-3">
+        <a href="/cases" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Active Cases</span>
+              <div class="gov-stat-icon bg-info-subtle text-info">
+                <i class="bi bi-activity"></i>
+              </div>
             </div>
+            <div class="gov-stat-value text-primary"><%= stats.activeCases %></div>
           </div>
-          <div class="gov-stat-value text-primary"><%= stats.activeCases %></div>
-        </div>
+        </a>
       </div>
 
-      <div class="col-6 col-md-4 col-xl-2">
+      <div class="col-6 col-md-3">
         <div class="gov-stat-tile h-100">
           <div class="gov-stat-header">
-            <span class="gov-stat-label">Closed Cases</span>
-            <div class="gov-stat-icon bg-secondary-subtle text-secondary">
-              <i class="bi bi-check2-circle"></i>
-            </div>
-          </div>
-          <div class="gov-stat-value text-muted"><%= stats.closedCases %></div>
-        </div>
-      </div>
-
-      <div class="col-6 col-md-4 col-xl-2">
-        <div class="gov-stat-tile h-100">
-          <div class="gov-stat-header">
-            <span class="gov-stat-label">Evidence Files</span>
+            <span class="gov-stat-label">Evidence Items</span>
             <div class="gov-stat-icon bg-success-subtle text-success">
               <i class="bi bi-images"></i>
             </div>
@@ -87,31 +79,77 @@
         </div>
       </div>
 
-      <div class="col-6 col-md-4 col-xl-2">
-        <div class="gov-stat-tile h-100">
-          <div class="gov-stat-header">
-            <span class="gov-stat-label">Pending Transfers</span>
-            <div class="gov-stat-icon bg-warning-subtle text-warning">
-              <i class="bi bi-arrow-left-right"></i>
+      <div class="col-6 col-md-3">
+        <a href="/autopsy/jobs" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Autopsy Ingest Jobs</span>
+              <div class="gov-stat-icon bg-primary-subtle text-primary">
+                <i class="bi bi-hdd-network"></i>
+              </div>
             </div>
+            <div class="gov-stat-value"><%= typeof stats.autopsyJobsCount !== 'undefined' ? stats.autopsyJobsCount : 0 %></div>
           </div>
-          <div class="gov-stat-value <%= stats.pendingTransfers > 0 ? 'text-danger' : 'text-dark' %>">
-            <%= stats.pendingTransfers %>
-          </div>
-        </div>
+        </a>
       </div>
 
-      <div class="col-6 col-md-4 col-xl-2">
-        <div class="gov-stat-tile h-100">
-          <div class="gov-stat-header">
-            <span class="gov-stat-label">Unread Messages</span>
-            <div class="gov-stat-icon bg-primary-subtle text-primary">
-              <i class="bi bi-chat-dots"></i>
+      <div class="col-6 col-md-3">
+        <a href="/evidence/requests" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Evidence Requests</span>
+              <div class="gov-stat-icon bg-warning-subtle text-warning">
+                <i class="bi bi-arrow-left-right"></i>
+              </div>
+            </div>
+            <div class="gov-stat-value <%= stats.pendingRequestsCount > 0 ? 'text-danger' : 'text-dark' %>">
+              <%= typeof stats.pendingRequestsCount !== 'undefined' ? stats.pendingRequestsCount : 0 %>
             </div>
           </div>
-          <div class="gov-stat-value <%= stats.unreadMessages > 0 ? 'text-primary' : 'text-dark' %>">
-            <%= stats.unreadMessages %>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <a href="/custody" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Custody Transfers</span>
+              <div class="gov-stat-icon bg-secondary-subtle text-secondary">
+                <i class="bi bi-shield-check"></i>
+              </div>
+            </div>
+            <div class="gov-stat-value <%= stats.pendingTransfers > 0 ? 'text-danger' : 'text-dark' %>">
+              <%= stats.pendingTransfers %>
+            </div>
           </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <a href="/messages" class="text-decoration-none">
+          <div class="gov-stat-tile h-100">
+            <div class="gov-stat-header">
+              <span class="gov-stat-label">Unread Messages</span>
+              <div class="gov-stat-icon bg-primary-subtle text-primary">
+                <i class="bi bi-chat-dots"></i>
+              </div>
+            </div>
+            <div class="gov-stat-value <%= stats.unreadMessages > 0 ? 'text-primary' : 'text-dark' %>">
+              <%= stats.unreadMessages %>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="gov-stat-tile h-100">
+          <div class="gov-stat-header">
+            <span class="gov-stat-label">Closed Cases</span>
+            <div class="gov-stat-icon bg-secondary-subtle text-secondary">
+              <i class="bi bi-check2-circle"></i>
+            </div>
+          </div>
+          <div class="gov-stat-value text-muted"><%= stats.closedCases %></div>
         </div>
       </div>
     </div>
