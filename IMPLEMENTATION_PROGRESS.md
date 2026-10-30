@@ -127,7 +127,25 @@ The application provides end-to-end functionality for authorized law enforcement
 
 All automated test suites were executed against the live MongoDB Community Server database on Windows:
 
-### A. Unit & Integration Test Suite (`tests/runAllTests.js`)
+### A. Dedicated Comprehensive Automated Test Suite (`testing/automated-test-suite.js`)
+- **Total Tests Defined:** 55
+- **Automated Tests Executed:** 52
+- **Passed:** 51 (98.1%)
+- **Failed:** 0 (0.0%)
+- **Not Implemented:** 1 (`TC-SCN-03: Standalone crime scene creation form route`)
+- **Blocked:** 0
+- **Manual Assessment Tests:** 3 (`TC-MAN-01`, `TC-MAN-02`, `TC-MAN-03`)
+- **Pass Rate for Implemented Features:** **100.0%**
+- **Artifacts Created:**
+  - [`testing/TEST_CASES.md`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/TEST_CASES.md)
+  - [`testing/TEST_INPUTS.md`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/TEST_INPUTS.md)
+  - [`testing/TEST_EXECUTION_REPORT.md`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/TEST_EXECUTION_REPORT.md)
+  - [`testing/BUG_REPORT.md`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/BUG_REPORT.md)
+  - [`testing/TEST_SUMMARY.md`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/TEST_SUMMARY.md)
+  - [`testing/seed-test-data.js`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/seed-test-data.js)
+  - [`testing/automated-test-suite.js`](file:///C:/Users/swarn/.gemini/antigravity/scratch/smart-investigation-workspace/testing/automated-test-suite.js)
+
+### B. Unit & Integration Test Suite (`tests/runAllTests.js`)
 ```
 ================================================================
  STARTING SMART INVESTIGATION WORKSPACE VERIFICATION TEST SUITE
@@ -233,13 +251,19 @@ The server will start on `http://localhost:3000`.
 
 ### Step 2: (Optional) Run the Test Suites
 ```bash
+# Run dedicated comprehensive automated test suite (52 tests across 18 modules)
+npm run test:suite
+
+# Seed isolated test database
+npm run test:seed
+
 # Run unit & integration tests
 npm run test:unit
 
 # Run HTTP end-to-end tests
 npm run test:e2e
 
-# Run all verification tests
+# Run all baseline verification tests
 npm test
 ```
 

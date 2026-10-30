@@ -10,6 +10,8 @@
     "test": "node tests/runAllTests.js && node tests/testServerEndpoints.js",
     "test:unit": "node tests/runAllTests.js",
     "test:e2e": "node tests/testServerEndpoints.js",
+    "test:suite": "node testing/automated-test-suite.js",
+    "test:seed": "node testing/seed-test-data.js",
     "autopsy:worker": "node scripts/autopsyWorker.js"
   },
   "dependencies": {

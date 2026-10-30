@@ -1,0 +1,532 @@
+{
+  "timestamp": "2026-10-30T01:41:02.226Z",
+  "summary": {
+    "total": 52,
+    "passed": 51,
+    "failed": 0,
+    "blocked": 0,
+    "notImplemented": 1
+  },
+  "results": [
+    {
+      "id": "TC-NAV-01",
+      "module": "Home & Navigation",
+      "title": "Root URL loads welcome page for unauthenticated users",
+      "status": "PASS",
+      "expected": "HTTP 200 with HTML title",
+      "actual": "HTTP 200 rendered Home view",
+      "error": null,
+      "timeMs": 16
+    },
+    {
+      "id": "TC-NAV-02",
+      "module": "Home & Navigation",
+      "title": "Accessing /auth/login returns login view",
+      "status": "PASS",
+      "expected": "HTTP 200 with login form",
+      "actual": "HTTP 200 rendered Login view",
+      "error": null,
+      "timeMs": 9
+    },
+    {
+      "id": "TC-NAV-03",
+      "module": "Home & Navigation",
+      "title": "Accessing /auth/register returns registration form",
+      "status": "PASS",
+      "expected": "HTTP 200 with register form",
+      "actual": "HTTP 200 rendered Register view",
+      "error": null,
+      "timeMs": 7
+    },
+    {
+      "id": "TC-NAV-04",
+      "module": "Home & Navigation",
+      "title": "Requesting non-existent route returns styled 404 page",
+      "status": "PASS",
+      "expected": "HTTP 404 Not Found",
+      "actual": "HTTP 404 handled gracefully",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-NAV-05",
+      "module": "Home & Navigation",
+      "title": "Verification that unwanted Leave/Cancel navigation prompts are removed",
+      "status": "PASS",
+      "expected": "No beforeunload listener",
+      "actual": "Confirmed absent from public/js/main.js",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REG-01",
+      "module": "Registration",
+      "title": "Valid government email format matching xxx.yyy@gov.in",
+      "status": "PASS",
+      "expected": "Valid format passes regex",
+      "actual": "Standard gov.in format validated",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REG-02",
+      "module": "Registration",
+      "title": "Rejection of non-gov domains and invalid email structures",
+      "status": "PASS",
+      "expected": "Non-gov rejected",
+      "actual": "Invalid domains successfully rejected",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REG-03",
+      "module": "Registration",
+      "title": "Password complexity enforcement (min 8, uppercase, lowercase, digit, symbol)",
+      "status": "PASS",
+      "expected": "Regex enforces complexity",
+      "actual": "Password complexity regex validated",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REG-04",
+      "module": "Registration",
+      "title": "Single-word security answer enforcement",
+      "status": "PASS",
+      "expected": "Only 1 word allowed",
+      "actual": "Single-word constraint validated",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REG-05",
+      "module": "Registration",
+      "title": "Successful registration & password bcrypt hashing",
+      "status": "PASS",
+      "expected": "Bcrypt hash generated",
+      "actual": "Investigator registered with ID 6ae3f5ad1ee11e3d8c8515f6",
+      "error": null,
+      "timeMs": 176
+    },
+    {
+      "id": "TC-REG-06",
+      "module": "Registration",
+      "title": "Prevention of duplicate email registration",
+      "status": "PASS",
+      "expected": "MongoDB unique index triggers error",
+      "actual": "Duplicate email rejected by unique constraint",
+      "error": null,
+      "timeMs": 2
+    },
+    {
+      "id": "TC-LOG-01",
+      "module": "Login",
+      "title": "Valid password verification via bcryptjs",
+      "status": "PASS",
+      "expected": "Password match returns true",
+      "actual": "Bcrypt verified plaintext password",
+      "error": null,
+      "timeMs": 57
+    },
+    {
+      "id": "TC-LOG-02",
+      "module": "Login",
+      "title": "Incorrect password rejection",
+      "status": "PASS",
+      "expected": "Password match returns false",
+      "actual": "Incorrect password correctly rejected",
+      "error": null,
+      "timeMs": 55
+    },
+    {
+      "id": "TC-LOG-03",
+      "module": "Login",
+      "title": "Failed attempt counter increment and security challenge threshold (>=3)",
+      "status": "PASS",
+      "expected": "Failed counter tracks accurately",
+      "actual": "Security challenge threshold triggered at 3 failed attempts",
+      "error": null,
+      "timeMs": 5
+    },
+    {
+      "id": "TC-LOG-04",
+      "module": "Login",
+      "title": "Security answer verification after threshold trigger",
+      "status": "PASS",
+      "expected": "Security answer verified with bcrypt",
+      "actual": "Security answer successfully validated",
+      "error": null,
+      "timeMs": 57
+    },
+    {
+      "id": "TC-LOG-05",
+      "module": "Login",
+      "title": "Account lockout trigger after 5 consecutive failures",
+      "status": "PASS",
+      "expected": "Lockout until set for 15 minutes",
+      "actual": "Account lockout validated",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-LOG-06",
+      "module": "Login",
+      "title": "Unauthenticated request to protected route redirects to /auth/login",
+      "status": "PASS",
+      "expected": "HTTP 302 Redirect",
+      "actual": "HTTP 302 -> /auth/login?error=Please%20log%20in%20to%20access%20the%20investigation%20workspace.",
+      "error": null,
+      "timeMs": 2
+    },
+    {
+      "id": "TC-PRF-01",
+      "module": "Profile",
+      "title": "Investigator profile details retrieval",
+      "status": "PASS",
+      "expected": "Returns full name, role, email",
+      "actual": "Detective James Miller (Senior Forensic Investigator)",
+      "error": null,
+      "timeMs": 1
+    },
+    {
+      "id": "TC-PRF-02",
+      "module": "Profile",
+      "title": "Profile edit details update and audit logging",
+      "status": "PASS",
+      "expected": "Profile fields updated",
+      "actual": "Phone number updated and audit log saved",
+      "error": null,
+      "timeMs": 4
+    },
+    {
+      "id": "TC-PRF-03",
+      "module": "Profile",
+      "title": "Fallback avatar returned when custom photo absent",
+      "status": "PASS",
+      "expected": "Returns /images/default-avatar.png",
+      "actual": "/images/default-avatar.png",
+      "error": null,
+      "timeMs": 1
+    },
+    {
+      "id": "TC-CAS-01",
+      "module": "Case Management",
+      "title": "Atomic sequential case numbering (CASE001, CASE002)",
+      "status": "PASS",
+      "expected": "Generated CASE001",
+      "actual": "Generated atomic case number: CASE001",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-CAS-02",
+      "module": "Case Management",
+      "title": "Case creation with mandatory fields and timestamp immutability",
+      "status": "PASS",
+      "expected": "Case saved with CASE001",
+      "actual": "Case created: CASE001 - Central Data Repository Security Breach",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-CAS-03",
+      "module": "Case Management",
+      "title": "Case search and filtering by crimeType and status",
+      "status": "PASS",
+      "expected": "Filters return matching cases",
+      "actual": "Found 1 case(s) matching Cybercrime/New",
+      "error": null,
+      "timeMs": 1
+    },
+    {
+      "id": "TC-CAS-04",
+      "module": "Case Management",
+      "title": "Duplicate case number prevention",
+      "status": "PASS",
+      "expected": "Duplicate rejected by unique index",
+      "actual": "Duplicate case number rejected by unique constraint",
+      "error": null,
+      "timeMs": 2
+    },
+    {
+      "id": "TC-SCN-01",
+      "module": "Crime Scene",
+      "title": "Crime scene address and location stored on Case record",
+      "status": "PASS",
+      "expected": "Scene address preserved",
+      "actual": "Crime Scene Location: Server Rack Room B-12, Ground Floor",
+      "error": null,
+      "timeMs": 1
+    },
+    {
+      "id": "TC-SCN-02",
+      "module": "Crime Scene",
+      "title": "Standalone Scene model schema definition exists",
+      "status": "PASS",
+      "expected": "Scene model registered in Mongoose",
+      "actual": "Scene model schema verified",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-SCN-03",
+      "module": "Crime Scene",
+      "title": "Standalone crime scene creation form route status",
+      "status": "NOT IMPLEMENTED",
+      "expected": "Check if POST /scenes/new implemented",
+      "actual": "NOT IMPLEMENTED: Standalone scene creation routes (POST /scenes/new) are not implemented. Scenes are tracked via Case crimeSceneAddress and evidence uploads.",
+      "error": "NOT IMPLEMENTED: Standalone scene creation routes (POST /scenes/new) are not implemented. Scenes are tracked via Case crimeSceneAddress and evidence uploads.",
+      "timeMs": 0
+    },
+    {
+      "id": "TC-EVD-01",
+      "module": "Digital Evidence",
+      "title": "Cryptographic SHA-256 calculation matches known NIST digest",
+      "status": "PASS",
+      "expected": "SHA-256 matches standard digest",
+      "actual": "SHA-256: 706c0d8860c4497d33b0fe81ce51d859630c49385295f8fa34cd2fc2406c73f1",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-EVD-02",
+      "module": "Digital Evidence",
+      "title": "Metadata extraction & thumbnail generation via Sharp",
+      "status": "PASS",
+      "expected": "Extracts dimensions & format",
+      "actual": "Dimensions: 100x100, Format: PNG",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-EVD-03",
+      "module": "Digital Evidence",
+      "title": "Persistent storage in MongoDB GridFS evidence_bucket",
+      "status": "PASS",
+      "expected": "GridFS ObjectId returned",
+      "actual": "GridFS ID: 6ae3f5ad1ee11e3d8c851614",
+      "error": null,
+      "timeMs": 5
+    },
+    {
+      "id": "TC-EVD-04",
+      "module": "Digital Evidence",
+      "title": "Evidence item registration with atomic identifier (EVID-CASE001-001)",
+      "status": "PASS",
+      "expected": "EVID-CASE001-001 created",
+      "actual": "Registered EVID-CASE001-001",
+      "error": null,
+      "timeMs": 5
+    },
+    {
+      "id": "TC-CST-01",
+      "module": "Chain of Custody",
+      "title": "Record evidence intake custody event",
+      "status": "PASS",
+      "expected": "Evidence Received logged",
+      "actual": "Event: CUST-0001 - Evidence Received",
+      "error": null,
+      "timeMs": 6
+    },
+    {
+      "id": "TC-CST-02",
+      "module": "Chain of Custody",
+      "title": "Inter-investigator case transfer workflow",
+      "status": "PASS",
+      "expected": "Transfer initiated & accepted",
+      "actual": "Transfer completed to Detective David Chen",
+      "error": null,
+      "timeMs": 128
+    },
+    {
+      "id": "TC-CRM-01",
+      "module": "Criminal Records",
+      "title": "Criminal record creation with biometric & physical traits",
+      "status": "PASS",
+      "expected": "CR-2026-0001 created",
+      "actual": "Registered CR-2026-0001 (Vikram Aditya Sharma)",
+      "error": null,
+      "timeMs": 4
+    },
+    {
+      "id": "TC-CRM-02",
+      "module": "Criminal Records",
+      "title": "Append interrogation statement to criminal profile",
+      "status": "PASS",
+      "expected": "Interrogation entry saved",
+      "actual": "Interrogation statement recorded by Detective James Miller",
+      "error": null,
+      "timeMs": 6
+    },
+    {
+      "id": "TC-MSG-01",
+      "module": "Messaging",
+      "title": "Direct message creation between two investigators",
+      "status": "PASS",
+      "expected": "Message stored with Sent status",
+      "actual": "Message sent from Detective James Miller to Detective David Chen",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-MSG-02",
+      "module": "Messaging",
+      "title": "Unread count and mark messages as read",
+      "status": "PASS",
+      "expected": "Status changes to Read",
+      "actual": "Unread count updated to 0 after read",
+      "error": null,
+      "timeMs": 6
+    },
+    {
+      "id": "TC-REQ-01",
+      "module": "Evidence Sharing",
+      "title": "Inter-agency evidence access request filing",
+      "status": "PASS",
+      "expected": "REQ-2026-0001 created",
+      "actual": "Filed request REQ-2026-0001",
+      "error": null,
+      "timeMs": 4
+    },
+    {
+      "id": "TC-REQ-02",
+      "module": "Evidence Sharing",
+      "title": "Custodian approval decision and automated custody transfer",
+      "status": "PASS",
+      "expected": "Status changes to Approved",
+      "actual": "Request marked Approved by custodian Detective David Chen",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-NOT-01",
+      "module": "Notifications",
+      "title": "Notification creation for investigator recipient",
+      "status": "PASS",
+      "expected": "Notification document created",
+      "actual": "Notification sent to Detective David Chen",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-NOT-02",
+      "module": "Notifications",
+      "title": "Mark notification as read",
+      "status": "PASS",
+      "expected": "isRead updated to true",
+      "actual": "Notification marked read",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-AUT-01",
+      "module": "Autopsy Integration",
+      "title": "Analysis job creation, ingest execution and findings generation",
+      "status": "PASS",
+      "expected": "Job status Completed",
+      "actual": "Job AJOB-2026-0001 produced 3 findings",
+      "error": null,
+      "timeMs": 29
+    },
+    {
+      "id": "TC-AUT-02",
+      "module": "Autopsy Integration",
+      "title": "Magic byte file signature inspection verification",
+      "status": "PASS",
+      "expected": "Detects PNG/JPEG signatures",
+      "actual": "Magic bytes correctly identify PNG and JPEG",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-REP-01",
+      "module": "Report Generation",
+      "title": "PDFKit Report compilation with SHA-256 integrity seal",
+      "status": "PASS",
+      "expected": "PDF report created with 64-char hash",
+      "actual": "Report REP-CASE001-001 verified intact (35022 bytes)",
+      "error": null,
+      "timeMs": 52
+    },
+    {
+      "id": "TC-SEC-01",
+      "module": "Security",
+      "title": "Anti-caching Cache-Control headers on protected routes",
+      "status": "PASS",
+      "expected": "no-store, no-cache returned",
+      "actual": "Cache-Control: no-store, no-cache, must-revalidate, private",
+      "error": null,
+      "timeMs": 4
+    },
+    {
+      "id": "TC-SEC-02",
+      "module": "Security",
+      "title": "Strict Transport / Helmet security headers presence",
+      "status": "PASS",
+      "expected": "X-Content-Type-Options: nosniff present",
+      "actual": "nosniff header confirmed",
+      "error": null,
+      "timeMs": 4
+    },
+    {
+      "id": "TC-SEC-03",
+      "module": "Security",
+      "title": "Cross-Site Scripting (XSS) payload escaping in templates",
+      "status": "PASS",
+      "expected": "Escapes dangerous HTML tags",
+      "actual": "Script tags escaped safely into HTML entities",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-DB-01",
+      "module": "Database & Persistence",
+      "title": "MongoDB connection stability and isolated database check",
+      "status": "PASS",
+      "expected": "Connected to smart_investigation_test",
+      "actual": "Connected to smart_investigation_test",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-DB-02",
+      "module": "Database & Persistence",
+      "title": "Concurrency-safe atomic case counter simulation",
+      "status": "PASS",
+      "expected": "5 concurrent requests produce unique numbers",
+      "actual": "Concurrent sequences: CASE002, CASE003, CASE004",
+      "error": null,
+      "timeMs": 2
+    },
+    {
+      "id": "TC-STR-01",
+      "module": "File Storage",
+      "title": "Stream file response with private cache & nosniff headers",
+      "status": "PASS",
+      "expected": "Sets secure stream headers",
+      "actual": "serveFileResponse function verified",
+      "error": null,
+      "timeMs": 0
+    },
+    {
+      "id": "TC-PRF-01",
+      "module": "Performance",
+      "title": "Root welcome page responds within 250ms threshold",
+      "status": "PASS",
+      "expected": "Response under 250ms",
+      "actual": "Response time: 3ms",
+      "error": null,
+      "timeMs": 3
+    },
+    {
+      "id": "TC-PRF-02",
+      "module": "Performance",
+      "title": "Graceful shutdown and server resource release",
+      "status": "PASS",
+      "expected": "Server closes cleanly",
+      "actual": "Test server closed successfully",
+      "error": null,
+      "timeMs": 0
+    }
+  ]
+}
