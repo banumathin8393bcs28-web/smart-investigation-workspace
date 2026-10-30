@@ -107,8 +107,10 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
 
       // Save thumbnail to persistent storage
       let thumbGridFsId = null;
+      let thumbnailDataUri = '';
       if (fs.existsSync(thumbPath)) {
         const thumbBuf = fs.readFileSync(thumbPath);
+        thumbnailDataUri = `data:image/jpeg;base64,${thumbBuf.toString('base64')}`;
         const thumbStorage = await saveToStorage({
           buffer: thumbBuf,
           filePath: thumbPath,
@@ -134,6 +136,7 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
         protectedStoragePath: file.path,
         thumbnailPath: fs.existsSync(thumbPath) ? thumbPath : '',
         thumbnailGridFsId: thumbGridFsId,
+        thumbnailDataUri: thumbnailDataUri,
         fileMimeType: file.mimetype,
         fileSize: file.size,
         imageProperties: properties,
@@ -278,6 +281,8 @@ router.get('/:id/file', ensureAuthenticated, canAccessEvidence, async (req, res)
     localPath: evidence.protectedStoragePath,
     mimeType: evidence.fileMimeType || 'image/jpeg',
     bucketName: 'evidence_bucket',
+    fallbackDataUri: evidence.thumbnailDataUri,
+    fallbackPath: '/images/evidence-placeholder.svg',
     downloadAs: req.query.download ? evidence.originalFilename : null
   });
 });
@@ -291,7 +296,8 @@ router.get('/:id/thumbnail', ensureAuthenticated, canAccessEvidence, async (req,
     localPath: evidence.thumbnailPath || evidence.protectedStoragePath,
     mimeType: 'image/jpeg',
     bucketName: 'evidence_bucket',
-    fallbackPath: '/images/default-avatar.png'
+    fallbackDataUri: evidence.thumbnailDataUri,
+    fallbackPath: '/images/evidence-placeholder.svg'
   });
 });
 

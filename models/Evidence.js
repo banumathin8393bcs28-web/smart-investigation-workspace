@@ -50,6 +50,10 @@ const evidenceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     default: null
   },
+  thumbnailDataUri: {
+    type: String,
+    default: ''
+  },
   fileMimeType: {
     type: String,
     required: true

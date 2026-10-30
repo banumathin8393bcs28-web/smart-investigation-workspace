@@ -176,10 +176,29 @@ async function getFileReadStream({ gridFsId, filename, localPath, bucketName = '
 /**
  * Serves a persistent file over Express HTTP response with appropriate caching and security headers.
  */
-async function serveFileResponse(req, res, { gridFsId, filename, localPath, mimeType = 'application/octet-stream', bucketName = 'evidence_bucket', fallbackPath = null, downloadAs = null }) {
+async function serveFileResponse(req, res, { gridFsId, filename, localPath, mimeType = 'application/octet-stream', bucketName = 'evidence_bucket', fallbackPath = null, fallbackDataUri = null, downloadAs = null }) {
   const result = await getFileReadStream({ gridFsId, filename, localPath, bucketName });
 
   if (!result || !result.stream) {
+    if (fallbackDataUri && fallbackDataUri.startsWith('data:')) {
+      const parts = fallbackDataUri.split(',');
+      if (parts.length === 2) {
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const resolvedMime = mimeMatch ? mimeMatch[1] : (mimeType !== 'application/octet-stream' ? mimeType : 'image/jpeg');
+        const imgBuf = Buffer.from(parts[1], 'base64');
+        res.setHeader('Content-Type', resolvedMime);
+        res.setHeader('Content-Length', imgBuf.length);
+        res.setHeader('Cache-Control', 'private, max-age=86400');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        if (downloadAs) {
+          res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(downloadAs)}"`);
+        } else {
+          res.setHeader('Content-Disposition', 'inline');
+        }
+        return res.send(imgBuf);
+      }
+    }
+
     const resolvedFallback = fallbackPath || (bucketName === 'evidence_bucket' ? '/images/evidence-placeholder.svg' : null);
     if (resolvedFallback) {
       const fullFallback = path.isAbsolute(resolvedFallback) ? resolvedFallback : path.join(__dirname, '..', 'public', resolvedFallback.replace(/^\//, ''));

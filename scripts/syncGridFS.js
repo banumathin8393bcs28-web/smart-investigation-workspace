@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+const sharp = require('sharp');
 const { saveToStorage } = require('../services/storageService');
 const Evidence = require('../models/Evidence');
 
@@ -32,43 +33,45 @@ async function syncAllEvidenceToGridFS() {
       }
     }
 
-    if (fileBuf) {
-      // Check if GridFS has this file already or if gridFsId is missing
-      const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'evidence_bucket' });
-      let existingGridFs = null;
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'evidence_bucket' });
+    let existingGridFs = null;
 
-      if (ev.gridFsId) {
+    if (ev.gridFsId) {
+      try {
         const found = await bucket.find({ _id: ev.gridFsId }).limit(1).toArray();
         if (found && found.length > 0) {
           existingGridFs = found[0];
         }
-      }
+      } catch (e) {}
+    }
 
-      if (!existingGridFs && ev.storedFilename) {
+    if (!existingGridFs && ev.storedFilename) {
+      try {
         const foundByName = await bucket.find({ filename: ev.storedFilename }).limit(1).toArray();
         if (foundByName && foundByName.length > 0) {
           existingGridFs = foundByName[0];
           updateFields.gridFsId = existingGridFs._id;
           changed = true;
         }
-      }
+      } catch (e) {}
+    }
 
-      if (!existingGridFs) {
-        console.log(`[GridFS Sync] Storing ${ev.evidenceIdentifier} (${ev.storedFilename}, ${fileBuf.length} bytes) to GridFS...`);
-        const saved = await saveToStorage({
-          buffer: fileBuf,
-          filePath,
-          filename: ev.storedFilename,
-          mimeType: ev.fileMimeType || 'image/png',
-          bucketName: 'evidence_bucket',
-          metadata: { caseNumber: ev.caseNumber, evidenceIdentifier: ev.evidenceIdentifier }
-        });
-        if (saved && saved.gridFsId) {
-          updateFields.gridFsId = saved.gridFsId;
-          updateFields.storageKey = saved.storageKey;
-          changed = true;
-          console.log(`[GridFS Sync] -> GridFS ID: ${saved.gridFsId}`);
-        }
+    if (fileBuf && !existingGridFs) {
+      console.log(`[GridFS Sync] Storing ${ev.evidenceIdentifier} (${ev.storedFilename}, ${fileBuf.length} bytes) to GridFS...`);
+      const saved = await saveToStorage({
+        buffer: fileBuf,
+        filePath,
+        filename: ev.storedFilename,
+        mimeType: ev.fileMimeType || 'image/png',
+        bucketName: 'evidence_bucket',
+        metadata: { caseNumber: ev.caseNumber, evidenceIdentifier: ev.evidenceIdentifier }
+      });
+      if (saved && saved.gridFsId) {
+        updateFields.gridFsId = saved.gridFsId;
+        updateFields.storageKey = saved.storageKey;
+        existingGridFs = { _id: saved.gridFsId };
+        changed = true;
+        console.log(`[GridFS Sync] -> GridFS ID: ${saved.gridFsId}`);
       }
     }
 
@@ -99,6 +102,40 @@ async function syncAllEvidenceToGridFS() {
       if (savedThumb && savedThumb.gridFsId) {
         updateFields.thumbnailGridFsId = savedThumb.gridFsId;
         changed = true;
+      }
+    }
+
+    // 3. Resolve inline thumbnailDataUri directly inside MongoDB document
+    if (!ev.thumbnailDataUri) {
+      let sourceBuf = thumbBuf || fileBuf;
+      if (!sourceBuf && (ev.gridFsId || (existingGridFs && existingGridFs._id))) {
+        try {
+          const targetId = ev.gridFsId || existingGridFs._id;
+          const downloadStream = bucket.openDownloadStream(targetId);
+          const chunks = [];
+          await new Promise((resolve, reject) => {
+            downloadStream.on('data', c => chunks.push(c));
+            downloadStream.on('error', reject);
+            downloadStream.on('end', resolve);
+          });
+          sourceBuf = Buffer.concat(chunks);
+        } catch (streamErr) {
+          console.warn(`[GridFS Sync] Stream download warning for ${ev.evidenceIdentifier}:`, streamErr.message);
+        }
+      }
+
+      if (sourceBuf) {
+        try {
+          const resizedBuf = await sharp(sourceBuf)
+            .resize(400, 300, { fit: 'inside', withoutEnlargement: true })
+            .jpeg({ quality: 82 })
+            .toBuffer();
+          updateFields.thumbnailDataUri = `data:image/jpeg;base64,${resizedBuf.toString('base64')}`;
+          changed = true;
+          console.log(`[GridFS Sync] -> Stored inline thumbnailDataUri for ${ev.evidenceIdentifier} (${resizedBuf.length} bytes) in MongoDB`);
+        } catch (sharpErr) {
+          console.warn(`[GridFS Sync] Thumbnail sharp conversion warning:`, sharpErr.message);
+        }
       }
     }
 
