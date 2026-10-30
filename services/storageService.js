@@ -180,12 +180,14 @@ async function serveFileResponse(req, res, { gridFsId, filename, localPath, mime
   const result = await getFileReadStream({ gridFsId, filename, localPath, bucketName });
 
   if (!result || !result.stream) {
-    if (fallbackPath) {
-      const fullFallback = path.isAbsolute(fallbackPath) ? fallbackPath : path.join(__dirname, '..', 'public', fallbackPath.replace(/^\//, ''));
+    const resolvedFallback = fallbackPath || (bucketName === 'evidence_bucket' ? '/images/evidence-placeholder.svg' : null);
+    if (resolvedFallback) {
+      const fullFallback = path.isAbsolute(resolvedFallback) ? resolvedFallback : path.join(__dirname, '..', 'public', resolvedFallback.replace(/^\//, ''));
       if (fs.existsSync(fullFallback)) {
+        res.setHeader('Content-Type', resolvedFallback.endsWith('.svg') ? 'image/svg+xml' : 'image/png');
         return res.sendFile(fullFallback);
       }
-      return res.redirect(fallbackPath);
+      return res.redirect(resolvedFallback);
     }
     return res.status(404).send('Requested evidence or media artifact was not found in persistent storage.');
   }

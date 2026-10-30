@@ -225,16 +225,29 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 async function start() {
-  await connectDB();
   server.listen(PORT, () => {
+    const maskedUri = dbUri.includes('@') ? dbUri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@') : dbUri;
     console.log(`================================================================`);
     console.log(` SMART INVESTIGATION WORKSPACE // OFFICIAL FORENSIC SERVER`);
     console.log(` Port: ${PORT}`);
     console.log(` URL:  http://localhost:${PORT}`);
-    console.log(` Database: MongoDB Community Server (${dbUri})`);
+    console.log(` Database: ${maskedUri}`);
     console.log(` Session Store: connect-mongo active`);
     console.log(`================================================================`);
   });
+
+  try {
+    await connectDB();
+    // Auto-sync existing file artifacts into MongoDB GridFS for high persistence across restarts/deploys
+    try {
+      const { syncAllEvidenceToGridFS } = require('./scripts/syncGridFS');
+      await syncAllEvidenceToGridFS();
+    } catch (syncErr) {
+      console.warn('[Storage Sync Warning]:', syncErr.message);
+    }
+  } catch (err) {
+    console.error('[Database Connection Warning]:', err.message);
+  }
 }
 
 if (require.main === module) {

@@ -16,7 +16,8 @@ async function connectDB() {
       autoIndex: true
     });
     isConnected = true;
-    console.log(`[Database] Successfully connected to MongoDB Community Server at: ${MONGODB_URI}`);
+    const maskedUri = MONGODB_URI.includes('@') ? MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@') : MONGODB_URI;
+    console.log(`[Database] Successfully connected to MongoDB at: ${maskedUri}`);
     return mongoose.connection;
   } catch (error) {
     console.error('[Database] MongoDB connection error:', error.message);

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-30T01:41:02.226Z",
+  "timestamp": "2026-10-30T02:08:35.970Z",
   "summary": {
     "total": 52,
     "passed": 51,
@@ -26,7 +26,7 @@
       "expected": "HTTP 200 with login form",
       "actual": "HTTP 200 rendered Login view",
       "error": null,
-      "timeMs": 9
+      "timeMs": 11
     },
     {
       "id": "TC-NAV-03",
@@ -36,7 +36,7 @@
       "expected": "HTTP 200 with register form",
       "actual": "HTTP 200 rendered Register view",
       "error": null,
-      "timeMs": 7
+      "timeMs": 5
     },
     {
       "id": "TC-NAV-04",
@@ -46,7 +46,7 @@
       "expected": "HTTP 404 Not Found",
       "actual": "HTTP 404 handled gracefully",
       "error": null,
-      "timeMs": 3
+      "timeMs": 5
     },
     {
       "id": "TC-NAV-05",
@@ -104,9 +104,9 @@
       "title": "Successful registration & password bcrypt hashing",
       "status": "PASS",
       "expected": "Bcrypt hash generated",
-      "actual": "Investigator registered with ID 6ae3f5ad1ee11e3d8c8515f6",
+      "actual": "Investigator registered with ID 6ae3fc23d435a0dfd97a5c10",
       "error": null,
-      "timeMs": 176
+      "timeMs": 221
     },
     {
       "id": "TC-REG-06",
@@ -116,7 +116,7 @@
       "expected": "MongoDB unique index triggers error",
       "actual": "Duplicate email rejected by unique constraint",
       "error": null,
-      "timeMs": 2
+      "timeMs": 3
     },
     {
       "id": "TC-LOG-01",
@@ -126,7 +126,7 @@
       "expected": "Password match returns true",
       "actual": "Bcrypt verified plaintext password",
       "error": null,
-      "timeMs": 57
+      "timeMs": 65
     },
     {
       "id": "TC-LOG-02",
@@ -136,7 +136,7 @@
       "expected": "Password match returns false",
       "actual": "Incorrect password correctly rejected",
       "error": null,
-      "timeMs": 55
+      "timeMs": 58
     },
     {
       "id": "TC-LOG-03",
@@ -156,7 +156,7 @@
       "expected": "Security answer verified with bcrypt",
       "actual": "Security answer successfully validated",
       "error": null,
-      "timeMs": 57
+      "timeMs": 59
     },
     {
       "id": "TC-LOG-05",
@@ -216,7 +216,7 @@
       "expected": "Generated CASE001",
       "actual": "Generated atomic case number: CASE001",
       "error": null,
-      "timeMs": 3
+      "timeMs": 2
     },
     {
       "id": "TC-CAS-02",
@@ -236,7 +236,7 @@
       "expected": "Filters return matching cases",
       "actual": "Found 1 case(s) matching Cybercrime/New",
       "error": null,
-      "timeMs": 1
+      "timeMs": 2
     },
     {
       "id": "TC-CAS-04",
@@ -276,7 +276,7 @@
       "expected": "Check if POST /scenes/new implemented",
       "actual": "NOT IMPLEMENTED: Standalone scene creation routes (POST /scenes/new) are not implemented. Scenes are tracked via Case crimeSceneAddress and evidence uploads.",
       "error": "NOT IMPLEMENTED: Standalone scene creation routes (POST /scenes/new) are not implemented. Scenes are tracked via Case crimeSceneAddress and evidence uploads.",
-      "timeMs": 0
+      "timeMs": 1
     },
     {
       "id": "TC-EVD-01",
@@ -304,9 +304,9 @@
       "title": "Persistent storage in MongoDB GridFS evidence_bucket",
       "status": "PASS",
       "expected": "GridFS ObjectId returned",
-      "actual": "GridFS ID: 6ae3f5ad1ee11e3d8c851614",
+      "actual": "GridFS ID: 6ae3fc23d435a0dfd97a5c2e",
       "error": null,
-      "timeMs": 5
+      "timeMs": 4
     },
     {
       "id": "TC-EVD-04",
@@ -346,7 +346,7 @@
       "expected": "CR-2026-0001 created",
       "actual": "Registered CR-2026-0001 (Vikram Aditya Sharma)",
       "error": null,
-      "timeMs": 4
+      "timeMs": 5
     },
     {
       "id": "TC-CRM-02",
@@ -356,7 +356,7 @@
       "expected": "Interrogation entry saved",
       "actual": "Interrogation statement recorded by Detective James Miller",
       "error": null,
-      "timeMs": 6
+      "timeMs": 5
     },
     {
       "id": "TC-MSG-01",
@@ -366,7 +366,7 @@
       "expected": "Message stored with Sent status",
       "actual": "Message sent from Detective James Miller to Detective David Chen",
       "error": null,
-      "timeMs": 3
+      "timeMs": 4
     },
     {
       "id": "TC-MSG-02",
@@ -376,7 +376,7 @@
       "expected": "Status changes to Read",
       "actual": "Unread count updated to 0 after read",
       "error": null,
-      "timeMs": 6
+      "timeMs": 8
     },
     {
       "id": "TC-REQ-01",
@@ -386,7 +386,7 @@
       "expected": "REQ-2026-0001 created",
       "actual": "Filed request REQ-2026-0001",
       "error": null,
-      "timeMs": 4
+      "timeMs": 5
     },
     {
       "id": "TC-REQ-02",
@@ -396,7 +396,7 @@
       "expected": "Status changes to Approved",
       "actual": "Request marked Approved by custodian Detective David Chen",
       "error": null,
-      "timeMs": 3
+      "timeMs": 5
     },
     {
       "id": "TC-NOT-01",
@@ -406,7 +406,7 @@
       "expected": "Notification document created",
       "actual": "Notification sent to Detective David Chen",
       "error": null,
-      "timeMs": 3
+      "timeMs": 4
     },
     {
       "id": "TC-NOT-02",
@@ -416,7 +416,7 @@
       "expected": "isRead updated to true",
       "actual": "Notification marked read",
       "error": null,
-      "timeMs": 3
+      "timeMs": 4
     },
     {
       "id": "TC-AUT-01",
@@ -426,7 +426,7 @@
       "expected": "Job status Completed",
       "actual": "Job AJOB-2026-0001 produced 3 findings",
       "error": null,
-      "timeMs": 29
+      "timeMs": 41
     },
     {
       "id": "TC-AUT-02",
@@ -436,7 +436,7 @@
       "expected": "Detects PNG/JPEG signatures",
       "actual": "Magic bytes correctly identify PNG and JPEG",
       "error": null,
-      "timeMs": 0
+      "timeMs": 1
     },
     {
       "id": "TC-REP-01",
@@ -444,9 +444,9 @@
       "title": "PDFKit Report compilation with SHA-256 integrity seal",
       "status": "PASS",
       "expected": "PDF report created with 64-char hash",
-      "actual": "Report REP-CASE001-001 verified intact (35022 bytes)",
+      "actual": "Report REP-CASE001-001 verified intact (35008 bytes)",
       "error": null,
-      "timeMs": 52
+      "timeMs": 100
     },
     {
       "id": "TC-SEC-01",
@@ -456,7 +456,7 @@
       "expected": "no-store, no-cache returned",
       "actual": "Cache-Control: no-store, no-cache, must-revalidate, private",
       "error": null,
-      "timeMs": 4
+      "timeMs": 6
     },
     {
       "id": "TC-SEC-02",
@@ -476,7 +476,7 @@
       "expected": "Escapes dangerous HTML tags",
       "actual": "Script tags escaped safely into HTML entities",
       "error": null,
-      "timeMs": 0
+      "timeMs": 1
     },
     {
       "id": "TC-DB-01",
@@ -496,7 +496,7 @@
       "expected": "5 concurrent requests produce unique numbers",
       "actual": "Concurrent sequences: CASE002, CASE003, CASE004",
       "error": null,
-      "timeMs": 2
+      "timeMs": 3
     },
     {
       "id": "TC-STR-01",
@@ -514,9 +514,9 @@
       "title": "Root welcome page responds within 250ms threshold",
       "status": "PASS",
       "expected": "Response under 250ms",
-      "actual": "Response time: 3ms",
+      "actual": "Response time: 6ms",
       "error": null,
-      "timeMs": 3
+      "timeMs": 6
     },
     {
       "id": "TC-PRF-02",
@@ -526,7 +526,7 @@
       "expected": "Server closes cleanly",
       "actual": "Test server closed successfully",
       "error": null,
-      "timeMs": 0
+      "timeMs": 1
     }
   ]
 }
