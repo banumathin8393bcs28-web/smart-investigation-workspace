@@ -15,6 +15,7 @@ const { getNextEvidenceNumber } = require('../services/caseNumberService');
 const { recordEvidenceCustodyEvent } = require('../services/custodyService');
 const { createAnalysisJob } = require('../services/autopsyService');
 const { saveToStorage, serveFileResponse } = require('../services/storageService');
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require('../services/cloudinaryService');
 
 // 1. Upload Form
 router.get('/upload', ensureAuthenticated, async (req, res) => {
@@ -121,7 +122,32 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
         thumbGridFsId = thumbStorage.gridFsId;
       }
 
-      // 4. Generate unique atomic evidence identifier (EVID-CASE001-001)
+      // 4. Upload original image bytes to Cloudinary for persistent cloud storage
+      //    (Render ephemeral filesystem loses local disk files on restart;
+      //     Cloudinary URL is permanent. GridFS in MongoDB Atlas is the secondary fallback.)
+      //    SHA-256 is already calculated from the ORIGINAL buffer above — never re-hashed here.
+      let cloudinaryUrl = '';
+      let cloudinaryPublicId = '';
+      if (isCloudinaryConfigured()) {
+        try {
+          const cloudResult = await uploadBufferToCloudinary(
+            buffer,
+            file.filename,
+            file.mimetype,
+            'evidence'
+          );
+          cloudinaryUrl = cloudResult.url;
+          cloudinaryPublicId = cloudResult.publicId;
+          console.log(`[Cloudinary] Uploaded ${file.originalname} → ${cloudinaryUrl}`);
+        } catch (cloudErr) {
+          // Cloudinary failure must NOT block evidence creation — GridFS + DataURI are fallbacks
+          console.warn(`[Cloudinary] Upload failed for ${file.originalname}: ${cloudErr.message}`);
+        }
+      } else {
+        console.warn('[Cloudinary] Credentials not configured — skipping cloud upload. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET.');
+      }
+
+      // 5. Generate unique atomic evidence identifier (EVID-CASE001-001)
       const evidenceIdentifier = await getNextEvidenceNumber(caseDoc.caseNumber);
       const fileDescription = (descriptions[i] || req.body.generalDescription || '').trim();
 
@@ -137,6 +163,8 @@ router.post('/upload', ensureAuthenticated, uploadEvidence.array('evidenceFiles'
         thumbnailPath: fs.existsSync(thumbPath) ? thumbPath : '',
         thumbnailGridFsId: thumbGridFsId,
         thumbnailDataUri: thumbnailDataUri,
+        cloudinaryUrl: cloudinaryUrl,
+        cloudinaryPublicId: cloudinaryPublicId,
         fileMimeType: file.mimetype,
         fileSize: file.size,
         imageProperties: properties,

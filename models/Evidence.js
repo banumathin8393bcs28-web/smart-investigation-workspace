@@ -54,6 +54,15 @@ const evidenceSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // Cloudinary persistent cloud storage (added for Render deployment compatibility)
+  cloudinaryUrl: {
+    type: String,
+    default: ''
+  },
+  cloudinaryPublicId: {
+    type: String,
+    default: ''
+  },
   fileMimeType: {
     type: String,
     required: true

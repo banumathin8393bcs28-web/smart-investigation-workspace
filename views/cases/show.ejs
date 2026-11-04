@@ -176,7 +176,7 @@
                   <!-- Thumbnail / Image View -->
                   <div class="text-center p-2 bg-light border-bottom position-relative" style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                     <a href="/evidence/<%= ev._id %>">
-                      <img src="/evidence/<%= ev._id %>/thumbnail" alt="<%= ev.evidenceIdentifier %>" class="img-fluid rounded" style="max-height: 185px; width: auto; object-fit: contain;">
+                      <img src="<%= ev.cloudinaryUrl && ev.cloudinaryUrl.length > 10 ? ev.cloudinaryUrl : ('/evidence/' + ev._id + '/thumbnail') %>" alt="<%= ev.evidenceIdentifier %>" class="img-fluid rounded" style="max-height: 185px; width: auto; object-fit: contain;" onerror="if(this.src.indexOf('/evidence/')>=0){this.src='/images/evidence-placeholder.svg';}">
                     </a>
                     <span class="position-absolute top-0 end-0 m-2 badge <%= ev.inspectionStatus === 'Inspected' ? 'badge-soft-success' : 'badge-soft-secondary' %>">
                       <%= ev.inspectionStatus %>
