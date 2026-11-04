@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<div class="gov-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <main class="gov-main-content">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-2">
+      <div>
+        <h1 class="h4 fw-bold text-dark mb-1">
+          <i class="bi bi-cloud-arrow-up-fill text-primary me-2"></i>Cloudinary Evidence Migration
+        </h1>
+        <small class="text-muted">Upload existing evidence images to Cloudinary for permanent cloud storage.</small>
+      </div>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-4">
+        <div class="gov-card shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-dark"><%= total %></div>
+          <div class="small text-muted">Total Evidence Records</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="gov-card shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-success"><%= done %></div>
+          <div class="small text-muted">In Cloudinary</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="gov-card shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold <%= pending > 0 ? 'text-warning' : 'text-success' %>"><%= pending %></div>
+          <div class="small text-muted">Pending Migration</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloudinary Config Status -->
+    <div class="gov-card shadow-sm mb-4">
+      <div class="gov-card-header bg-white py-3 border-bottom">
+        <span><i class="bi bi-gear text-primary me-2"></i>Configuration Status</span>
+      </div>
+      <div class="gov-card-body p-4">
+        <% if (cloudinaryReady) { %>
+          <div class="alert alert-success mb-0">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Cloudinary is configured.</strong> CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET are set on this server.
+          </div>
+        <% } else { %>
+          <div class="alert alert-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Cloudinary credentials are NOT configured.</strong>
+          </div>
+          <p class="small text-muted mb-0">
+            To fix this, go to your <strong>Render Dashboard → Your Service → Environment</strong> and add:
+          </p>
+          <pre class="bg-light border rounded p-3 mt-2 small"><code>CLOUDINARY_CLOUD_NAME = your_cloud_name
+CLOUDINARY_API_KEY    = your_api_key
+CLOUDINARY_API_SECRET = your_api_secret</code></pre>
+          <p class="small text-muted">Then click <strong>Manual Deploy</strong> in Render, and return to this page.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Run Migration -->
+    <% if (pending > 0 && cloudinaryReady) { %>
+    <div class="gov-card shadow-sm mb-4 border-primary">
+      <div class="gov-card-header bg-white py-3 border-bottom">
+        <span class="text-primary fw-bold"><i class="bi bi-cloud-upload me-2"></i>Run Migration</span>
+      </div>
+      <div class="gov-card-body p-4">
+        <p class="small text-muted mb-3">
+          This will find all evidence records without a Cloudinary URL, retrieve each file from GridFS or the embedded DataURI, upload it to Cloudinary, and store the permanent URL in MongoDB.
+          <br><strong>Safe to run multiple times</strong> — already-migrated records are skipped.
+        </p>
+        <div class="alert alert-warning py-2 px-3 mb-3 small">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Note:</strong> Evidence files uploaded from Render that have been lost from the ephemeral disk will be sourced from GridFS (MongoDB Atlas). If GridFS also has no data, those records will be skipped and reported.
+        </div>
+        <form action="/admin/migrate-cloudinary/run" method="POST">
+          <button type="submit" class="btn btn-gov-primary">
+            <i class="bi bi-play-circle-fill me-2"></i>Start Cloudinary Migration for <%= pending %> Record(s)
+          </button>
+        </form>
+      </div>
+    </div>
+    <% } else if (pending === 0) { %>
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <strong>All <%= total %> evidence records have Cloudinary URLs.</strong> No migration needed.
+    </div>
+    <% } %>
+
+    <!-- Migration Result -->
+    <% if (result) { %>
+    <div class="gov-card shadow-sm mb-4">
+      <div class="gov-card-header bg-white py-3 border-bottom d-flex justify-content-between">
+        <span><i class="bi bi-terminal text-dark me-2"></i>Migration Log</span>
+        <span class="small">
+          <span class="badge bg-success me-1"><%= result.succeeded %> succeeded</span>
+          <span class="badge bg-warning text-dark me-1"><%= result.skipped %> skipped</span>
+          <span class="badge bg-danger"><%= result.failed %> failed</span>
+        </span>
+      </div>
+      <div class="gov-card-body p-0">
+        <pre class="bg-dark text-light p-4 mb-0 rounded-bottom small" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"><% result.log.forEach(line => { %><%= line %>
+<% }); %></pre>
+      </div>
+    </div>
+
+    <% if (result.succeeded > 0) { %>
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <strong><%= result.succeeded %> record(s) migrated to Cloudinary.</strong>
+      Reload any evidence page — images should now load directly from Cloudinary CDN.
+    </div>
+    <% } %>
+    <% } %>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

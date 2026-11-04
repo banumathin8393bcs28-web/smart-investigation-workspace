@@ -32,6 +32,7 @@ const custodyRoutes = require('./routes/custody');
 const reportRoutes = require('./routes/reports');
 const autopsyRoutes = require('./routes/autopsy');
 const criminalRoutes = require('./routes/criminalRecords');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const server = http.createServer(app);
@@ -51,10 +52,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      scriptSrc:  ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      styleSrc:   ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      // Allow images from: same origin, data URIs (base64 thumbnails), Cloudinary CDN
+      imgSrc:     ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
+      fontSrc:    ["'self'", "https://cdn.jsdelivr.net"],
       connectSrc: ["'self'", "ws:", "wss:"]
     }
   },
@@ -204,6 +206,7 @@ app.use('/reports', reportRoutes);
 app.use('/autopsy', autopsyRoutes);
 app.use('/criminals', criminalRoutes);
 app.use('/suspects', criminalRoutes);
+app.use('/admin', adminRoutes);
 
 // 404 Handler
 app.use((req, res) => {
