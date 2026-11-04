@@ -8,7 +8,7 @@
  * transmits the generated forensic dossier back to the central server.
  *
  * Usage:
- *   node scripts/autopsyWorker.js --server https://smart-investigation-workspace-1.onrender.com --token <WORKER_SECRET>
+ *   node scripts/autopsyWorker.js --server https://smart-investigation-workspace-2.onrender.com --token <WORKER_SECRET>
  */
 
 const fs = require('fs');

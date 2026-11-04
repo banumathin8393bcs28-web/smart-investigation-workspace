@@ -49,7 +49,7 @@ The analysis worker runs as a background service on the workstation.
 
 2. Set the configuration environment variables in `.env` (or pass as CLI arguments):
    ```ini
-   SERVER_URL=https://smart-investigation-workspace-1.onrender.com
+   SERVER_URL=https://smart-investigation-workspace-2.onrender.com
    AUTOPSY_WORKER_SECRET=forensic-worker-shared-token-2026
    AUTOPSY_PATH=C:\Program Files\Autopsy-4.21.0\bin\autopsy64.exe
    ```
@@ -60,7 +60,7 @@ The analysis worker runs as a background service on the workstation.
    npm run autopsy:worker
 
    # Option B: Directly via Node CLI with explicit parameters
-   node scripts/autopsyWorker.js --server https://smart-investigation-workspace-1.onrender.com --token forensic-worker-shared-token-2026 --interval 10000
+   node scripts/autopsyWorker.js --server https://smart-investigation-workspace-2.onrender.com --token forensic-worker-shared-token-2026 --interval 10000
    ```
 
 ---

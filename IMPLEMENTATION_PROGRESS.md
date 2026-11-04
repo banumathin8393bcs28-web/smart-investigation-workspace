@@ -2,7 +2,7 @@
 
 **Last Updated:** October 30, 2026  
 **Status:** Verification & Hardening Complete — All Test Suites Passing (41/41 Tests)  
-**Target Deployment:** `https://smart-investigation-workspace-1.onrender.com`  
+**Target Deployment:** `https://smart-investigation-workspace-2.onrender.com`  
 **Repository Branch:** `main` (Preserved locally, ready for review)  
 
 ---
@@ -277,7 +277,7 @@ npm run autopsy:worker
 
 ## 6. Cloud Deployment Configuration (Render)
 
-When deploying to Render (`https://smart-investigation-workspace-1.onrender.com`):
+When deploying to Render (`https://smart-investigation-workspace-2.onrender.com`):
 
 1. **Environment Variables on Render**:
    - `NODE_ENV`: `production`
