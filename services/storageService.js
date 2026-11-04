@@ -175,11 +175,18 @@ async function getFileReadStream({ gridFsId, filename, localPath, bucketName = '
 
 /**
  * Serves a persistent file over Express HTTP response with appropriate caching and security headers.
+ *
+ * @param {boolean} [options.returnErrorOnMissing=false]
+ *   When true, returns HTTP 404 JSON instead of the placeholder SVG when no file is found.
+ *   Set this to true for primary image display routes so the browser's img.onerror fires
+ *   correctly and the frontend can show its own styled fallback UI.
+ *   Leave false (default) for thumbnail routes where showing a placeholder is acceptable.
  */
-async function serveFileResponse(req, res, { gridFsId, filename, localPath, mimeType = 'application/octet-stream', bucketName = 'evidence_bucket', fallbackPath = null, fallbackDataUri = null, downloadAs = null }) {
+async function serveFileResponse(req, res, { gridFsId, filename, localPath, mimeType = 'application/octet-stream', bucketName = 'evidence_bucket', fallbackPath = null, fallbackDataUri = null, downloadAs = null, returnErrorOnMissing = false }) {
   const result = await getFileReadStream({ gridFsId, filename, localPath, bucketName });
 
   if (!result || !result.stream) {
+    // Try embedded DataURI fallback first (always works, fastest)
     if (fallbackDataUri && fallbackDataUri.startsWith('data:')) {
       const parts = fallbackDataUri.split(',');
       if (parts.length === 2) {
@@ -199,6 +206,13 @@ async function serveFileResponse(req, res, { gridFsId, filename, localPath, mime
       }
     }
 
+    // If returnErrorOnMissing is set, return 404 so the browser's img.onerror triggers
+    // and the frontend can display its own styled fallback instead of the placeholder SVG.
+    if (returnErrorOnMissing) {
+      return res.status(404).json({ error: 'Evidence file not found in persistent storage. File may have been stored on a previous server instance.' });
+    }
+
+    // Default: serve placeholder SVG (used for thumbnail routes, not primary file route)
     const resolvedFallback = fallbackPath || (bucketName === 'evidence_bucket' ? '/images/evidence-placeholder.svg' : null);
     if (resolvedFallback) {
       const fullFallback = path.isAbsolute(resolvedFallback) ? resolvedFallback : path.join(__dirname, '..', 'public', resolvedFallback.replace(/^\//, ''));

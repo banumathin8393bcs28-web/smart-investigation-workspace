@@ -303,6 +303,14 @@ router.post('/:id/inspect', ensureAuthenticated, canAccessEvidence, async (req, 
 // 6. Authenticated File Serving for Original Evidence Image across all environments
 router.get('/:id/file', ensureAuthenticated, canAccessEvidence, async (req, res) => {
   const evidence = req.evidence;
+  const isDownload = !!req.query.download;
+
+  // If the evidence has a Cloudinary URL and this is not a forced download, redirect there.
+  // Cloudinary URLs are permanent CDN links — no need to stream through the Node.js server.
+  if (evidence.cloudinaryUrl && evidence.cloudinaryUrl.length > 10 && !isDownload) {
+    return res.redirect(302, evidence.cloudinaryUrl);
+  }
+
   await serveFileResponse(req, res, {
     gridFsId: evidence.gridFsId,
     filename: evidence.storedFilename || evidence.storageKey,
@@ -310,8 +318,12 @@ router.get('/:id/file', ensureAuthenticated, canAccessEvidence, async (req, res)
     mimeType: evidence.fileMimeType || 'image/jpeg',
     bucketName: 'evidence_bucket',
     fallbackDataUri: evidence.thumbnailDataUri,
-    fallbackPath: '/images/evidence-placeholder.svg',
-    downloadAs: req.query.download ? evidence.originalFilename : null
+    // returnErrorOnMissing: true ensures the browser's img.onerror fires when
+    // no file is available, so the frontend shows its styled inline fallback
+    // instead of silently displaying the placeholder SVG as if it were the evidence.
+    returnErrorOnMissing: !isDownload,
+    fallbackPath: isDownload ? '/images/evidence-placeholder.svg' : null,
+    downloadAs: isDownload ? evidence.originalFilename : null
   });
 });
 

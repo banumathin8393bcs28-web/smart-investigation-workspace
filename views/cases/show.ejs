@@ -176,7 +176,19 @@
                   <!-- Thumbnail / Image View -->
                   <div class="text-center p-2 bg-light border-bottom position-relative" style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                     <a href="/evidence/<%= ev._id %>">
-                      <img src="<%= ev.cloudinaryUrl && ev.cloudinaryUrl.length > 10 ? ev.cloudinaryUrl : ('/evidence/' + ev._id + '/thumbnail') %>" alt="<%= ev.evidenceIdentifier %>" class="img-fluid rounded" style="max-height: 185px; width: auto; object-fit: contain;" onerror="if(this.src.indexOf('/evidence/')>=0){this.src='/images/evidence-placeholder.svg';}">
+                      <%
+                        // Cloudinary URL → authenticated /thumbnail route → styled inline fallback
+                        const thumbSrc = (ev.cloudinaryUrl && ev.cloudinaryUrl.length > 10)
+                          ? ev.cloudinaryUrl
+                          : ((ev.thumbnailDataUri && ev.thumbnailDataUri.length > 50)
+                              ? ev.thumbnailDataUri
+                              : ('/evidence/' + ev._id + '/thumbnail'));
+                      %>
+                      <img src="<%= thumbSrc %>"
+                           alt="<%= ev.evidenceIdentifier %>"
+                           class="img-fluid rounded"
+                           style="max-height: 185px; width: auto; object-fit: contain;"
+                           onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'d-flex flex-column align-items-center justify-content-center w-100 h-100 text-muted small\'><i class=\'bi bi-image-fill fs-2 mb-1\' style=\'color:#94a3b8\'></i><span>No preview</span></div>';">
                     </a>
                     <span class="position-absolute top-0 end-0 m-2 badge <%= ev.inspectionStatus === 'Inspected' ? 'badge-soft-success' : 'badge-soft-secondary' %>">
                       <%= ev.inspectionStatus %>
