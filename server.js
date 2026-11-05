@@ -35,6 +35,10 @@ const criminalRoutes = require('./routes/criminalRecords');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
+// Enable trust proxy for Render reverse-proxy environment
+// Ensures real client IP resolution for rate limiting and secure multi-user cookie isolation
+app.set('trust proxy', 1);
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' }
@@ -82,6 +86,7 @@ app.use(methodOverride('_method'));
 // Session configuration with connect-mongo MongoDB session store
 const dbUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/smart_investigation';
 app.use(session({
+  name: 'siw_session',
   secret: process.env.SESSION_SECRET || 'forensic-secure-key-998822334411',
   resave: false,
   saveUninitialized: false,
@@ -94,7 +99,7 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
     sameSite: 'lax',
-    secure: false // Set to true when running over HTTPS
+    secure: 'auto' // Automatically enables secure flag over HTTPS (Render) while working over local HTTP
   }
 }));
 
