@@ -7,6 +7,8 @@ const AuditLog = require('../models/AuditLog');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadProfile } = require('../middleware/upload');
 const { saveToStorage, serveFileResponse } = require('../services/storageService');
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require('../services/cloudinaryService');
+const fs = require('fs');
 
 // 1. List & Filter Criminal Records
 router.get('/', ensureAuthenticated, async (req, res) => {
@@ -91,6 +93,26 @@ router.post('/', ensureAuthenticated, uploadProfile.single('photo'), async (req,
 
     if (req.file) {
       photoPath = `/criminals/photo/${req.file.filename}`;
+
+      // Upload to Cloudinary for permanent hosting across Render restarts
+      if (isCloudinaryConfigured()) {
+        try {
+          const fileBuf = fs.readFileSync(req.file.path);
+          const cloudRes = await uploadBufferToCloudinary(
+            fileBuf,
+            req.file.filename,
+            req.file.mimetype,
+            'criminals'
+          );
+          if (cloudRes && cloudRes.url) {
+            photoPath = cloudRes.url;
+            console.log(`[Cloudinary] Criminal profile photo uploaded: ${photoPath}`);
+          }
+        } catch (cloudErr) {
+          console.warn('[Criminal Record] Cloudinary upload failed:', cloudErr.message);
+        }
+      }
+
       try {
         const storageResult = await saveToStorage({
           filePath: req.file.path,
@@ -248,13 +270,33 @@ router.post('/:id/link-case', ensureAuthenticated, async (req, res) => {
 });
 
 // 7. Serve Criminal Photograph persistently across all environments
-router.get('/photo/:filename', (req, res) => {
+router.get('/photo/:filename', async (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(__dirname, '..', 'private_uploads', 'profiles', filename);
   const ext = path.extname(filename).toLowerCase();
   const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
 
+  // Check if there is a criminal record with this photo URL or GridFS ID
+  let gridFsId = null;
+  try {
+    const rec = await CriminalRecord.findOne({
+      $or: [
+        { photo: `/criminals/photo/${filename}` },
+        { photo: `/uploads/suspects/${filename}` }
+      ]
+    }).select('photo photoGridFsId').lean();
+    if (rec) {
+      if (rec.photo && rec.photo.startsWith('http')) {
+        return res.redirect(302, rec.photo);
+      }
+      if (rec.photoGridFsId) {
+        gridFsId = rec.photoGridFsId;
+      }
+    }
+  } catch (_) {}
+
   serveFileResponse(req, res, {
+    gridFsId,
     filename,
     localPath: filePath,
     mimeType,

@@ -35,7 +35,8 @@ const messageSchema = new mongoose.Schema({
     storagePath: { type: String, required: true },
     mimeType: { type: String, required: true },
     size: { type: Number, required: true },
-    sha256: { type: String, required: true }
+    sha256: { type: String, required: true },
+    cloudinaryUrl: { type: String, default: '' }
   }],
   sentTimestamp: {
     type: Date,

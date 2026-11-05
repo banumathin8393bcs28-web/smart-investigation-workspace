@@ -10,6 +10,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadAttachment } = require('../middleware/upload');
 const { calculateFileHash } = require('../services/hashService');
 const { createNotification } = require('../services/notificationService');
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require('../services/cloudinaryService');
 
 // 1. Messages / Chat Interface
 router.get('/', ensureAuthenticated, async (req, res) => {
@@ -79,13 +80,34 @@ router.post('/send', ensureAuthenticated, uploadAttachment.single('attachment'),
     const attachments = [];
     if (req.file) {
       const sha256 = await calculateFileHash(req.file.path);
+      let cloudinaryUrl = '';
+
+      if (isCloudinaryConfigured()) {
+        try {
+          const fileBuf = fs.readFileSync(req.file.path);
+          const cloudRes = await uploadBufferToCloudinary(
+            fileBuf,
+            req.file.filename,
+            req.file.mimetype,
+            'chat'
+          );
+          if (cloudRes && cloudRes.url) {
+            cloudinaryUrl = cloudRes.url;
+            console.log(`[Cloudinary] Chat attachment uploaded: ${cloudinaryUrl}`);
+          }
+        } catch (cloudErr) {
+          console.warn('[Messages] Cloudinary attachment upload failed:', cloudErr.message);
+        }
+      }
+
       attachments.push({
         originalName: req.file.originalname,
         storedName: req.file.filename,
         storagePath: req.file.path,
         mimeType: req.file.mimetype,
         size: req.file.size,
-        sha256
+        sha256,
+        cloudinaryUrl
       });
     }
 
@@ -139,7 +161,16 @@ router.get('/attachment/:messageId/:attachmentIndex', ensureAuthenticated, async
 
     const index = parseInt(req.params.attachmentIndex, 10);
     const attachment = message.attachments[index];
-    if (!attachment || !fs.existsSync(attachment.storagePath)) {
+    if (!attachment) {
+      return res.status(404).send('Attachment record not found.');
+    }
+
+    // Redirect to permanent Cloudinary storage if available
+    if (attachment.cloudinaryUrl && attachment.cloudinaryUrl.startsWith('http')) {
+      return res.redirect(302, attachment.cloudinaryUrl);
+    }
+
+    if (!fs.existsSync(attachment.storagePath)) {
       return res.status(404).send('Attachment file not found on disk.');
     }
 

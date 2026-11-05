@@ -51,7 +51,11 @@
             <span class="fw-bold text-dark"><i class="bi bi-camera me-1 text-primary"></i> Identification Photograph</span>
           </div>
           <div class="gov-card-body text-center p-4 bg-light">
-            <img src="<%= s.photo || '/images/default-suspect.png' %>" alt="<%= s.fullName %>" class="img-fluid rounded border shadow-sm mx-auto mb-3" style="max-height: 240px; width: 100%; object-fit: cover;">
+            <img src="<%= s.photo || '/images/default-suspect.png' %>"
+                 alt="<%= s.fullName %>"
+                 class="img-fluid rounded border shadow-sm mx-auto mb-3"
+                 style="max-height: 240px; width: 100%; object-fit: cover;"
+                 onerror="this.onerror=null; this.src='/images/default-suspect.png';">
             <h5 class="fw-bold text-dark mb-1"><%= s.fullName %></h5>
             <div class="text-muted small mb-2">Alias: "<%= s.alias || 'None' %>"</div>
             <span class="badge badge-soft-primary font-monospace"><%= s.recordNumber || 'REGISTERED' %></span>
