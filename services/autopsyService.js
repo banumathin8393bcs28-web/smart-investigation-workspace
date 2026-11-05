@@ -425,6 +425,16 @@ async function executeAnalysis(jobId) {
       }
     });
 
+    // Update evidence inspection status to Inspected
+    if (evidenceDoc) {
+      await Evidence.findByIdAndUpdate(evidenceDoc._id, {
+        $set: {
+          inspectionStatus: 'Inspected',
+          lastModifiedTimestamp: new Date()
+        }
+      });
+    }
+
     // Record Chain of Custody Event
     if (evidenceDoc && caseDoc) {
       await recordEvidenceCustodyEvent({

@@ -300,6 +300,43 @@ router.post('/:id/inspect', ensureAuthenticated, canAccessEvidence, async (req, 
   return res.redirect(307, `/evidence/${req.params.id}/autopsy`);
 });
 
+// Update Evidence Inspection Status (e.g. Mark as Inspected)
+router.post('/:id/inspection-status', ensureAuthenticated, canAccessEvidence, async (req, res) => {
+  try {
+    const evidence = req.evidence;
+    const { status } = req.body;
+    const validStatuses = ['Uninspected', 'Pending', 'Inspected', 'Failed'];
+
+    if (!validStatuses.includes(status)) {
+      return res.redirect(`/evidence/${evidence._id}?error=Invalid+inspection+status`);
+    }
+
+    const oldStatus = evidence.inspectionStatus;
+    evidence.inspectionStatus = status;
+    evidence.lastModifiedTimestamp = new Date();
+    await evidence.save();
+
+    await AuditLog.create({
+      actor: req.investigator._id,
+      actorName: req.investigator.fullName,
+      action: 'EVIDENCE_INSPECTION_STATUS_CHANGED',
+      relatedCase: evidence.caseId,
+      caseNumber: evidence.caseNumber,
+      relatedEvidence: evidence._id,
+      relatedObjectIdentifier: evidence.evidenceIdentifier,
+      changeSummary: `Inspection status changed from '${oldStatus}' to '${status}' by ${req.investigator.fullName}`,
+      ipAddress: req.ip || '127.0.0.1',
+      userAgent: req.headers['user-agent'] || '',
+      timestamp: new Date()
+    });
+
+    res.redirect(`/evidence/${evidence._id}?success=${encodeURIComponent(`Evidence marked as ${status}.`)}`);
+  } catch (error) {
+    console.error('[Evidence Inspection Status Error]:', error);
+    res.redirect(`/evidence/${req.params.id}?error=${encodeURIComponent(error.message)}`);
+  }
+});
+
 // 6. Authenticated File Serving for Original Evidence Image across all environments
 router.get('/:id/file', ensureAuthenticated, canAccessEvidence, async (req, res) => {
   const evidence = req.evidence;

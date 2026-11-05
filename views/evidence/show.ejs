@@ -19,7 +19,22 @@
           <span class="font-monospace">Uploaded: <%= formatTimestamp(evidence.uploadTimestamp) %> by <%= evidence.uploaderName %></span>
         </small>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <% if (evidence.inspectionStatus !== 'Inspected') { %>
+          <form action="/evidence/<%= evidence._id %>/inspection-status" method="POST" class="d-inline">
+            <input type="hidden" name="status" value="Inspected">
+            <button type="submit" class="btn btn-success btn-sm shadow-sm" title="Mark this evidence item as Inspected and Verified">
+              <i class="bi bi-check2-circle me-1"></i> Mark as Inspected
+            </button>
+          </form>
+        <% } else { %>
+          <form action="/evidence/<%= evidence._id %>/inspection-status" method="POST" class="d-inline">
+            <input type="hidden" name="status" value="Uninspected">
+            <button type="submit" class="btn btn-outline-secondary btn-sm" title="Revert back to uninspected status">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Revert to Uninspected
+            </button>
+          </form>
+        <% } %>
         <a href="/cases/<%= caseDoc._id %>" class="btn btn-gov-secondary btn-sm">
           <i class="bi bi-arrow-left me-1"></i> Return to Case
         </a>
