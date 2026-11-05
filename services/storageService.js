@@ -215,7 +215,9 @@ async function serveFileResponse(req, res, { gridFsId, filename, localPath, mime
     // Default: serve placeholder SVG (used for thumbnail routes, not primary file route)
     const resolvedFallback = fallbackPath || (bucketName === 'evidence_bucket' ? '/images/evidence-placeholder.svg' : null);
     if (resolvedFallback) {
-      const fullFallback = path.isAbsolute(resolvedFallback) ? resolvedFallback : path.join(__dirname, '..', 'public', resolvedFallback.replace(/^\//, ''));
+      const fullFallback = (path.isAbsolute(resolvedFallback) && fs.existsSync(resolvedFallback))
+        ? resolvedFallback
+        : path.join(__dirname, '..', 'public', resolvedFallback.replace(/^\//, ''));
       if (fs.existsSync(fullFallback)) {
         res.setHeader('Content-Type', resolvedFallback.endsWith('.svg') ? 'image/svg+xml' : 'image/png');
         return res.sendFile(fullFallback);

@@ -7,6 +7,8 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadProfile } = require('../middleware/upload');
 const { GOV_EMAIL_REGEX, PASSWORD_REGEX } = require('../middleware/validation');
 const { saveToStorage } = require('../services/storageService');
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require('../services/cloudinaryService');
+const fs = require('fs');
 
 // View & Edit Profile
 router.get('/edit', ensureAuthenticated, (req, res) => {
@@ -60,7 +62,25 @@ router.post('/edit', ensureAuthenticated, uploadProfile.single('profilePhoto'), 
     }
 
     if (req.file) {
-      investigator.profilePhoto = `/uploads/profiles/${req.file.filename}`;
+      let photoUrl = `/uploads/profiles/${req.file.filename}`;
+      if (isCloudinaryConfigured()) {
+        try {
+          const fileBuf = fs.readFileSync(req.file.path);
+          const cloudRes = await uploadBufferToCloudinary(
+            fileBuf,
+            req.file.filename,
+            req.file.mimetype,
+            'profiles'
+          );
+          if (cloudRes && cloudRes.url) {
+            photoUrl = cloudRes.url;
+            console.log(`[Cloudinary] Profile photo updated: ${photoUrl}`);
+          }
+        } catch (cloudErr) {
+          console.warn('[Profile Edit] Cloudinary profile upload failed:', cloudErr.message);
+        }
+      }
+      investigator.profilePhoto = photoUrl;
       try {
         const storageResult = await saveToStorage({
           filePath: req.file.path,

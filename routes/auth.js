@@ -10,6 +10,8 @@ const { validateRegistration, validateLogin, handleValidationErrors } = require(
 const { redirectIfAuthenticated, ensureAuthenticated } = require('../middleware/auth');
 const { formatTimestamp } = require('../services/timestampService');
 const { saveToStorage } = require('../services/storageService');
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require('../services/cloudinaryService');
+const fs = require('fs');
 
 // Reusable CAPTCHA generator
 function generateCaptcha(req) {
@@ -109,6 +111,26 @@ router.post('/register', redirectIfAuthenticated, uploadProfile.single('profileP
 
     if (req.file) {
       profilePhotoPath = `/uploads/profiles/${req.file.filename}`;
+      
+      // Upload to Cloudinary for permanent hosting across Render restarts
+      if (isCloudinaryConfigured()) {
+        try {
+          const fileBuf = fs.readFileSync(req.file.path);
+          const cloudRes = await uploadBufferToCloudinary(
+            fileBuf,
+            req.file.filename,
+            req.file.mimetype,
+            'profiles'
+          );
+          if (cloudRes && cloudRes.url) {
+            profilePhotoPath = cloudRes.url;
+            console.log(`[Cloudinary] Profile photo uploaded: ${profilePhotoPath}`);
+          }
+        } catch (cloudErr) {
+          console.warn('[Registration] Cloudinary profile upload failed:', cloudErr.message);
+        }
+      }
+
       try {
         const storageResult = await saveToStorage({
           filePath: req.file.path,

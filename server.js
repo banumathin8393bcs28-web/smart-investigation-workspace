@@ -106,13 +106,33 @@ app.use((req, res, next) => {
 });
 
 // Authenticated route for serving private profile uploads across local and cloud environments
-app.get('/uploads/profiles/:filename', (req, res) => {
+app.get('/uploads/profiles/:filename', async (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(__dirname, 'private_uploads', 'profiles', filename);
   const ext = path.extname(filename).toLowerCase();
   const mimeType = ext === '.png' ? 'image/png' : (ext === '.webp' ? 'image/webp' : 'image/jpeg');
 
+  // Check if investigator has a Cloudinary URL or GridFS ID
+  let gridFsId = null;
+  try {
+    const inv = await Investigator.findOne({
+      $or: [
+        { profilePhoto: `/uploads/profiles/${filename}` },
+        { profilePhotoKey: filename }
+      ]
+    }).select('profilePhoto profilePhotoGridFsId').lean();
+    if (inv) {
+      if (inv.profilePhoto && inv.profilePhoto.startsWith('http')) {
+        return res.redirect(302, inv.profilePhoto);
+      }
+      if (inv.profilePhotoGridFsId) {
+        gridFsId = inv.profilePhotoGridFsId;
+      }
+    }
+  } catch (_) {}
+
   serveFileResponse(req, res, {
+    gridFsId,
     filename,
     localPath: filePath,
     mimeType,

@@ -4,7 +4,7 @@
 <nav class="gov-sidebar">
   <!-- Officer Mini Identification Card -->
   <div class="gov-sidebar-user-card">
-    <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Officer Avatar" class="gov-avatar-sm" style="width: 36px; height: 36px; object-fit: cover;">
+    <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Officer Avatar" class="gov-avatar-sm" style="width: 36px; height: 36px; object-fit: cover;" onerror="this.onerror=null; this.src='/images/default-avatar.png';">
     <div class="overflow-hidden">
       <div class="fw-bold small text-dark text-truncate" title="<%= currentInvestigator.fullName %>"><%= currentInvestigator.fullName %></div>
       <div class="text-muted text-truncate" style="font-size: 11px;"><%= currentInvestigator.email %></div>

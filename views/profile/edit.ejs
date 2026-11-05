@@ -36,7 +36,10 @@
             <span><i class="bi bi-person-vcard text-primary me-2"></i> Registered Identity</span>
           </div>
           <div class="gov-card-body text-center p-4">
-            <img src="<%= investigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-lg mb-3 shadow-sm mx-auto">
+            <img src="<%= investigator.profilePhoto || '/images/default-avatar.png' %>"
+                 alt="Profile"
+                 class="gov-avatar-lg mb-3 shadow-sm mx-auto"
+                 onerror="this.onerror=null; this.src='/images/default-avatar.png';">
             <h5 class="fw-bold mb-1 text-dark"><%= investigator.fullName %></h5>
             <div class="badge bg-secondary-subtle text-secondary-emphasis border mb-3"><%= investigator.role %></div>
 

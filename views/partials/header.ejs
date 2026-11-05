@@ -54,7 +54,7 @@
 
     <!-- Investigator Profile Pill -->
     <a href="/profile/edit" class="gov-user-pill border-start ps-2 ps-sm-3 border-secondary border-opacity-50 text-decoration-none" title="Officer Profile Settings">
-      <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-sm">
+      <img src="<%= currentInvestigator.profilePhoto || '/images/default-avatar.png' %>" alt="Profile" class="gov-avatar-sm" onerror="this.onerror=null; this.src='/images/default-avatar.png';">
       <div class="d-none d-md-block text-start">
         <div class="fw-semibold text-white lh-1 small"><%= currentInvestigator.fullName %></div>
         <small class="text-white-50" style="font-size: 11px;"><%= currentInvestigator.role %></small>
