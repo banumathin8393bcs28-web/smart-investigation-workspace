@@ -86,13 +86,26 @@
 
                   <div class="d-flex flex-column <%= isMine ? 'align-items-end' : 'align-items-start' %>" style="max-width: 70%;">
                     <div class="p-3 rounded shadow-sm <%= isMine ? 'text-white' : 'bg-white text-dark border' %>" style="<%= isMine ? 'background-color: #0f2a4a;' : '' %>">
-                      <div class="mb-1" style="font-size: 0.92rem; line-height: 1.5;"><%= m.messageText %></div>
+                      <% if (m.messageText) { %>
+                        <div class="mb-1" style="font-size: 0.92rem; line-height: 1.5;"><%= m.messageText %></div>
+                      <% } %>
 
                       <% if (m.attachments && m.attachments.length > 0) { %>
-                        <div class="mt-2 pt-2 border-top border-opacity-25 <%= isMine ? 'border-white' : 'border-secondary' %>">
+                        <div class="<%= m.messageText ? 'mt-2 pt-2 border-top border-opacity-25' : '' %> <%= isMine ? 'border-white' : 'border-secondary' %>">
                           <% m.attachments.forEach((att, attIdx) => { %>
+                            <% 
+                              const isImg = (att.mimeType && att.mimeType.startsWith('image/')) || (att.originalName && att.originalName.match(/\.(jpg|jpeg|png|webp|gif)$/i));
+                              const fileSrc = att.cloudinaryUrl && att.cloudinaryUrl.startsWith('http') ? att.cloudinaryUrl : ('/messages/attachment/' + m._id + '/' + attIdx);
+                            %>
+                            <% if (isImg) { %>
+                              <div class="mb-2">
+                                <a href="<%= fileSrc %>" target="_blank" title="View Full Image">
+                                  <img src="<%= fileSrc %>" alt="<%= att.originalName %>" class="img-fluid rounded border shadow-sm" style="max-height: 220px; max-width: 100%; object-fit: contain; background: rgba(0,0,0,0.05); display: block;" onerror="this.style.display='none';">
+                                </a>
+                              </div>
+                            <% } %>
                             <a href="/messages/attachment/<%= m._id %>/<%= attIdx %>" class="btn btn-sm <%= isMine ? 'btn-outline-light' : 'btn-gov-secondary' %> py-1 px-2 mb-1" download>
-                              <i class="bi bi-paperclip me-1"></i> <%= att.originalName || att.originalFilename || 'Attachment' %>
+                              <i class="bi <%= isImg ? 'bi-image' : 'bi-paperclip' %> me-1"></i> <%= att.originalName || att.originalFilename || 'Attachment' %>
                               <span class="opacity-75 small">(<%= (att.size / 1024).toFixed(0) %> KB)</span>
                             </a>
                           <% }) %>
@@ -120,17 +133,32 @@
 
           <!-- Message Input Toolbar -->
           <div class="p-3 bg-white border-top flex-shrink-0">
-            <form action="/messages/send" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+            <!-- File attachment preview container -->
+            <div id="attachmentPreview" class="d-none mb-2 p-2 bg-light rounded border align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <img id="attachmentThumbnail" src="" alt="preview" class="rounded border d-none" style="width: 44px; height: 44px; object-fit: cover;">
+                <i id="attachmentFileIcon" class="bi bi-paperclip fs-4 text-primary"></i>
+                <div class="text-truncate small">
+                  <strong id="attachmentFileName" class="text-dark d-block text-truncate"></strong>
+                  <span id="attachmentFileSize" class="text-muted" style="font-size: 11px;"></span>
+                </div>
+              </div>
+              <button type="button" id="removeAttachmentBtn" class="btn btn-sm btn-outline-danger py-0 px-2" title="Remove attachment">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <form action="/messages/send" method="POST" enctype="multipart/form-data" id="chatForm" class="d-flex align-items-center gap-2">
               <input type="hidden" name="recipientId" value="<%= activeRecipient._id %>">
 
-              <label class="btn btn-gov-secondary btn-sm mb-0 px-3 py-2" title="Attach Evidence File">
+              <label class="btn btn-gov-secondary btn-sm mb-0 px-3 py-2" id="attachBtn" title="Attach Evidence File or Photo" style="cursor: pointer;">
                 <i class="bi bi-paperclip"></i>
-                <input type="file" name="attachment" class="d-none">
+                <input type="file" id="attachmentInput" name="attachment" class="d-none" accept="image/*,.pdf,.doc,.docx,.txt">
               </label>
 
-              <input type="text" class="form-control" name="messageText" placeholder="Type an encrypted message..." required autofocus autocomplete="off">
+              <input type="text" class="form-control" id="messageTextInput" name="messageText" placeholder="Type a message or select an image to attach..." autofocus autocomplete="off">
 
-              <button type="submit" class="btn btn-gov-primary px-4 py-2">
+              <button type="submit" class="btn btn-gov-primary px-4 py-2" id="sendBtn">
                 <i class="bi bi-send-fill me-1"></i> Send
               </button>
             </form>
@@ -156,6 +184,76 @@
   const stream = document.getElementById('messageStream');
   if (stream) {
     stream.scrollTop = stream.scrollHeight;
+  }
+
+  // Handle attachment selection & preview
+  const fileInput = document.getElementById('attachmentInput');
+  const previewBox = document.getElementById('attachmentPreview');
+  const fileNameEl = document.getElementById('attachmentFileName');
+  const fileSizeEl = document.getElementById('attachmentFileSize');
+  const thumbEl = document.getElementById('attachmentThumbnail');
+  const iconEl = document.getElementById('attachmentFileIcon');
+  const removeBtn = document.getElementById('removeAttachmentBtn');
+  const chatForm = document.getElementById('chatForm');
+  const messageInput = document.getElementById('messageTextInput');
+  const attachBtn = document.getElementById('attachBtn');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function () {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        fileNameEl.textContent = file.name;
+        fileSizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        previewBox.classList.remove('d-none');
+        previewBox.classList.add('d-flex');
+        if (attachBtn) {
+          attachBtn.classList.add('btn-primary');
+          attachBtn.classList.remove('btn-gov-secondary');
+        }
+
+        if (file.type && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            thumbEl.src = e.target.result;
+            thumbEl.classList.remove('d-none');
+            iconEl.classList.add('d-none');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          thumbEl.classList.add('d-none');
+          iconEl.classList.remove('d-none');
+        }
+
+        if (messageInput) {
+          messageInput.focus();
+        }
+      }
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener('click', function () {
+      if (fileInput) fileInput.value = '';
+      previewBox.classList.add('d-none');
+      previewBox.classList.remove('d-flex');
+      thumbEl.src = '';
+      if (attachBtn) {
+        attachBtn.classList.remove('btn-primary');
+        attachBtn.classList.add('btn-gov-secondary');
+      }
+    });
+  }
+
+  if (chatForm) {
+    chatForm.addEventListener('submit', function (e) {
+      const hasText = messageInput && messageInput.value.trim().length > 0;
+      const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+      if (!hasText && !hasFile) {
+        e.preventDefault();
+        if (messageInput) messageInput.focus();
+        return false;
+      }
+    });
   }
 </script>
 
